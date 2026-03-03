@@ -163,7 +163,6 @@ export default function App() {
     <div className="page">
       <header className="app-header">
         <h1>Proposal & Project Seeding App (v1)</h1>
-        <p>Desktop-first guided builder for proposal and Teamwork task import generation.</p>
       </header>
 
       <main className="layout">
@@ -176,7 +175,7 @@ export default function App() {
           {proposals.map((proposal) => (
             <div key={proposal.id} className={`card ${proposal.id === activeProposalId ? "active" : ""}`}>
               <button className="linklike" onClick={() => setActiveProposalId(proposal.id)}>
-                <strong>{proposal.name || proposal.projectTitle || "Untitled"}</strong>
+                <strong>{proposal.name || proposal.projectTitle || "New Proposal"}</strong>
                 <span>{proposal.clientName || "No client"}</span>
                 <span>{proposal.status}</span>
               </button>
@@ -199,7 +198,7 @@ export default function App() {
             <>
               <div className="panel">
                 <div className="row">
-                  <h2>{activeProposal.name || "Untitled Proposal"}</h2>
+                  <h2>{activeProposal.name || activeProposal.projectTitle || "New Proposal"}</h2>
                   <span className="status-pill">{activeProposal.status}</span>
                 </div>
                 <p className="muted">Current step: {steps[step]}</p>
