@@ -1,0 +1,167 @@
+:root {
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  color: #1f2f2f;
+  background: linear-gradient(140deg, #eef4ef 0%, #fff8f0 45%, #f4f8ff 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  min-width: 1440px;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.app-header h1 {
+  margin: 0 0 8px;
+}
+
+.app-header p {
+  margin: 0;
+}
+
+.layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 340px 1fr;
+  margin-top: 20px;
+}
+
+.sidebar,
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel,
+.card,
+.subpanel {
+  background: #ffffff;
+  border: 1px solid #d4dfd4;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.card.active {
+  border-color: #2f7a5b;
+  box-shadow: 0 0 0 1px #2f7a5b;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.row.wrap {
+  flex-wrap: wrap;
+}
+
+.linklike {
+  background: transparent;
+  border: 0;
+  display: flex;
+  width: 100%;
+  text-align: left;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+input,
+select,
+textarea,
+button {
+  border: 1px solid #b4c6b4;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+}
+
+button {
+  background: #f0f7f0;
+  cursor: pointer;
+}
+
+button.active-step {
+  background: #2f7a5b;
+  border-color: #2f7a5b;
+  color: #fff;
+}
+
+button.danger {
+  border-color: #cc4f4f;
+  color: #9d2525;
+}
+
+.checkbox-row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.inclusion-row {
+  border-bottom: 1px solid #eef4ef;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+}
+
+.inclusion-row:last-child {
+  border: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.staff-row {
+  background: #f9fbf9;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.effective {
+  color: #385a49;
+  font-weight: 600;
+}
+
+.status-pill {
+  border: 1px solid #8ca98c;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.muted {
+  color: #5f6f65;
+}
+
+.warning {
+  color: #9d2525;
+  font-weight: 600;
+}
+
+table {
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #dce7dc;
+  padding: 6px 8px;
+  text-align: left;
+}

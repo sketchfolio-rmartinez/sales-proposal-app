@@ -1,0 +1,100 @@
+import { blurbLibrary, inclusions, phases, roles, sizeTiers, timelineOptions } from "../data/defaults";
+import { ProposalDraft, ReviewModel } from "../types";
+
+export function generateProposalText(draft: ProposalDraft, review: ReviewModel): string {
+  const tier = sizeTiers.find((item) => item.id === draft.sizeTierId);
+  const timeline = timelineOptions.find((item) => item.id === draft.timelineOptionId);
+  const pickedBlurbs = blurbLibrary.filter((item) => draft.pickedBlurbIds.includes(item.id));
+  const selectedInclusions = draft.inclusions
+    .filter((item) => item.selected)
+    .map((item) => inclusions.find((inc) => inc.id === item.inclusionId))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  const lines: string[] = [];
+  lines.push(`# ${draft.projectTitle || "Untitled Project Proposal"}`);
+  lines.push("");
+  lines.push("## Client");
+  lines.push(draft.clientName || "TBD");
+  lines.push("");
+  lines.push("## Scope Summary");
+  lines.push(`- Size Tier: ${tier?.label ?? "TBD"}`);
+  lines.push(`- Timeline: ${timeline?.label ?? "TBD"}`);
+  lines.push("");
+
+  for (const phase of phases) {
+    const phaseInclusions = selectedInclusions.filter((inc) => inc.phaseId === phase.id);
+    if (phaseInclusions.length === 0) continue;
+    lines.push(`### ${phase.name}`);
+    for (const inclusion of phaseInclusions) {
+      lines.push(`- ${inclusion.name}: ${inclusion.description}`);
+    }
+    lines.push("");
+  }
+
+  lines.push("## Pricing Summary");
+  lines.push(`- Estimated Hours: ${review.totalHours}`);
+  lines.push(`- Estimated Price: $${review.totalPrice.toLocaleString()}`);
+  lines.push("");
+
+  lines.push("## Assumptions");
+  lines.push(draft.assumptions);
+  lines.push("");
+  lines.push("## Exclusions");
+  lines.push(draft.exclusions);
+  lines.push("");
+  lines.push("## Risks");
+  lines.push(draft.risks);
+  lines.push("");
+
+  if (draft.rfpRequirements.length > 0 || pickedBlurbs.length > 0) {
+    lines.push("## RFP Responses");
+    for (const req of draft.rfpRequirements) {
+      lines.push(`- ${req.prompt}`);
+      lines.push(`  ${req.response}`);
+    }
+    for (const blurb of pickedBlurbs) {
+      lines.push(`- ${blurb.title}: ${blurb.contentPlaintext}`);
+    }
+    lines.push("");
+  }
+
+  lines.push("## Role Rates");
+  for (const staff of draft.staffing) {
+    const role = roles.find((r) => r.id === staff.roleId);
+    lines.push(
+      `- ${role?.label ?? staff.roleId}: ${staff.seniority}, base $${staff.baseRate}/hr, markup ${staff.markupPercent}%`
+    );
+  }
+
+  return lines.join("\n");
+}
+
+export function generateTeamworkCsv(draft: ProposalDraft): string {
+  const selectedInclusions = draft.inclusions
+    .filter((item) => item.selected)
+    .map((item) => inclusions.find((inc) => inc.id === item.inclusionId))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  const header = ["List Name", "Task Name", "Task Description", "Assignee Role", "Sort Order"];
+  const rows = [header];
+  let index = 1;
+
+  for (const phase of phases) {
+    const phaseInclusions = selectedInclusions.filter((inc) => inc.phaseId === phase.id);
+    for (const inclusion of phaseInclusions) {
+      rows.push([phase.name, inclusion.name, inclusion.description, "", String(index)]);
+      index += 1;
+    }
+  }
+
+  return rows
+    .map((row) =>
+      row
+        .map((cell) => {
+          const escaped = String(cell).replace(/"/g, "\"\"");
+          return `"${escaped}"`;
+        })
+        .join(",")
+    )
+    .join("\n");
+}
