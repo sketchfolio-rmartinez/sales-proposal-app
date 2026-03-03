@@ -616,16 +616,19 @@ export default function App() {
                 </div>
               )}
 
-              <div className="row">
+              <div className="step-nav">
                 <button onClick={() => setStep((value) => (value > 1 ? ((value - 1) as EditorStep) : value))} disabled={step === 1}>
                   Back
                 </button>
-                <button
-                  onClick={() => setStep((value) => (value < 7 ? ((value + 1) as EditorStep) : value))}
-                  disabled={step === 2 && !canAdvanceFromInclusions(activeProposal)}
-                >
-                  Next
-                </button>
+                {step < 7 && (
+                  <button
+                    className="next-btn"
+                    onClick={() => setStep((value) => (value < 7 ? ((value + 1) as EditorStep) : value))}
+                    disabled={step === 2 && !canAdvanceFromInclusions(activeProposal)}
+                  >
+                    Next
+                  </button>
+                )}
               </div>
             </>
           )}

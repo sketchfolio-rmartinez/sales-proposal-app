@@ -109,6 +109,27 @@ button.active-step {
   color: #fff;
 }
 
+.step-nav {
+  position: sticky;
+  bottom: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d4dfd4;
+  border-radius: 12px;
+  backdrop-filter: blur(3px);
+}
+
+.next-btn {
+  background: #2f7a5b;
+  border-color: #2f7a5b;
+  color: #fff;
+  font-weight: 600;
+}
+
 button.danger {
   border-color: #cc4f4f;
   color: #9d2525;
