@@ -13,9 +13,11 @@ body {
 }
 
 .page {
-  min-width: 1440px;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   padding: 24px;
+  overflow-x: hidden;
 }
 
 .app-header h1 {
@@ -29,8 +31,9 @@ body {
 .layout {
   display: grid;
   gap: 16px;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
   margin-top: 20px;
+  max-width: 100%;
 }
 
 .sidebar,
@@ -38,6 +41,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-width: 0;
 }
 
 .panel,
@@ -91,6 +95,7 @@ button {
   border-radius: 8px;
   padding: 8px 10px;
   font: inherit;
+  max-width: 100%;
 }
 
 button {
@@ -157,6 +162,7 @@ table {
   border-collapse: collapse;
   margin-bottom: 12px;
   width: 100%;
+  table-layout: fixed;
 }
 
 th,
@@ -164,4 +170,5 @@ td {
   border: 1px solid #dce7dc;
   padding: 6px 8px;
   text-align: left;
+  overflow-wrap: anywhere;
 }
