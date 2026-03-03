@@ -6,14 +6,13 @@ import { ProposalDraft, ProposalInclusionState, ProposalRoleStaffing, ProposalSt
 
 const STORAGE_KEY = "sales-proposal-app:v1";
 const steps = [
-  "0) Proposal List",
-  "1) New Proposal Setup",
-  "2) Inclusions",
-  "3) Timeline & Complexity",
-  "4) Roles, Seniority & Rates",
-  "5) RFP Requirements & Blurbs",
-  "6) Review & Generate",
-  "7) Exports",
+  { id: 1, label: "Setup" },
+  { id: 2, label: "Inclusions" },
+  { id: 3, label: "Timeline" },
+  { id: 4, label: "Roles & Rates" },
+  { id: 5, label: "RFP Responses" },
+  { id: 6, label: "Review" },
+  { id: 7, label: "Exports" },
 ] as const;
 
 type EditorStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -201,13 +200,29 @@ export default function App() {
                   <h2>{activeProposal.name || activeProposal.projectTitle || "New Proposal"}</h2>
                   <span className="status-pill">{activeProposal.status}</span>
                 </div>
-                <p className="muted">Current step: {steps[step]}</p>
-                <div className="row wrap">
-                  {[1, 2, 3, 4, 5, 6, 7].map((number) => (
-                    <button key={number} onClick={() => setStep(number as EditorStep)} className={step === number ? "active-step" : ""}>
-                      {number}
-                    </button>
-                  ))}
+                <div className="stepper-header">
+                  <p className="stepper-title">
+                    Step {step} of {steps.length}: <strong>{steps[step - 1].label}</strong>
+                  </p>
+                  <div className="stepper-progress-track" aria-hidden="true">
+                    <div className="stepper-progress-fill" style={{ width: `${(step / steps.length) * 100}%` }} />
+                  </div>
+                </div>
+                <div className="stepper-grid" role="tablist" aria-label="Proposal steps">
+                  {steps.map((stepItem) => {
+                    const isActive = step === stepItem.id;
+                    const isComplete = step > stepItem.id;
+                    return (
+                      <button
+                        key={stepItem.id}
+                        onClick={() => setStep(stepItem.id as EditorStep)}
+                        className={`step-chip ${isActive ? "active" : ""} ${isComplete ? "complete" : ""}`}
+                      >
+                        <span className="step-chip-number">{stepItem.id}</span>
+                        <span className="step-chip-label">{stepItem.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
