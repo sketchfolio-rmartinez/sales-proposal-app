@@ -11,7 +11,7 @@ export function generateProposalText(draft: ProposalDraft, review: ReviewModel):
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
   const lines: string[] = [];
-  lines.push(`# ${draft.projectTitle || "Untitled Project Proposal"}`);
+  lines.push(`# ${draft.projectTitle || draft.name || "Proposal"}`);
   lines.push("");
   lines.push("## Client");
   lines.push(draft.clientName || "TBD");

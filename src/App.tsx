@@ -6,14 +6,13 @@ import { ProposalDraft, ProposalInclusionState, ProposalRoleStaffing, ProposalSt
 
 const STORAGE_KEY = "sales-proposal-app:v1";
 const steps = [
-  "0) Proposal List",
-  "1) New Proposal Setup",
-  "2) Inclusions",
-  "3) Timeline & Complexity",
-  "4) Roles, Seniority & Rates",
-  "5) RFP Requirements & Blurbs",
-  "6) Review & Generate",
-  "7) Exports",
+  { id: 1, label: "Setup" },
+  { id: 2, label: "Inclusions" },
+  { id: 3, label: "Timeline" },
+  { id: 4, label: "Roles & Rates" },
+  { id: 5, label: "RFP Responses" },
+  { id: 6, label: "Review" },
+  { id: 7, label: "Exports" },
 ] as const;
 
 type EditorStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -71,6 +70,7 @@ function statusActionLabel(status: ProposalStatus): string {
 export default function App() {
   const [proposals, setProposals] = useState<ProposalDraft[]>(() => loadStoredProposals());
   const [activeProposalId, setActiveProposalId] = useState<string | null>(proposals[0]?.id ?? null);
+  const [proposalQuery, setProposalQuery] = useState("");
   const [step, setStep] = useState<EditorStep>(1);
   const [exportText, setExportText] = useState("");
   const [exportCsv, setExportCsv] = useState("");
@@ -81,6 +81,16 @@ export default function App() {
   );
 
   const review = useMemo(() => (activeProposal ? buildReviewModel(activeProposal) : null), [activeProposal]);
+  const filteredProposals = useMemo(() => {
+    const query = proposalQuery.trim().toLowerCase();
+    if (!query) return proposals;
+    return proposals.filter((proposal) => {
+      const name = proposal.name.toLowerCase();
+      const title = proposal.projectTitle.toLowerCase();
+      const client = proposal.clientName.toLowerCase();
+      return name.includes(query) || title.includes(query) || client.includes(query);
+    });
+  }, [proposalQuery, proposals]);
 
   const persist = (next: ProposalDraft[]) => {
     setProposals(next);
@@ -129,6 +139,15 @@ export default function App() {
     }
   };
 
+  const formatUpdated = (iso: string): string => {
+    const date = new Date(iso);
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
+
+  const sizeTierLabel = (sizeTierId: string): string => {
+    return sizeTiers.find((tier) => tier.id === sizeTierId)?.label ?? "";
+  };
+
   const transitionStatus = () => {
     if (!activeProposal) return;
     const nextStatus: ProposalStatus =
@@ -163,31 +182,50 @@ export default function App() {
     <div className="page">
       <header className="app-header">
         <h1>Proposal & Project Seeding App (v1)</h1>
-        <p>Desktop-first guided builder for proposal and Teamwork task import generation.</p>
       </header>
 
       <main className="layout">
         <aside className="sidebar">
-          <div className="row">
+          <div className="sidebar-head">
             <h2>Proposals</h2>
-            <button onClick={newProposal}>New Proposal</button>
+            <button className="new-proposal-btn" onClick={newProposal}>
+              New
+            </button>
           </div>
-          {proposals.length === 0 && <p className="muted">No proposals saved yet.</p>}
-          {proposals.map((proposal) => (
-            <div key={proposal.id} className={`card ${proposal.id === activeProposalId ? "active" : ""}`}>
-              <button className="linklike" onClick={() => setActiveProposalId(proposal.id)}>
-                <strong>{proposal.name || proposal.projectTitle || "Untitled"}</strong>
-                <span>{proposal.clientName || "No client"}</span>
-                <span>{proposal.status}</span>
-              </button>
-              <div className="row">
-                <button onClick={() => duplicateProposal(proposal)}>Duplicate</button>
-                <button className="danger" onClick={() => deleteProposal(proposal.id)}>
-                  Delete
+          <label className="sidebar-search">
+            <input
+              placeholder="Search proposals"
+              value={proposalQuery}
+              onChange={(event) => setProposalQuery(event.target.value)}
+            />
+          </label>
+          <div className="proposal-list-head" aria-hidden="true">
+            <span>Name</span>
+          </div>
+          <div className="proposal-list">
+            {filteredProposals.map((proposal) => (
+              <div key={proposal.id} className={`proposal-row ${proposal.id === activeProposalId ? "active" : ""}`}>
+                <button className="proposal-row-main" onClick={() => setActiveProposalId(proposal.id)}>
+                  <div className="proposal-primary">
+                    <span className="proposal-title">{proposal.name || proposal.projectTitle || "New Proposal"}</span>
+                    <span className="proposal-meta">
+                      <span className="proposal-client">{proposal.clientName || "Client pending"}</span>
+                      <span className="proposal-tier">{sizeTierLabel(proposal.sizeTierId)}</span>
+                      <span className="proposal-updated">{formatUpdated(proposal.updatedAt)}</span>
+                    </span>
+                  </div>
                 </button>
+                <div className="proposal-row-actions">
+                  <span className={`status-dot status-${proposal.status.toLowerCase()}`}>{proposal.status}</span>
+                  <button onClick={() => duplicateProposal(proposal)}>Dup</button>
+                  <button className="danger" onClick={() => deleteProposal(proposal.id)}>
+                    Del
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+            {filteredProposals.length === 0 && <p className="muted">No matches</p>}
+          </div>
         </aside>
 
         <section className="content">
@@ -198,17 +236,33 @@ export default function App() {
           ) : (
             <>
               <div className="panel">
-                <div className="row">
-                  <h2>{activeProposal.name || "Untitled Proposal"}</h2>
+                <div className="proposal-heading">
+                  <h2>{activeProposal.name || activeProposal.projectTitle || "New Proposal"}</h2>
                   <span className="status-pill">{activeProposal.status}</span>
                 </div>
-                <p className="muted">Current step: {steps[step]}</p>
-                <div className="row wrap">
-                  {[1, 2, 3, 4, 5, 6, 7].map((number) => (
-                    <button key={number} onClick={() => setStep(number as EditorStep)} className={step === number ? "active-step" : ""}>
-                      {number}
-                    </button>
-                  ))}
+                <div className="stepper-header">
+                  <p className="stepper-title">
+                    Step {step} of {steps.length}: <strong>{steps[step - 1].label}</strong>
+                  </p>
+                  <div className="stepper-progress-track" aria-hidden="true">
+                    <div className="stepper-progress-fill" style={{ width: `${(step / steps.length) * 100}%` }} />
+                  </div>
+                </div>
+                <div className="stepper-grid" role="tablist" aria-label="Proposal steps">
+                  {steps.map((stepItem) => {
+                    const isActive = step === stepItem.id;
+                    const isComplete = step > stepItem.id;
+                    return (
+                      <button
+                        key={stepItem.id}
+                        onClick={() => setStep(stepItem.id as EditorStep)}
+                        className={`step-chip ${isActive ? "active" : ""} ${isComplete ? "complete" : ""}`}
+                      >
+                        <span className="step-chip-number">{stepItem.id}</span>
+                        <span className="step-chip-label">{stepItem.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -617,16 +671,19 @@ export default function App() {
                 </div>
               )}
 
-              <div className="row">
+              <div className="step-nav">
                 <button onClick={() => setStep((value) => (value > 1 ? ((value - 1) as EditorStep) : value))} disabled={step === 1}>
                   Back
                 </button>
-                <button
-                  onClick={() => setStep((value) => (value < 7 ? ((value + 1) as EditorStep) : value))}
-                  disabled={step === 2 && !canAdvanceFromInclusions(activeProposal)}
-                >
-                  Next
-                </button>
+                {step < 7 && (
+                  <button
+                    className="next-btn"
+                    onClick={() => setStep((value) => (value < 7 ? ((value + 1) as EditorStep) : value))}
+                    disabled={step === 2 && !canAdvanceFromInclusions(activeProposal)}
+                  >
+                    Next
+                  </button>
+                )}
               </div>
             </>
           )}

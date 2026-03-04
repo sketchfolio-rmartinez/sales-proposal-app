@@ -13,9 +13,11 @@ body {
 }
 
 .page {
-  min-width: 1440px;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   padding: 24px;
+  overflow-x: hidden;
 }
 
 .app-header h1 {
@@ -29,8 +31,9 @@ body {
 .layout {
   display: grid;
   gap: 16px;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
   margin-top: 20px;
+  max-width: 100%;
 }
 
 .sidebar,
@@ -38,6 +41,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-width: 0;
+}
+
+.sidebar {
+  max-height: calc(100vh - 48px);
 }
 
 .panel,
@@ -76,6 +84,160 @@ body {
   padding: 0;
 }
 
+.sidebar-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #eef4ef;
+  padding-bottom: 2px;
+}
+
+.new-proposal-btn {
+  background: #2f7a5b;
+  border-color: #2f7a5b;
+  color: #fff;
+}
+
+.sidebar-search {
+  margin: 0;
+}
+
+.proposal-list-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 0 8px;
+  color: #5f6f65;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.proposal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.proposal-row {
+  border: 1px solid #d4dfd4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.proposal-row.active {
+  border-color: #2f7a5b;
+  box-shadow: 0 0 0 1px #2f7a5b;
+}
+
+.proposal-row-main {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  display: block;
+  padding: 8px;
+  text-align: left;
+}
+
+.proposal-primary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.proposal-title {
+  display: block;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proposal-client {
+  color: #5f6f65;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proposal-meta {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.proposal-tier {
+  color: #385a49;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  justify-self: center;
+  text-align: center;
+}
+
+.proposal-client {
+  justify-self: start;
+}
+
+.proposal-updated {
+  justify-self: end;
+}
+
+.status-dot {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+}
+
+.status-draft {
+  background: #f0f5f2;
+  border-color: #cfe0d1;
+}
+
+.status-readyforapproval {
+  background: #fff6e8;
+  border-color: #f0c982;
+}
+
+.status-approved {
+  background: #e8f8ee;
+  border-color: #93c9a6;
+}
+
+.proposal-updated {
+  color: #5f6f65;
+  font-size: 12px;
+}
+
+.proposal-row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 8px 8px;
+}
+
+.proposal-row-actions .status-dot {
+  margin-right: auto;
+}
+
+.proposal-row-actions button {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
 label {
   display: flex;
   flex-direction: column;
@@ -91,6 +253,7 @@ button {
   border-radius: 8px;
   padding: 8px 10px;
   font: inherit;
+  max-width: 100%;
 }
 
 button {
@@ -98,10 +261,101 @@ button {
   cursor: pointer;
 }
 
-button.active-step {
+.stepper-header {
+  margin: 6px 0 12px;
+}
+
+.stepper-title {
+  margin: 0 0 8px;
+  color: #385a49;
+}
+
+.stepper-progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e3ece6;
+  overflow: hidden;
+}
+
+.stepper-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2f7a5b 0%, #4e9b77 100%);
+  transition: width 180ms ease;
+}
+
+.stepper-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.step-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+  background: #f6faf7;
+  border: 1px solid #cfe0d1;
+  color: #2f3f3a;
+  min-width: 0;
+}
+
+.step-chip-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e3ece6;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.step-chip-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+
+.step-chip.active {
   background: #2f7a5b;
   border-color: #2f7a5b;
   color: #fff;
+}
+
+.step-chip.active .step-chip-number {
+  background: #ffffff;
+  color: #2f7a5b;
+}
+
+.step-chip.complete {
+  border-color: #87b89d;
+  background: #edf7f0;
+}
+
+.step-nav {
+  position: sticky;
+  bottom: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d4dfd4;
+  border-radius: 12px;
+  backdrop-filter: blur(3px);
+}
+
+.next-btn {
+  background: #2f7a5b;
+  border-color: #2f7a5b;
+  color: #fff;
+  font-weight: 600;
 }
 
 button.danger {
@@ -144,6 +398,13 @@ button.danger {
   padding: 4px 10px;
 }
 
+.proposal-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
 .muted {
   color: #5f6f65;
 }
@@ -157,6 +418,7 @@ table {
   border-collapse: collapse;
   margin-bottom: 12px;
   width: 100%;
+  table-layout: fixed;
 }
 
 th,
@@ -164,4 +426,5 @@ td {
   border: 1px solid #dce7dc;
   padding: 6px 8px;
   text-align: left;
+  overflow-wrap: anywhere;
 }
