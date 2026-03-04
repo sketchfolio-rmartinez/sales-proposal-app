@@ -70,6 +70,7 @@ function statusActionLabel(status: ProposalStatus): string {
 export default function App() {
   const [proposals, setProposals] = useState<ProposalDraft[]>(() => loadStoredProposals());
   const [activeProposalId, setActiveProposalId] = useState<string | null>(proposals[0]?.id ?? null);
+  const [proposalQuery, setProposalQuery] = useState("");
   const [step, setStep] = useState<EditorStep>(1);
   const [exportText, setExportText] = useState("");
   const [exportCsv, setExportCsv] = useState("");
@@ -80,6 +81,16 @@ export default function App() {
   );
 
   const review = useMemo(() => (activeProposal ? buildReviewModel(activeProposal) : null), [activeProposal]);
+  const filteredProposals = useMemo(() => {
+    const query = proposalQuery.trim().toLowerCase();
+    if (!query) return proposals;
+    return proposals.filter((proposal) => {
+      const name = proposal.name.toLowerCase();
+      const title = proposal.projectTitle.toLowerCase();
+      const client = proposal.clientName.toLowerCase();
+      return name.includes(query) || title.includes(query) || client.includes(query);
+    });
+  }, [proposalQuery, proposals]);
 
   const persist = (next: ProposalDraft[]) => {
     setProposals(next);
@@ -128,6 +139,15 @@ export default function App() {
     }
   };
 
+  const formatUpdated = (iso: string): string => {
+    const date = new Date(iso);
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
+
+  const sizeTierLabel = (sizeTierId: string): string => {
+    return sizeTiers.find((tier) => tier.id === sizeTierId)?.label ?? "";
+  };
+
   const transitionStatus = () => {
     if (!activeProposal) return;
     const nextStatus: ProposalStatus =
@@ -166,26 +186,46 @@ export default function App() {
 
       <main className="layout">
         <aside className="sidebar">
-          <div className="row">
+          <div className="sidebar-head">
             <h2>Proposals</h2>
-            <button onClick={newProposal}>New Proposal</button>
+            <button className="new-proposal-btn" onClick={newProposal}>
+              New
+            </button>
           </div>
-          {proposals.length === 0 && <p className="muted">No proposals saved yet.</p>}
-          {proposals.map((proposal) => (
-            <div key={proposal.id} className={`card ${proposal.id === activeProposalId ? "active" : ""}`}>
-              <button className="linklike" onClick={() => setActiveProposalId(proposal.id)}>
-                <strong>{proposal.name || proposal.projectTitle || "New Proposal"}</strong>
-                <span>{proposal.clientName || "No client"}</span>
-                <span>{proposal.status}</span>
-              </button>
-              <div className="row">
-                <button onClick={() => duplicateProposal(proposal)}>Duplicate</button>
-                <button className="danger" onClick={() => deleteProposal(proposal.id)}>
-                  Delete
+          <label className="sidebar-search">
+            <input
+              placeholder="Search proposals"
+              value={proposalQuery}
+              onChange={(event) => setProposalQuery(event.target.value)}
+            />
+          </label>
+          <div className="proposal-list-head" aria-hidden="true">
+            <span>Name</span>
+          </div>
+          <div className="proposal-list">
+            {filteredProposals.map((proposal) => (
+              <div key={proposal.id} className={`proposal-row ${proposal.id === activeProposalId ? "active" : ""}`}>
+                <button className="proposal-row-main" onClick={() => setActiveProposalId(proposal.id)}>
+                  <div className="proposal-primary">
+                    <span className="proposal-title">{proposal.name || proposal.projectTitle || "New Proposal"}</span>
+                    <span className="proposal-meta">
+                      <span className="proposal-client">{proposal.clientName || "Client pending"}</span>
+                      <span className="proposal-tier">{sizeTierLabel(proposal.sizeTierId)}</span>
+                      <span className="proposal-updated">{formatUpdated(proposal.updatedAt)}</span>
+                    </span>
+                  </div>
                 </button>
+                <div className="proposal-row-actions">
+                  <span className={`status-dot status-${proposal.status.toLowerCase()}`}>{proposal.status}</span>
+                  <button onClick={() => duplicateProposal(proposal)}>Dup</button>
+                  <button className="danger" onClick={() => deleteProposal(proposal.id)}>
+                    Del
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+            {filteredProposals.length === 0 && <p className="muted">No matches</p>}
+          </div>
         </aside>
 
         <section className="content">
@@ -196,7 +236,7 @@ export default function App() {
           ) : (
             <>
               <div className="panel">
-                <div className="row">
+                <div className="proposal-heading">
                   <h2>{activeProposal.name || activeProposal.projectTitle || "New Proposal"}</h2>
                   <span className="status-pill">{activeProposal.status}</span>
                 </div>
