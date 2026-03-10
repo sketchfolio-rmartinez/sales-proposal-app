@@ -96,6 +96,7 @@ export interface ProposalDraft {
   projectTitle: string;
   status: ProposalStatus;
   sizeTierId: string;
+  companySize: "Small" | "Medium" | "Large" | "XL";
   timelineOptionId: string;
   complexity: {
     stakeholdersCompanySize: ComplexityBand;

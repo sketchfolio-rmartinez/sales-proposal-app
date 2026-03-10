@@ -1,4 +1,4 @@
-import { inclusions, phases, sizeTiers } from "../data/defaults";
+import { inclusions, phases } from "../data/defaults";
 import {
   EstimateLine,
   PhaseId,
@@ -42,6 +42,21 @@ function toFixedMoney(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+function companySizeMultiplier(size: string): number {
+  switch (size) {
+    case "Small":
+      return 1;
+    case "Medium":
+      return 2;
+    case "Large":
+      return 3;
+    case "XL":
+      return 5;
+    default:
+      return 1;
+  }
+}
+
 // this takes in the whole proposal draft and builds the review model, which is basically the most important logic
 // this is the money
 // this is where we have to get it right
@@ -55,6 +70,7 @@ export function buildReviewModel(draft: ProposalDraft): ReviewModel {
 
   const staff = staffingMap(draft.staffing);
   const multiplier = complexityMultiplier(draft); // ex 1.08
+  const sizeMult = companySizeMultiplier(draft.companySize);
 
   const aggregate = new Map<string, number>();
   for (const inclusion of selectedInclusions) {
@@ -73,7 +89,7 @@ export function buildReviewModel(draft: ProposalDraft): ReviewModel {
       const [phaseId, roleId] = key.split("|") as [PhaseId, RoleId];
       const staffing = staff.get(roleId);
       const rate = calcRate(staffing);
-      const adjustedHours = Math.round(hours * multiplier);
+      const adjustedHours = Math.round(hours * sizeMult * multiplier);
       const cost = toFixedMoney(adjustedHours * rate);
       const markup = staffing?.markupPercent ?? 0;
       const price = toFixedMoney(cost * (1 + markup / 100));
@@ -92,6 +108,14 @@ export function buildReviewModel(draft: ProposalDraft): ReviewModel {
     },
   );
 
+  const budgetByPhase = {} as Record<PhaseId, number>;
+  for (const phase of phases) {
+    const phasePrice = estimateLines
+      .filter((line) => line.phaseId === phase.id)
+      .reduce((sum, line) => sum + line.price, 0);
+    budgetByPhase[phase.id] = toFixedMoney(phasePrice);
+  }
+
   estimateLines.sort((a, b) => {
     const phaseA = phases.find((p) => p.id === a.phaseId)?.sortOrder ?? 99;
     const phaseB = phases.find((p) => p.id === b.phaseId)?.sortOrder ?? 99;
@@ -99,16 +123,8 @@ export function buildReviewModel(draft: ProposalDraft): ReviewModel {
     return a.roleId.localeCompare(b.roleId);
   });
 
-  const totalPrice = estimateLines.reduce((sum, line) => sum + line.price, 0);
+  const totalPrice = Object.values(budgetByPhase).reduce((sum, phaseBudget) => sum + phaseBudget, 0);
   const totalHours = estimateLines.reduce((sum, line) => sum + line.hours, 0);
-  const tier =
-    sizeTiers.find((item) => item.id === draft.sizeTierId) ?? sizeTiers[0];
-  const budgetByPhase = {} as Record<PhaseId, number>;
-
-  for (const phase of phases) {
-    const phasePercent = tier.defaultPhaseBudgetPercent[phase.id] ?? 0;
-    budgetByPhase[phase.id] = toFixedMoney(totalPrice * (phasePercent / 100));
-  }
 
   console.log("Review Model:\n\n", {
     estimateLines,

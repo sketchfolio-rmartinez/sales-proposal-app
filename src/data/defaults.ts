@@ -240,6 +240,7 @@ export function createDraftProposal(): ProposalDraft {
     projectTitle: "",
     status: "Draft",
     sizeTierId: sizeTiers[2].id,
+    companySize: "Medium",
     timelineOptionId: timelineOptions[1].id,
     complexity: {
       stakeholdersCompanySize: "Medium",

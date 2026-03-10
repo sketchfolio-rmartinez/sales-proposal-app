@@ -98,6 +98,23 @@ export function EditorStepContent({
             ))}
           </select>
         </label>
+        <label>
+          Company Size
+          <select
+            value={activeProposal.companySize}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                companySize: event.target.value as ProposalDraft["companySize"],
+              })
+            }
+          >
+            <option value="Small">Small</option>
+            <option value="Medium">Medium</option>
+            <option value="Large">Large</option>
+            <option value="XL">XL</option>
+          </select>
+        </label>
       </div>
     );
   }
@@ -198,7 +215,7 @@ export function EditorStepContent({
           </select>
         </label>
         <label>
-          Stakeholders / Company Size
+          Stakeholders Size
           <select
             value={activeProposal.complexity.stakeholdersCompanySize}
             onChange={(event) =>
