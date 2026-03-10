@@ -1,7 +1,24 @@
-import { blurbLibrary, inclusions, phases, roles, sizeTiers, timelineOptions } from "../data/defaults";
-import { canAdvanceFromInclusions, statusActionLabel, updateInclusion, updateStaffing } from "../app/proposalUtils";
+import {
+  blurbLibrary,
+  inclusions,
+  phases,
+  roles,
+  sizeTiers,
+  timelineOptions,
+} from "../data/defaults";
+import {
+  canAdvanceFromInclusions,
+  statusActionLabel,
+  updateInclusion,
+  updateStaffing,
+} from "../app/proposalUtils";
 import { EditorStep } from "../app/editorConfig";
-import { ProposalDraft, ProposalRoleStaffing, ReviewModel, RfpRequirement } from "../types";
+import {
+  ProposalDraft,
+  ProposalRoleStaffing,
+  ReviewModel,
+  RfpRequirement,
+} from "../types";
 
 interface EditorStepContentProps {
   step: EditorStep;
@@ -32,22 +49,48 @@ export function EditorStepContent({
         <h3>New Proposal Setup</h3>
         <label>
           Proposal Name (Internal)
-          <input value={activeProposal.name} onChange={(event) => onUpsertActive({ ...activeProposal, name: event.target.value })} />
+          <input
+            value={activeProposal.name}
+            onChange={(event) =>
+              onUpsertActive({ ...activeProposal, name: event.target.value })
+            }
+          />
         </label>
         <label>
           Client Name
-          <input value={activeProposal.clientName} onChange={(event) => onUpsertActive({ ...activeProposal, clientName: event.target.value })} />
+          <input
+            value={activeProposal.clientName}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                clientName: event.target.value,
+              })
+            }
+          />
         </label>
         <label>
           Project Title
           <input
             value={activeProposal.projectTitle}
-            onChange={(event) => onUpsertActive({ ...activeProposal, projectTitle: event.target.value })}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                projectTitle: event.target.value,
+              })
+            }
           />
         </label>
         <label>
           Size Tier
-          <select value={activeProposal.sizeTierId} onChange={(event) => onUpsertActive({ ...activeProposal, sizeTierId: event.target.value })}>
+          <select
+            value={activeProposal.sizeTierId}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                sizeTierId: event.target.value,
+              })
+            }
+          >
             {sizeTiers.map((tier) => (
               <option key={tier.id} value={tier.id}>
                 {tier.label}
@@ -69,7 +112,9 @@ export function EditorStepContent({
             {inclusions
               .filter((item) => item.phaseId === phase.id)
               .map((inclusion) => {
-                const state = activeProposal.inclusions.find((item) => item.inclusionId === inclusion.id);
+                const state = activeProposal.inclusions.find(
+                  (item) => item.inclusionId === inclusion.id,
+                );
                 if (!state) return null;
                 return (
                   <div key={inclusion.id} className="inclusion-row">
@@ -80,14 +125,19 @@ export function EditorStepContent({
                         onChange={(event) =>
                           onUpsertActive({
                             ...activeProposal,
-                            inclusions: updateInclusion(activeProposal.inclusions, inclusion.id, {
-                              selected: event.target.checked,
-                            }),
+                            inclusions: updateInclusion(
+                              activeProposal.inclusions,
+                              inclusion.id,
+                              {
+                                selected: event.target.checked,
+                              },
+                            ),
                           })
                         }
                       />
                       <span>
-                        {inclusion.name} {inclusion.isRequired ? "(Required)" : ""}
+                        {inclusion.name}{" "}
+                        {inclusion.isRequired ? "(Required)" : ""}
                       </span>
                     </label>
                     <p className="muted">{inclusion.description}</p>
@@ -99,9 +149,13 @@ export function EditorStepContent({
                           onChange={(event) =>
                             onUpsertActive({
                               ...activeProposal,
-                              inclusions: updateInclusion(activeProposal.inclusions, inclusion.id, {
-                                overrideReason: event.target.value,
-                              }),
+                              inclusions: updateInclusion(
+                                activeProposal.inclusions,
+                                inclusion.id,
+                                {
+                                  overrideReason: event.target.value,
+                                },
+                              ),
                             })
                           }
                         />
@@ -113,7 +167,9 @@ export function EditorStepContent({
           </div>
         ))}
         {!canAdvanceFromInclusions(activeProposal) && (
-          <p className="warning">Complete required reason fields before moving to next step.</p>
+          <p className="warning">
+            Complete required reason fields before moving to next step.
+          </p>
         )}
       </div>
     );
@@ -127,7 +183,12 @@ export function EditorStepContent({
           Timeline Option
           <select
             value={activeProposal.timelineOptionId}
-            onChange={(event) => onUpsertActive({ ...activeProposal, timelineOptionId: event.target.value })}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                timelineOptionId: event.target.value,
+              })
+            }
           >
             {timelineOptions.map((option) => (
               <option key={option.id} value={option.id}>
@@ -143,7 +204,13 @@ export function EditorStepContent({
             onChange={(event) =>
               onUpsertActive({
                 ...activeProposal,
-                complexity: { ...activeProposal.complexity, stakeholdersCompanySize: event.target.value as "Low" | "Medium" | "High" },
+                complexity: {
+                  ...activeProposal.complexity,
+                  stakeholdersCompanySize: event.target.value as
+                    | "Low"
+                    | "Medium"
+                    | "High",
+                },
               })
             }
           >
@@ -159,7 +226,11 @@ export function EditorStepContent({
             onChange={(event) =>
               onUpsertActive({
                 ...activeProposal,
-                complexity: { ...activeProposal.complexity, cmsType: event.target.value as ProposalDraft["complexity"]["cmsType"] },
+                complexity: {
+                  ...activeProposal.complexity,
+                  cmsType: event.target
+                    .value as ProposalDraft["complexity"]["cmsType"],
+                },
               })
             }
           >
@@ -177,7 +248,10 @@ export function EditorStepContent({
             onChange={(event) =>
               onUpsertActive({
                 ...activeProposal,
-                complexity: { ...activeProposal.complexity, notes: event.target.value },
+                complexity: {
+                  ...activeProposal.complexity,
+                  notes: event.target.value,
+                },
               })
             }
           />
@@ -187,13 +261,18 @@ export function EditorStepContent({
   }
 
   if (step === 4) {
+    // I need to revisit this part so I can make progress on the formula and how # are getting crunched.
     return (
       <div className="panel">
         <h3>Roles, Seniority & Rates</h3>
         {roles.map((role) => {
-          const staff = activeProposal.staffing.find((item) => item.roleId === role.id);
+          const staff = activeProposal.staffing.find(
+            (item) => item.roleId === role.id,
+          );
           if (!staff) return null;
-          const effectiveRate = Math.round(staff.baseRate * (staff.seniority === "Senior" ? 1.25 : 1));
+          const effectiveRate = Math.round(
+            staff.baseRate * (staff.seniority === "Senior" ? 1.25 : 1),
+          ); // so Q1 how would I even input the team here? bc based off that I will have to make
           return (
             <div key={role.id} className="staff-row">
               <h4>{role.label}</h4>
@@ -204,9 +283,14 @@ export function EditorStepContent({
                   onChange={(event) =>
                     onUpsertActive({
                       ...activeProposal,
-                      staffing: updateStaffing(activeProposal.staffing, role.id, {
-                        seniority: event.target.value as ProposalRoleStaffing["seniority"],
-                      }),
+                      staffing: updateStaffing(
+                        activeProposal.staffing,
+                        role.id,
+                        {
+                          seniority: event.target
+                            .value as ProposalRoleStaffing["seniority"],
+                        },
+                      ),
                     })
                   }
                 >
@@ -223,9 +307,13 @@ export function EditorStepContent({
                   onChange={(event) =>
                     onUpsertActive({
                       ...activeProposal,
-                      staffing: updateStaffing(activeProposal.staffing, role.id, {
-                        baseRate: Number(event.target.value),
-                      }),
+                      staffing: updateStaffing(
+                        activeProposal.staffing,
+                        role.id,
+                        {
+                          baseRate: Number(event.target.value),
+                        },
+                      ),
                     })
                   }
                 />
@@ -239,14 +327,20 @@ export function EditorStepContent({
                   onChange={(event) =>
                     onUpsertActive({
                       ...activeProposal,
-                      staffing: updateStaffing(activeProposal.staffing, role.id, {
-                        markupPercent: Number(event.target.value),
-                      }),
+                      staffing: updateStaffing(
+                        activeProposal.staffing,
+                        role.id,
+                        {
+                          markupPercent: Number(event.target.value),
+                        },
+                      ),
                     })
                   }
                 />
               </label>
-              <div className="effective">Effective rate: ${effectiveRate}/hr</div>
+              <div className="effective">
+                Effective rate: ${effectiveRate}/hr
+              </div>
             </div>
           );
         })}
@@ -262,7 +356,14 @@ export function EditorStepContent({
           onClick={() =>
             onUpsertActive({
               ...activeProposal,
-              rfpRequirements: [...activeProposal.rfpRequirements, { id: crypto.randomUUID(), prompt: "", response: "" } as RfpRequirement],
+              rfpRequirements: [
+                ...activeProposal.rfpRequirements,
+                {
+                  id: crypto.randomUUID(),
+                  prompt: "",
+                  response: "",
+                } as RfpRequirement,
+              ],
             })
           }
         >
@@ -277,8 +378,11 @@ export function EditorStepContent({
                 onChange={(event) =>
                   onUpsertActive({
                     ...activeProposal,
-                    rfpRequirements: activeProposal.rfpRequirements.map((item) =>
-                      item.id === req.id ? { ...item, prompt: event.target.value } : item
+                    rfpRequirements: activeProposal.rfpRequirements.map(
+                      (item) =>
+                        item.id === req.id
+                          ? { ...item, prompt: event.target.value }
+                          : item,
                     ),
                   })
                 }
@@ -291,8 +395,11 @@ export function EditorStepContent({
                 onChange={(event) =>
                   onUpsertActive({
                     ...activeProposal,
-                    rfpRequirements: activeProposal.rfpRequirements.map((item) =>
-                      item.id === req.id ? { ...item, response: event.target.value } : item
+                    rfpRequirements: activeProposal.rfpRequirements.map(
+                      (item) =>
+                        item.id === req.id
+                          ? { ...item, response: event.target.value }
+                          : item,
                     ),
                   })
                 }
@@ -314,7 +421,9 @@ export function EditorStepContent({
                     ...activeProposal,
                     pickedBlurbIds: event.target.checked
                       ? [...activeProposal.pickedBlurbIds, blurb.id]
-                      : activeProposal.pickedBlurbIds.filter((id) => id !== blurb.id),
+                      : activeProposal.pickedBlurbIds.filter(
+                          (id) => id !== blurb.id,
+                        ),
                   })
                 }
               />
@@ -334,12 +443,16 @@ export function EditorStepContent({
         <h3>Review & Generate</h3>
         <div className="row wrap">
           <button onClick={onRegenerate}>Regenerate</button>
-          <button onClick={onTransitionStatus} disabled={activeProposal.status === "Approved"}>
+          <button
+            onClick={onTransitionStatus}
+            disabled={activeProposal.status === "Approved"}
+          >
             {statusActionLabel(activeProposal.status)}
           </button>
         </div>
         <p>
-          Total Hours: <strong>{review.totalHours}</strong> | Total Price: <strong>${review.totalPrice.toLocaleString()}</strong>
+          Total Hours: <strong>{review.totalHours}</strong> | Total Price:{" "}
+          <strong>${review.totalPrice.toLocaleString()}</strong>
         </p>
 
         <h4>Estimates by Phase and Role</h4>
@@ -357,7 +470,9 @@ export function EditorStepContent({
           <tbody>
             {review.estimateLines.map((line) => (
               <tr key={`${line.phaseId}-${line.roleId}`}>
-                <td>{phases.find((phase) => phase.id === line.phaseId)?.name}</td>
+                <td>
+                  {phases.find((phase) => phase.id === line.phaseId)?.name}
+                </td>
                 <td>{roles.find((role) => role.id === line.roleId)?.label}</td>
                 <td>{line.hours}</td>
                 <td>${line.rate}</td>
@@ -389,15 +504,36 @@ export function EditorStepContent({
         <h4>Assumptions / Exclusions / Risks</h4>
         <label>
           Assumptions
-          <textarea value={activeProposal.assumptions} onChange={(event) => onUpsertActive({ ...activeProposal, assumptions: event.target.value })} />
+          <textarea
+            value={activeProposal.assumptions}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                assumptions: event.target.value,
+              })
+            }
+          />
         </label>
         <label>
           Exclusions
-          <textarea value={activeProposal.exclusions} onChange={(event) => onUpsertActive({ ...activeProposal, exclusions: event.target.value })} />
+          <textarea
+            value={activeProposal.exclusions}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                exclusions: event.target.value,
+              })
+            }
+          />
         </label>
         <label>
           Risks
-          <textarea value={activeProposal.risks} onChange={(event) => onUpsertActive({ ...activeProposal, risks: event.target.value })} />
+          <textarea
+            value={activeProposal.risks}
+            onChange={(event) =>
+              onUpsertActive({ ...activeProposal, risks: event.target.value })
+            }
+          />
         </label>
       </div>
     );

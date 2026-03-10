@@ -4,7 +4,12 @@ import { generateProposalText, generateTeamworkCsv } from "../lib/exporters";
 import { buildReviewModel } from "../lib/estimate";
 import { ProposalDraft, ProposalStatus, ReviewModel } from "../types";
 import { type EditorStep } from "./editorConfig";
-import { filterProposals, loadStoredProposals, saveStoredProposals, touch } from "./proposalUtils";
+import {
+  filterProposals,
+  loadStoredProposals,
+  saveStoredProposals,
+  touch,
+} from "./proposalUtils";
 
 interface ProposalBuilderState {
   activeProposalId: string | null;
@@ -15,6 +20,7 @@ interface ProposalBuilderState {
 }
 
 interface ProposalBuilderView {
+  // este model tiene toda la info
   activeProposal: ProposalDraft | null;
   review: ReviewModel | null;
   filteredProposals: ProposalDraft[];
@@ -40,8 +46,12 @@ export interface ProposalBuilderModel {
 }
 
 export function useProposalBuilder(): ProposalBuilderModel {
-  const [proposals, setProposals] = useState<ProposalDraft[]>(() => loadStoredProposals());
-  const [activeProposalId, setActiveProposalId] = useState<string | null>(proposals[0]?.id ?? null);
+  const [proposals, setProposals] = useState<ProposalDraft[]>(() =>
+    loadStoredProposals(),
+  );
+  const [activeProposalId, setActiveProposalId] = useState<string | null>(
+    proposals[0]?.id ?? null,
+  );
   const [proposalQuery, setProposalQuery] = useState("");
   const [step, setStep] = useState<EditorStep>(1);
   const [exportText, setExportText] = useState("");
@@ -49,11 +59,18 @@ export function useProposalBuilder(): ProposalBuilderModel {
 
   const activeProposal = useMemo(
     () => proposals.find((item) => item.id === activeProposalId) ?? null,
-    [activeProposalId, proposals]
+    [activeProposalId, proposals],
   );
 
-  const review = useMemo(() => (activeProposal ? buildReviewModel(activeProposal) : null), [activeProposal]);
-  const filteredProposals = useMemo(() => filterProposals(proposals, proposalQuery), [proposalQuery, proposals]);
+  // pauy attention here
+  const review = useMemo(
+    () => (activeProposal ? buildReviewModel(activeProposal) : null),
+    [activeProposal],
+  );
+  const filteredProposals = useMemo(
+    () => filterProposals(proposals, proposalQuery),
+    [proposalQuery, proposals],
+  );
 
   const persist = (next: ProposalDraft[]) => {
     setProposals(next);
@@ -62,7 +79,9 @@ export function useProposalBuilder(): ProposalBuilderModel {
 
   const upsertActive = (nextDraft: ProposalDraft) => {
     if (!activeProposal) return;
-    const next = proposals.map((item) => (item.id === activeProposal.id ? touch(nextDraft) : item));
+    const next = proposals.map((item) =>
+      item.id === activeProposal.id ? touch(nextDraft) : item,
+    );
     persist(next);
   };
 
@@ -108,8 +127,8 @@ export function useProposalBuilder(): ProposalBuilderModel {
       activeProposal.status === "Draft"
         ? "ReadyForApproval"
         : activeProposal.status === "ReadyForApproval"
-        ? "Approved"
-        : "Approved";
+          ? "Approved"
+          : "Approved";
     upsertActive({ ...activeProposal, status: nextStatus });
   };
 

@@ -10,7 +10,11 @@ import {
 
 export const phases: Phase[] = [
   { id: "discovery", name: "Discovery", sortOrder: 1 },
-  { id: "strategy_architecture", name: "Strategy & Architecture", sortOrder: 2 },
+  {
+    id: "strategy_architecture",
+    name: "Strategy & Architecture",
+    sortOrder: 2,
+  },
   { id: "creative_direction", name: "Creative Direction", sortOrder: 3 },
   { id: "content", name: "Content", sortOrder: 4 },
   { id: "development", name: "Development", sortOrder: 5 },
@@ -139,7 +143,7 @@ export const inclusions: InclusionItem[] = [
     description: "Alignment workshop and project brief validation.",
     phaseId: "discovery",
     isRequired: true,
-    defaultHoursByRole: { strategist: 10, project_manager: 6 },
+    defaultHoursByRole: { strategist: 10, project_manager: 6 }, // this here needs to change right to better match what Chris has on his mind, about him being able to mess with these percentages as he goes.
   },
   {
     id: "inc_ia",

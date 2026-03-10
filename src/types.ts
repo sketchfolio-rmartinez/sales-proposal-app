@@ -39,7 +39,7 @@ export interface SizeTier {
   label: string;
   minBudget: number;
   maxBudget?: number;
-  defaultPhaseBudgetPercent: Record<PhaseId, number>;
+  defaultPhaseBudgetPercent: Record<PhaseId, number>; // not sure what this one does?
 }
 
 export interface InclusionItem {
@@ -48,7 +48,7 @@ export interface InclusionItem {
   description: string;
   phaseId: PhaseId;
   isRequired: boolean;
-  defaultHoursByRole: Partial<Record<RoleId, number>>;
+  defaultHoursByRole: Partial<Record<RoleId, number>>; // ex defaultHoursByRole: { strategist: 10, project_manager: 6 }
 }
 
 export interface TimelineOption {
@@ -126,6 +126,7 @@ export interface EstimateLine {
 }
 
 export interface ReviewModel {
+  // okay this is the money model here
   estimateLines: EstimateLine[];
   budgetByPhase: Record<PhaseId, number>;
   totalHours: number;
