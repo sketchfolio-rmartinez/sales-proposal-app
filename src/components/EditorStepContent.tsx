@@ -13,12 +13,7 @@ import {
   updateStaffing,
 } from "../app/proposalUtils";
 import { EditorStep } from "../app/editorConfig";
-import {
-  ProposalDraft,
-  ProposalRoleStaffing,
-  ReviewModel,
-  RfpRequirement,
-} from "../types";
+import { ProposalDraft, ReviewModel, RfpRequirement } from "../types";
 
 interface EditorStepContentProps {
   step: EditorStep;
@@ -278,89 +273,111 @@ export function EditorStepContent({
   }
 
   if (step === 4) {
-    // I need to revisit this part so I can make progress on the formula and how # are getting crunched.
     return (
       <div className="panel">
-        <h3>Roles, Seniority & Rates</h3>
-        {roles.map((role) => {
-          const staff = activeProposal.staffing.find(
-            (item) => item.roleId === role.id,
-          );
-          if (!staff) return null;
-          const effectiveRate = Math.round(
-            staff.baseRate * (staff.seniority === "Senior" ? 1.25 : 1),
-          ); // so Q1 how would I even input the team here? bc based off that I will have to make
-          return (
-            <div key={role.id} className="staff-row">
-              <h4>{role.label}</h4>
-              <label>
-                Seniority
-                <select
-                  value={staff.seniority}
-                  onChange={(event) =>
-                    onUpsertActive({
-                      ...activeProposal,
-                      staffing: updateStaffing(
-                        activeProposal.staffing,
-                        role.id,
-                        {
-                          seniority: event.target
-                            .value as ProposalRoleStaffing["seniority"],
-                        },
-                      ),
-                    })
-                  }
-                >
-                  <option value="Standard">Standard</option>
-                  <option value="Senior">Senior</option>
-                </select>
-              </label>
-              <label>
-                Base Rate
-                <input
-                  type="number"
-                  min={0}
-                  value={staff.baseRate}
-                  onChange={(event) =>
-                    onUpsertActive({
-                      ...activeProposal,
-                      staffing: updateStaffing(
-                        activeProposal.staffing,
-                        role.id,
-                        {
-                          baseRate: Number(event.target.value),
-                        },
-                      ),
-                    })
-                  }
-                />
-              </label>
-              <label>
-                Markup %
-                <input
-                  type="number"
-                  min={0}
-                  value={staff.markupPercent}
-                  onChange={(event) =>
-                    onUpsertActive({
-                      ...activeProposal,
-                      staffing: updateStaffing(
-                        activeProposal.staffing,
-                        role.id,
-                        {
-                          markupPercent: Number(event.target.value),
-                        },
-                      ),
-                    })
-                  }
-                />
-              </label>
-              <div className="effective">
-                Effective rate: ${effectiveRate}/hr
-              </div>
-            </div>
-          );
-        })}
+        <h3 className="role-header-title">Roles, Lead & Support</h3>
+        <p className="role-matrix-description">
+          High-level role structure for planning &nbsp;
+          <strong>(This does not change estimator formula.)</strong>
+        </p>
+        <table className="role-matrix">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Lead</th>
+              <th>Support</th>
+              <th>Base Rate</th>
+              <th>Markup %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {roles.map((role) => {
+              const staff = activeProposal.staffing.find(
+                (item) => item.roleId === role.id,
+              );
+              if (!staff) return null;
+              return (
+                <tr key={role.id}>
+                  <td>{role.label}</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(staff.leadSelected)}
+                      onChange={(event) =>
+                        onUpsertActive({
+                          ...activeProposal,
+                          staffing: updateStaffing(
+                            activeProposal.staffing,
+                            role.id,
+                            {
+                              leadSelected: event.target.checked,
+                            },
+                          ),
+                        })
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(staff.supportSelected)}
+                      onChange={(event) =>
+                        onUpsertActive({
+                          ...activeProposal,
+                          staffing: updateStaffing(
+                            activeProposal.staffing,
+                            role.id,
+                            {
+                              supportSelected: event.target.checked,
+                            },
+                          ),
+                        })
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      min={0}
+                      value={staff.baseRate}
+                      onChange={(event) =>
+                        onUpsertActive({
+                          ...activeProposal,
+                          staffing: updateStaffing(
+                            activeProposal.staffing,
+                            role.id,
+                            {
+                              baseRate: Number(event.target.value),
+                            },
+                          ),
+                        })
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      min={0}
+                      value={staff.markupPercent}
+                      onChange={(event) =>
+                        onUpsertActive({
+                          ...activeProposal,
+                          staffing: updateStaffing(
+                            activeProposal.staffing,
+                            role.id,
+                            {
+                              markupPercent: Number(event.target.value),
+                            },
+                          ),
+                        })
+                      }
+                    />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     );
   }

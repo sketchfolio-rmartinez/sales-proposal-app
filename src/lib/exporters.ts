@@ -61,8 +61,11 @@ export function generateProposalText(draft: ProposalDraft, review: ReviewModel):
   lines.push("## Role Rates");
   for (const staff of draft.staffing) {
     const role = roles.find((r) => r.id === staff.roleId);
+    const leadSupport = [staff.leadSelected ? "Lead" : "", staff.supportSelected ? "Support" : ""]
+      .filter(Boolean)
+      .join(" + ");
     lines.push(
-      `- ${role?.label ?? staff.roleId}: ${staff.seniority}, base $${staff.baseRate}/hr, markup ${staff.markupPercent}%`
+      `- ${role?.label ?? staff.roleId}: ${leadSupport || "Not selected"}, base $${staff.baseRate}/hr, markup ${staff.markupPercent}%`
     );
   }
 

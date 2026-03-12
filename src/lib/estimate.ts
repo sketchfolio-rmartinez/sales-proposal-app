@@ -33,9 +33,7 @@ function staffingMap(staffing: ProposalRoleStaffing[]) {
 
 function calcRate(staffing?: ProposalRoleStaffing): number {
   if (!staffing) return 0;
-  const seniorityMult = staffing.seniority === "Senior" ? 1.25 : 1;
-  const effectiveRate = staffing.baseRate * seniorityMult;
-  return Math.round(effectiveRate);
+  return Math.round(staffing.baseRate);
 }
 
 function toFixedMoney(value: number): number {
@@ -97,7 +95,6 @@ export function buildReviewModel(draft: ProposalDraft): ReviewModel {
       return {
         phaseId,
         roleId,
-        seniority: staffing?.seniority ?? "Standard",
         hours: adjustedHours,
         rate,
         cost,
@@ -123,7 +120,10 @@ export function buildReviewModel(draft: ProposalDraft): ReviewModel {
     return a.roleId.localeCompare(b.roleId);
   });
 
-  const totalPrice = Object.values(budgetByPhase).reduce((sum, phaseBudget) => sum + phaseBudget, 0);
+  const totalPrice = Object.values(budgetByPhase).reduce(
+    (sum, phaseBudget) => sum + phaseBudget,
+    0,
+  );
   const totalHours = estimateLines.reduce((sum, line) => sum + line.hours, 0);
 
   console.log("Review Model:\n\n", {

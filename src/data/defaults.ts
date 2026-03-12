@@ -254,7 +254,8 @@ export function createDraftProposal(): ProposalDraft {
     })),
     staffing: roles.map((role) => ({
       roleId: role.id,
-      seniority: "Standard",
+      leadSelected: false,
+      supportSelected: false,
       baseRate: role.defaultBaseRate,
       markupPercent: 30,
     })),

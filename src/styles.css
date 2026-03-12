@@ -429,12 +429,19 @@ button.danger {
   color: #9d2525;
   font-weight: 600;
 }
+.role-header-title {
+  margin-left: 12px;
+}
+.role-matrix-description {
+  margin-left: 24px;
+}
 
 table {
   border-collapse: collapse;
   margin-bottom: 12px;
-  width: 100%;
+  width: 65%;
   table-layout: fixed;
+  margin-left: 48px;
 }
 
 th,
@@ -443,4 +450,26 @@ td {
   padding: 6px 8px;
   text-align: left;
   overflow-wrap: anywhere;
+}
+
+.role-matrix th:nth-child(2),
+.role-matrix th:nth-child(3),
+.role-matrix td:nth-child(2),
+.role-matrix td:nth-child(3) {
+  text-align: center;
+  width: 90px;
+}
+
+.role-matrix td:nth-child(2) input,
+.role-matrix td:nth-child(3) input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.role-matrix td:nth-child(4) input,
+.role-matrix td:nth-child(5) input {
+  margin-left: 12px;
+  padding-left: 12px;
+  width: 100px;
 }

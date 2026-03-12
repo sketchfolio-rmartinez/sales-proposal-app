@@ -70,7 +70,8 @@ export interface ProposalInclusionState {
 
 export interface ProposalRoleStaffing {
   roleId: RoleId;
-  seniority: Seniority;
+  leadSelected: boolean;
+  supportSelected: boolean;
   baseRate: number;
   markupPercent: number;
 }
@@ -117,7 +118,6 @@ export interface ProposalDraft {
 export interface EstimateLine {
   phaseId: PhaseId;
   roleId: RoleId;
-  seniority: Seniority;
   hours: number;
   rate: number;
   cost: number;
