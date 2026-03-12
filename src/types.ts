@@ -17,8 +17,6 @@ export type RoleId =
   | "developer"
   | "contractor";
 
-export type Seniority = "Standard" | "Senior";
-
 export type CmsType =
   | "WordPress"
   | "Webflow"

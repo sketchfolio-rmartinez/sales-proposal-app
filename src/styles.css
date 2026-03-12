@@ -473,3 +473,16 @@ td {
   padding-left: 12px;
   width: 100px;
 }
+
+.summary-table {
+  width: 72%;
+}
+
+.summary-table th:nth-child(2),
+.summary-table th:nth-child(3),
+.summary-table th:nth-child(4),
+.summary-table td:nth-child(2),
+.summary-table td:nth-child(3),
+.summary-table td:nth-child(4) {
+  text-align: right;
+}

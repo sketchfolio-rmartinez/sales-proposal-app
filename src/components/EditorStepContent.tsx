@@ -27,6 +27,15 @@ interface EditorStepContentProps {
   onDownloadCsv: () => void;
 }
 
+function formatCurrency(value: number): string {
+  return `$${Math.round(value).toLocaleString()}`;
+}
+
+function formatPercent(part: number, total: number): string {
+  if (total <= 0) return "0%";
+  return `${Math.round((part / total) * 100)}%`;
+}
+
 export function EditorStepContent({
   step,
   activeProposal,
@@ -472,6 +481,30 @@ export function EditorStepContent({
   }
 
   if (step === 6 && review) {
+    const phaseRows = phases
+      .map((phase) => ({
+        id: phase.id,
+        label: phase.name,
+        budget: review.budgetByPhase[phase.id],
+      }))
+      .filter((row) => row.budget > 0);
+
+    const roleRows = roles
+      .map((role) => {
+        const matchingLines = review.estimateLines.filter(
+          (line) => line.roleId === role.id,
+        );
+        const hours = matchingLines.reduce((sum, line) => sum + line.hours, 0);
+        const budget = matchingLines.reduce((sum, line) => sum + line.price, 0);
+        return {
+          id: role.id,
+          label: role.label,
+          hours,
+          budget,
+        };
+      })
+      .filter((row) => row.hours > 0 || row.budget > 0);
+
     return (
       <div className="panel">
         <h3>Review & Generate</h3>
@@ -486,50 +519,46 @@ export function EditorStepContent({
         </div>
         <p>
           Total Hours: <strong>{review.totalHours}</strong> | Total Price:{" "}
-          <strong>${review.totalPrice.toLocaleString()}</strong>
+          <strong>{formatCurrency(review.totalPrice)}</strong>
         </p>
 
-        <h4>Estimates by Phase and Role</h4>
-        <table>
+        <h4>Phase Allocation</h4>
+        <table className="summary-table">
           <thead>
             <tr>
               <th>Phase</th>
-              <th>Role</th>
-              <th>Hours</th>
-              <th>Rate</th>
-              <th>Markup</th>
-              <th>Price</th>
+              <th>Budget</th>
+              <th>%</th>
             </tr>
           </thead>
           <tbody>
-            {review.estimateLines.map((line) => (
-              <tr key={`${line.phaseId}-${line.roleId}`}>
-                <td>
-                  {phases.find((phase) => phase.id === line.phaseId)?.name}
-                </td>
-                <td>{roles.find((role) => role.id === line.roleId)?.label}</td>
-                <td>{line.hours}</td>
-                <td>${line.rate}</td>
-                <td>{line.markup}%</td>
-                <td>${line.price.toLocaleString()}</td>
+            {phaseRows.map((row) => (
+              <tr key={row.id}>
+                <td>{row.label}</td>
+                <td>{formatCurrency(row.budget)}</td>
+                <td>{formatPercent(row.budget, review.totalPrice)}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        <h4>Budget Allocation by Phase</h4>
-        <table>
+        <h4>Role Allocation</h4>
+        <table className="summary-table">
           <thead>
             <tr>
-              <th>Phase</th>
+              <th>Role</th>
               <th>Budget</th>
+              <th>%</th>
+              <th>Hours</th>
             </tr>
           </thead>
           <tbody>
-            {phases.map((phase) => (
-              <tr key={phase.id}>
-                <td>{phase.name}</td>
-                <td>${review.budgetByPhase[phase.id].toLocaleString()}</td>
+            {roleRows.map((row) => (
+              <tr key={row.id}>
+                <td>{row.label}</td>
+                <td>{formatCurrency(row.budget)}</td>
+                <td>{formatPercent(row.budget, review.totalPrice)}</td>
+                <td>{row.hours}</td>
               </tr>
             ))}
           </tbody>
