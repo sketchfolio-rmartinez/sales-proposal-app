@@ -7,24 +7,18 @@ import {
   ReviewModel,
   RoleId,
 } from "../types";
+import {
+  STAKEHOLDER_SIZE_MULTIPLIERS,
+  CMS_MULTIPLIERS,
+  COMPANY_SIZE_MULTIPLIERS,
+} from "../config/estimation";
 
 function complexityMultiplier(draft: ProposalDraft): number {
-  // this here is.part of the formula
   const bandMult =
-    draft.complexity.stakeholdersCompanySize === "High"
-      ? 1.3
-      : draft.complexity.stakeholdersCompanySize === "Low"
-        ? 0.9
-        : 1;
+    STAKEHOLDER_SIZE_MULTIPLIERS[draft.complexity.stakeholdersCompanySize] ?? 1;
+  const cmsMult = CMS_MULTIPLIERS[draft.complexity.cmsType] ?? 1;
 
-  const cmsMult =
-    draft.complexity.cmsType === "Custom"
-      ? 1.2
-      : draft.complexity.cmsType === "Headless"
-        ? 1.15
-        : 1;
-
-  return bandMult * cmsMult; // okkay cool to know this
+  return bandMult * cmsMult;
 }
 
 function staffingMap(staffing: ProposalRoleStaffing[]) {
@@ -41,18 +35,9 @@ function toFixedMoney(value: number): number {
 }
 
 function companySizeMultiplier(size: string): number {
-  switch (size) {
-    case "Small":
-      return 1;
-    case "Medium":
-      return 2;
-    case "Large":
-      return 3;
-    case "XL":
-      return 5;
-    default:
-      return 1;
-  }
+  return (
+    COMPANY_SIZE_MULTIPLIERS[size as keyof typeof COMPANY_SIZE_MULTIPLIERS] ?? 1
+  );
 }
 
 // this takes in the whole proposal draft and builds the review model, which is basically the most important logic
