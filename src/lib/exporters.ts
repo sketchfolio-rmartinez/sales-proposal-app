@@ -1,14 +1,26 @@
-import { blurbLibrary, inclusions, phases, roles, sizeTiers, timelineOptions } from "../data/defaults";
-import { ProposalDraft, ReviewModel } from "../types";
+import { inclusions, phases, roles, sizeTiers, timelineOptions } from "../data/defaults";
+import { BlurbLibraryItem, ProposalDraft, ReviewModel } from "../types";
 
-export function generateProposalText(draft: ProposalDraft, review: ReviewModel): string {
+export function generateProposalText(
+  draft: ProposalDraft,
+  review: ReviewModel,
+  blurbs: BlurbLibraryItem[],
+): string {
   const tier = sizeTiers.find((item) => item.id === draft.sizeTierId);
   const timeline = timelineOptions.find((item) => item.id === draft.timelineOptionId);
-  const pickedBlurbs = blurbLibrary.filter((item) => draft.pickedBlurbIds.includes(item.id));
+  const pickedBlurbs = blurbs.filter((item) => draft.pickedBlurbIds.includes(item.id));
   const selectedInclusions = draft.inclusions
     .filter((item) => item.selected)
-    .map((item) => inclusions.find((inc) => inc.id === item.inclusionId))
-    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+    .map((item) => {
+      const inclusion = inclusions.find((inc) => inc.id === item.inclusionId);
+      return inclusion
+        ? {
+            inclusion,
+            blurb: blurbs.find((blurb) => blurb.id === item.blurbId) ?? null,
+          }
+        : null;
+    })
+    .filter((item): item is { inclusion: NonNullable<typeof inclusions[number]>; blurb: BlurbLibraryItem | null } => Boolean(item));
 
   const lines: string[] = [];
   lines.push(`# ${draft.projectTitle || draft.name || "Proposal"}`);
@@ -22,11 +34,14 @@ export function generateProposalText(draft: ProposalDraft, review: ReviewModel):
   lines.push("");
 
   for (const phase of phases) {
-    const phaseInclusions = selectedInclusions.filter((inc) => inc.phaseId === phase.id);
+    const phaseInclusions = selectedInclusions.filter((item) => item.inclusion.phaseId === phase.id);
     if (phaseInclusions.length === 0) continue;
     lines.push(`### ${phase.name}`);
-    for (const inclusion of phaseInclusions) {
-      lines.push(`- ${inclusion.name}: ${inclusion.description}`);
+    for (const item of phaseInclusions) {
+      lines.push(`- ${item.inclusion.name}: ${item.inclusion.description}`);
+      if (item.blurb) {
+        lines.push(`  ${item.blurb.contentPlaintext}`);
+      }
     }
     lines.push("");
   }

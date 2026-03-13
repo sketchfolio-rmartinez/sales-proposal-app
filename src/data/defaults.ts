@@ -216,6 +216,7 @@ export const blurbLibrary: BlurbLibraryItem[] = [
   {
     id: "blurb_compliance",
     title: "Accessibility and Compliance",
+    category: "Accessibility",
     tags: ["compliance", "a11y"],
     contentPlaintext:
       "Our process includes WCAG-informed design and QA checks during implementation.",
@@ -224,9 +225,34 @@ export const blurbLibrary: BlurbLibraryItem[] = [
   {
     id: "blurb_handoff",
     title: "Post-launch Handoff",
+    category: "Training",
     tags: ["training"],
     contentPlaintext:
       "We provide admin training and concise documentation to support internal team ownership.",
+    isActive: true,
+  },
+  {
+    id: "blurb_content_modeling_scope",
+    title: "Content Modeling Scope",
+    category: "Inclusion",
+    contentPlaintext:
+      "Content modeling includes defining reusable content types, field structures, and relationships needed for long-term content governance.",
+    isActive: true,
+  },
+  {
+    id: "blurb_security_practices",
+    title: "Security Practices",
+    category: "Security",
+    contentPlaintext:
+      "Our development practices follow secure coding standards, dependency hygiene, and environment-level access controls appropriate to the project.",
+    isActive: true,
+  },
+  {
+    id: "blurb_hosting_responsibility",
+    title: "Hosting Responsibility",
+    category: "Hosting",
+    contentPlaintext:
+      "Hosting, DNS, and third-party infrastructure procurement are assumed to remain client-managed unless explicitly included in scope.",
     isActive: true,
   },
 ];
@@ -251,6 +277,7 @@ export function createDraftProposal(): ProposalDraft {
       inclusionId: item.id,
       selected: true,
       overrideReason: "",
+      blurbId: null,
     })),
     staffing: roles.map((role) => ({
       roleId: role.id,

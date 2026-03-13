@@ -486,3 +486,316 @@ td {
 .summary-table td:nth-child(4) {
   text-align: right;
 }
+
+.app-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-layout {
+  margin-top: 20px;
+}
+
+.admin-form,
+.admin-blurb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-filters input,
+.admin-filters select {
+  width: min(320px, 100%);
+}
+
+.admin-blurb-item {
+  background: #fdfefd;
+  border: 1px solid #dce7dc;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.admin-blurb-item.inactive {
+  opacity: 0.65;
+}
+
+.inclusion-blurb-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 10px;
+}
+
+.inline-blurb {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #f7fbf7;
+  border: 1px solid #dce7dc;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.inline-blurb em {
+  color: #5f6f65;
+  font-style: normal;
+  margin-left: 6px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 47, 47, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 20;
+}
+
+.modal-panel {
+  width: min(780px, 100%);
+  max-height: 80vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #d4dfd4;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 18px 40px rgba(31, 47, 47, 0.18);
+}
+
+.modal-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.modal-toolbar input,
+.modal-toolbar select {
+  width: 100%;
+}
+
+.modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.modal-list-item {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid #dce7dc;
+  border-radius: 12px;
+  padding: 10px;
+  background: #fbfdfb;
+  margin-bottom: 0;
+}
+
+.modal-list-copy {
+  display: block;
+  margin-top: 4px;
+  color: #5f6f65;
+}
+
+.blurb-admin-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.blurb-library {
+  background: white;
+  border: 1px solid #e4ece4;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.library-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.blurb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.blurb-row {
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.blurb-row:hover {
+  background: #f5faf5;
+}
+
+.blurb-row.selected {
+  background: #e9f5e9;
+}
+
+.blurb-editor {
+  background: white;
+  border: 1px solid #e4ece4;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.primary-btn {
+  background: #2e6f50;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.danger-btn {
+  background: #ffeaea;
+  color: #b42318;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.blurb-admin-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+/* LEFT LIBRARY */
+
+.blurb-library {
+  background: #ffffff;
+  border: 1px solid #e4ece4;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.library-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.library-filters input,
+.library-filters select {
+  height: 34px;
+}
+
+/* BLURB ROWS */
+
+.blurb-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.blurb-row:hover {
+  background: #f3f8f3;
+}
+
+.blurb-row.selected {
+  background: #e5f2e5;
+}
+
+.blurb-row span {
+  color: #6b776f;
+  font-size: 12px;
+}
+
+/* RIGHT EDITOR */
+
+.blurb-editor {
+  background: white;
+  border: 1px solid #e4ece4;
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.editor-grid {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 12px;
+}
+
+.editor-grid input,
+.editor-grid select {
+  height: 36px;
+}
+
+/* TEXTAREA */
+
+.blurb-editor textarea {
+  border-radius: 8px;
+  border: 1px solid #dbe5db;
+  padding: 10px;
+  min-height: 180px;
+  resize: vertical;
+}
+
+/* BUTTONS */
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.primary-btn {
+  background: #2f6f52;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.danger-btn {
+  background: #ffecec;
+  color: #b42318;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+}

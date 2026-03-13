@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createDraftProposal } from "../data/defaults";
 import { generateProposalText, generateTeamworkCsv } from "../lib/exporters";
 import { buildReviewModel } from "../lib/estimate";
-import { ProposalDraft, ProposalStatus, ReviewModel } from "../types";
+import { BlurbLibraryItem, ProposalDraft, ProposalStatus, ReviewModel } from "../types";
 import { type EditorStep } from "./editorConfig";
 import {
   filterProposals,
@@ -45,7 +45,7 @@ export interface ProposalBuilderModel {
   handlers: ProposalBuilderHandlers;
 }
 
-export function useProposalBuilder(): ProposalBuilderModel {
+export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderModel {
   const [proposals, setProposals] = useState<ProposalDraft[]>(() =>
     loadStoredProposals(),
   );
@@ -134,7 +134,7 @@ export function useProposalBuilder(): ProposalBuilderModel {
 
   const regenerate = () => {
     if (!activeProposal || !review) return;
-    setExportText(generateProposalText(activeProposal, review));
+    setExportText(generateProposalText(activeProposal, review, blurbs));
     setExportCsv(generateTeamworkCsv(activeProposal));
   };
 

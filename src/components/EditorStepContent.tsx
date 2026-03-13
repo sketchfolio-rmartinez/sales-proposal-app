@@ -1,5 +1,5 @@
+import { useState } from "react";
 import {
-  blurbLibrary,
   inclusions,
   phases,
   roles,
@@ -12,12 +12,14 @@ import {
   updateInclusion,
   updateStaffing,
 } from "../app/proposalUtils";
+import { BlurbPickerModal } from "./BlurbPickerModal";
 import { EditorStep } from "../app/editorConfig";
-import { ProposalDraft, ReviewModel, RfpRequirement } from "../types";
+import { BlurbLibraryItem, ProposalDraft, ReviewModel, RfpRequirement } from "../types";
 
 interface EditorStepContentProps {
   step: EditorStep;
   activeProposal: ProposalDraft;
+  blurbs: BlurbLibraryItem[];
   review: ReviewModel | null;
   exportText: string;
   exportCsv: string;
@@ -39,6 +41,7 @@ function formatPercent(part: number, total: number): string {
 export function EditorStepContent({
   step,
   activeProposal,
+  blurbs,
   review,
   exportText,
   exportCsv,
@@ -47,6 +50,17 @@ export function EditorStepContent({
   onTransitionStatus,
   onDownloadCsv,
 }: EditorStepContentProps) {
+  const [pickerState, setPickerState] = useState<
+    | null
+    | {
+        mode: "inclusion" | "rfp";
+        inclusionId?: string;
+      }
+  >(null);
+
+  const resolveBlurb = (blurbId: string | null | undefined) =>
+    blurbs.find((blurb) => blurb.id === blurbId) ?? null;
+
   if (step === 1) {
     return (
       <div className="panel">
@@ -125,48 +139,25 @@ export function EditorStepContent({
 
   if (step === 2) {
     return (
-      <div className="panel">
-        <h3>Inclusions (Scope Builder)</h3>
-        {phases.map((phase) => (
-          <div key={phase.id} className="subpanel">
-            <h4>{phase.name}</h4>
-            {inclusions
-              .filter((item) => item.phaseId === phase.id)
-              .map((inclusion) => {
-                const state = activeProposal.inclusions.find(
-                  (item) => item.inclusionId === inclusion.id,
-                );
-                if (!state) return null;
-                return (
-                  <div key={inclusion.id} className="inclusion-row">
-                    <label className="checkbox-row">
-                      <input
-                        type="checkbox"
-                        checked={state.selected}
-                        onChange={(event) =>
-                          onUpsertActive({
-                            ...activeProposal,
-                            inclusions: updateInclusion(
-                              activeProposal.inclusions,
-                              inclusion.id,
-                              {
-                                selected: event.target.checked,
-                              },
-                            ),
-                          })
-                        }
-                      />
-                      <span>
-                        {inclusion.name}{" "}
-                        {inclusion.isRequired ? "(Required)" : ""}
-                      </span>
-                    </label>
-                    <p className="muted">{inclusion.description}</p>
-                    {inclusion.isRequired && !state.selected && (
-                      <label>
-                        Reason/Assumption (required to continue)
+      <>
+        <div className="panel">
+          <h3>Inclusions (Scope Builder)</h3>
+          {phases.map((phase) => (
+            <div key={phase.id} className="subpanel">
+              <h4>{phase.name}</h4>
+              {inclusions
+                .filter((item) => item.phaseId === phase.id)
+                .map((inclusion) => {
+                  const state = activeProposal.inclusions.find(
+                    (item) => item.inclusionId === inclusion.id,
+                  );
+                  if (!state) return null;
+                  return (
+                    <div key={inclusion.id} className="inclusion-row">
+                      <label className="checkbox-row">
                         <input
-                          value={state.overrideReason}
+                          type="checkbox"
+                          checked={state.selected}
                           onChange={(event) =>
                             onUpsertActive({
                               ...activeProposal,
@@ -174,25 +165,110 @@ export function EditorStepContent({
                                 activeProposal.inclusions,
                                 inclusion.id,
                                 {
-                                  overrideReason: event.target.value,
+                                  selected: event.target.checked,
                                 },
                               ),
                             })
                           }
                         />
+                        <span>
+                          {inclusion.name}{" "}
+                          {inclusion.isRequired ? "(Required)" : ""}
+                        </span>
                       </label>
-                    )}
-                  </div>
-                );
-              })}
-          </div>
-        ))}
-        {!canAdvanceFromInclusions(activeProposal) && (
-          <p className="warning">
-            Complete required reason fields before moving to next step.
-          </p>
+                      <p className="muted">{inclusion.description}</p>
+                      <div className="inclusion-blurb-row">
+                        {state.blurbId ? (
+                          <div className="inline-blurb">
+                            <strong>{resolveBlurb(state.blurbId)?.title ?? "Selected blurb"}</strong>
+                            <span>{resolveBlurb(state.blurbId)?.contentPlaintext}</span>
+                          </div>
+                        ) : (
+                          <p className="muted">No inclusion blurb attached.</p>
+                        )}
+                        <div className="row">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPickerState({
+                                mode: "inclusion",
+                                inclusionId: inclusion.id,
+                              })
+                            }
+                          >
+                            {state.blurbId ? "Change Blurb" : "+ Add Blurb"}
+                          </button>
+                          {state.blurbId && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                onUpsertActive({
+                                  ...activeProposal,
+                                  inclusions: updateInclusion(activeProposal.inclusions, inclusion.id, {
+                                    blurbId: null,
+                                  }),
+                                })
+                              }
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      {inclusion.isRequired && !state.selected && (
+                        <label>
+                          Reason/Assumption (required to continue)
+                          <input
+                            value={state.overrideReason}
+                            onChange={(event) =>
+                              onUpsertActive({
+                                ...activeProposal,
+                                inclusions: updateInclusion(
+                                  activeProposal.inclusions,
+                                  inclusion.id,
+                                  {
+                                    overrideReason: event.target.value,
+                                  },
+                                ),
+                              })
+                            }
+                          />
+                        </label>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          ))}
+          {!canAdvanceFromInclusions(activeProposal) && (
+            <p className="warning">
+              Complete required reason fields before moving to next step.
+            </p>
+          )}
+        </div>
+        {pickerState?.mode === "inclusion" && (
+          <BlurbPickerModal
+            title="Pick Inclusion Blurb"
+            blurbs={blurbs.filter((blurb) => blurb.isActive)}
+            allowedCategories={["Inclusion"]}
+            selectedIds={[
+              activeProposal.inclusions.find((item) => item.inclusionId === pickerState.inclusionId)?.blurbId ?? "",
+            ].filter(Boolean)}
+            selectionMode="single"
+            onClose={() => setPickerState(null)}
+            onConfirm={(selectedIds) => {
+              if (!pickerState.inclusionId) return;
+              onUpsertActive({
+                ...activeProposal,
+                inclusions: updateInclusion(activeProposal.inclusions, pickerState.inclusionId, {
+                  blurbId: selectedIds[0] ?? null,
+                }),
+              });
+              setPickerState(null);
+            }}
+          />
         )}
-      </div>
+      </>
     );
   }
 
@@ -393,90 +469,110 @@ export function EditorStepContent({
 
   if (step === 5) {
     return (
-      <div className="panel">
-        <h3>RFP Requirements & Blurbs</h3>
-        <button
-          onClick={() =>
-            onUpsertActive({
-              ...activeProposal,
-              rfpRequirements: [
-                ...activeProposal.rfpRequirements,
-                {
-                  id: crypto.randomUUID(),
-                  prompt: "",
-                  response: "",
-                } as RfpRequirement,
-              ],
-            })
-          }
-        >
-          Add Requirement
-        </button>
-        {activeProposal.rfpRequirements.map((req) => (
-          <div key={req.id} className="subpanel">
-            <label>
-              Prompt
-              <input
-                value={req.prompt}
-                onChange={(event) =>
-                  onUpsertActive({
-                    ...activeProposal,
-                    rfpRequirements: activeProposal.rfpRequirements.map(
-                      (item) =>
-                        item.id === req.id
-                          ? { ...item, prompt: event.target.value }
-                          : item,
-                    ),
-                  })
-                }
-              />
-            </label>
-            <label>
-              Response
-              <textarea
-                value={req.response}
-                onChange={(event) =>
-                  onUpsertActive({
-                    ...activeProposal,
-                    rfpRequirements: activeProposal.rfpRequirements.map(
-                      (item) =>
-                        item.id === req.id
-                          ? { ...item, response: event.target.value }
-                          : item,
-                    ),
-                  })
-                }
-              />
-            </label>
+      <>
+        <div className="panel">
+          <h3>RFP Requirements & Blurbs</h3>
+          <button
+            type="button"
+            onClick={() =>
+              onUpsertActive({
+                ...activeProposal,
+                rfpRequirements: [
+                  ...activeProposal.rfpRequirements,
+                  {
+                    id: crypto.randomUUID(),
+                    prompt: "",
+                    response: "",
+                  } as RfpRequirement,
+                ],
+              })
+            }
+          >
+            Add Requirement
+          </button>
+          <div className="row">
+            <h4>Selected Blurbs</h4>
+            <button type="button" onClick={() => setPickerState({ mode: "rfp" })}>
+              Add Blurb
+            </button>
           </div>
-        ))}
+          {activeProposal.pickedBlurbIds.length > 0 ? (
+            <div className="subpanel">
+              {activeProposal.pickedBlurbIds.map((blurbId) => {
+                const blurb = resolveBlurb(blurbId);
+                if (!blurb) return null;
+                return (
+                  <div key={blurb.id} className="inline-blurb">
+                    <strong>
+                      {blurb.title} <em>{blurb.category}</em>
+                    </strong>
+                    <span>{blurb.contentPlaintext}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="muted">No library blurbs added to proposal narrative yet.</p>
+          )}
+          {activeProposal.rfpRequirements.map((req) => (
+            <div key={req.id} className="subpanel">
+              <label>
+                Prompt
+                <input
+                  value={req.prompt}
+                  onChange={(event) =>
+                    onUpsertActive({
+                      ...activeProposal,
+                      rfpRequirements: activeProposal.rfpRequirements.map(
+                        (item) =>
+                          item.id === req.id
+                            ? { ...item, prompt: event.target.value }
+                            : item,
+                      ),
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Response
+                <textarea
+                  value={req.response}
+                  onChange={(event) =>
+                    onUpsertActive({
+                      ...activeProposal,
+                      rfpRequirements: activeProposal.rfpRequirements.map(
+                        (item) =>
+                          item.id === req.id
+                            ? { ...item, response: event.target.value }
+                            : item,
+                      ),
+                    })
+                  }
+                />
+              </label>
+            </div>
+          ))}
 
-        <h4>Saved Blurbs</h4>
-        {blurbLibrary.map((blurb) => {
-          const selected = activeProposal.pickedBlurbIds.includes(blurb.id);
-          return (
-            <label key={blurb.id} className="checkbox-row">
-              <input
-                type="checkbox"
-                checked={selected}
-                onChange={(event) =>
-                  onUpsertActive({
-                    ...activeProposal,
-                    pickedBlurbIds: event.target.checked
-                      ? [...activeProposal.pickedBlurbIds, blurb.id]
-                      : activeProposal.pickedBlurbIds.filter(
-                          (id) => id !== blurb.id,
-                        ),
-                  })
-                }
-              />
-              <span>
-                <strong>{blurb.title}</strong> - {blurb.contentPlaintext}
-              </span>
-            </label>
-          );
-        })}
-      </div>
+          <h4>Library Reference</h4>
+          <p className="muted">Blurbs are referenced from the library and can be reused across proposals.</p>
+        </div>
+        {pickerState?.mode === "rfp" && (
+          <BlurbPickerModal
+            title="Pick Proposal Blurbs"
+            blurbs={blurbs.filter((blurb) => blurb.isActive && blurb.category !== "Inclusion")}
+            selectedIds={activeProposal.pickedBlurbIds}
+            selectionMode="multiple"
+            onClose={() => setPickerState(null)}
+            onConfirm={(selectedIds) => {
+              onUpsertActive({
+                ...activeProposal,
+                pickedBlurbIds: selectedIds,
+              });
+              setPickerState(null);
+            }}
+          />
+        )}
+      </>
     );
   }
 

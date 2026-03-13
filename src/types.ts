@@ -26,6 +26,17 @@ export type CmsType =
 
 export type ComplexityBand = "Low" | "Medium" | "High";
 
+export type BlurbCategory =
+  | "Inclusion"
+  | "Assumptions"
+  | "Exclusions"
+  | "Security"
+  | "Accessibility"
+  | "Hosting"
+  | "Training"
+  | "Migration"
+  | "General RFP";
+
 export interface Phase {
   id: PhaseId;
   name: string;
@@ -64,6 +75,7 @@ export interface ProposalInclusionState {
   inclusionId: string;
   selected: boolean;
   overrideReason: string;
+  blurbId: string | null;
 }
 
 export interface ProposalRoleStaffing {
@@ -83,7 +95,8 @@ export interface RfpRequirement {
 export interface BlurbLibraryItem {
   id: string;
   title: string;
-  tags: string[];
+  category: BlurbCategory;
+  tags?: string[];
   contentPlaintext: string;
   isActive: boolean;
 }
