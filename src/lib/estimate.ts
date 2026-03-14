@@ -9,17 +9,15 @@ import {
 } from "../types";
 import {
   STAKEHOLDER_SIZE_MULTIPLIERS,
-  CMS_MULTIPLIERS,
   PROJECT_SIZE_MULTIPLIERS,
 } from "../config/estimation";
 
 function complexityMultiplier(draft: ProposalDraft): number {
-  const bandMult =
-    STAKEHOLDER_SIZE_MULTIPLIERS[draft.complexity.stakeholdersComplexitySize] ??
-    1;
-  const cmsMult = CMS_MULTIPLIERS[draft.complexity.cmsType] ?? 1;
-
-  return bandMult * cmsMult;
+  return (
+    STAKEHOLDER_SIZE_MULTIPLIERS[
+      draft.complexity.stakeholdersComplexitySize
+    ] ?? 1
+  );
 }
 
 function staffingMap(staffing: ProposalRoleStaffing[]) {
