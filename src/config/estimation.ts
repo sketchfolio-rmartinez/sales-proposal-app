@@ -1,8 +1,10 @@
-export const STAKEHOLDER_SIZE_MULTIPLIERS = {
-  Low: 0.9,
-  Medium: 1,
-  High: 1.3,
-} as const;
+import { ComplexityBand } from "../types";
+
+export const STAKEHOLDER_SIZE_MULTIPLIERS: Record<ComplexityBand, number> = {
+  1: 1,
+  1.25: 1.25,
+  1.5: 1.5,
+};
 
 export const CMS_MULTIPLIERS = {
   WordPress: 1,
@@ -12,7 +14,7 @@ export const CMS_MULTIPLIERS = {
   Custom: 1.2,
 } as const;
 
-export const COMPANY_SIZE_MULTIPLIERS = {
+export const PROJECT_SIZE_MULTIPLIERS = {
   Small: 1,
   Medium: 2,
   Large: 3,

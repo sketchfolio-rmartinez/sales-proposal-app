@@ -24,7 +24,7 @@ export type CmsType =
   | "Headless"
   | "Custom";
 
-export type ComplexityBand = "Low" | "Medium" | "High";
+export type ComplexityBand = 1 | 1.25 | 1.5;
 
 export type BlurbCategory =
   | "Inclusion"
@@ -108,10 +108,10 @@ export interface ProposalDraft {
   projectTitle: string;
   status: ProposalStatus;
   sizeTierId: string;
-  companySize: "Small" | "Medium" | "Large" | "XL";
+  projectSize: "Small" | "Medium" | "Large" | "XL";
   timelineOptionId: string;
   complexity: {
-    stakeholdersCompanySize: ComplexityBand;
+    stakeholdersComplexitySize: ComplexityBand;
     cmsType: CmsType;
     notes: string;
   };

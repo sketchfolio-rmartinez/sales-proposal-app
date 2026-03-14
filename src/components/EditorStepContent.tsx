@@ -14,7 +14,12 @@ import {
 } from "../app/proposalUtils";
 import { BlurbPickerModal } from "./BlurbPickerModal";
 import { EditorStep } from "../app/editorConfig";
-import { BlurbLibraryItem, ProposalDraft, ReviewModel, RfpRequirement } from "../types";
+import {
+  BlurbLibraryItem,
+  ProposalDraft,
+  ReviewModel,
+  RfpRequirement,
+} from "../types";
 
 interface EditorStepContentProps {
   step: EditorStep;
@@ -50,13 +55,10 @@ export function EditorStepContent({
   onTransitionStatus,
   onDownloadCsv,
 }: EditorStepContentProps) {
-  const [pickerState, setPickerState] = useState<
-    | null
-    | {
-        mode: "inclusion" | "rfp";
-        inclusionId?: string;
-      }
-  >(null);
+  const [pickerState, setPickerState] = useState<null | {
+    mode: "inclusion" | "rfp";
+    inclusionId?: string;
+  }>(null);
 
   const resolveBlurb = (blurbId: string | null | undefined) =>
     blurbs.find((blurb) => blurb.id === blurbId) ?? null;
@@ -117,20 +119,20 @@ export function EditorStepContent({
           </select>
         </label>
         <label>
-          Company Size
+          Project Size
           <select
-            value={activeProposal.companySize}
+            value={activeProposal.projectSize}
             onChange={(event) =>
               onUpsertActive({
                 ...activeProposal,
-                companySize: event.target.value as ProposalDraft["companySize"],
+                projectSize: event.target.value as ProposalDraft["projectSize"],
               })
             }
           >
-            <option value="Small">Small</option>
-            <option value="Medium">Medium</option>
-            <option value="Large">Large</option>
-            <option value="XL">XL</option>
+            <option value="Small">Small (1x)</option>
+            <option value="Medium">Medium (2x)</option>
+            <option value="Large">Large (3x)</option>
+            <option value="XL">XL (5x)</option>
           </select>
         </label>
       </div>
@@ -180,8 +182,13 @@ export function EditorStepContent({
                       <div className="inclusion-blurb-row">
                         {state.blurbId ? (
                           <div className="inline-blurb">
-                            <strong>{resolveBlurb(state.blurbId)?.title ?? "Selected blurb"}</strong>
-                            <span>{resolveBlurb(state.blurbId)?.contentPlaintext}</span>
+                            <strong>
+                              {resolveBlurb(state.blurbId)?.title ??
+                                "Selected blurb"}
+                            </strong>
+                            <span>
+                              {resolveBlurb(state.blurbId)?.contentPlaintext}
+                            </span>
                           </div>
                         ) : (
                           <p className="muted">No inclusion blurb attached.</p>
@@ -204,9 +211,13 @@ export function EditorStepContent({
                               onClick={() =>
                                 onUpsertActive({
                                   ...activeProposal,
-                                  inclusions: updateInclusion(activeProposal.inclusions, inclusion.id, {
-                                    blurbId: null,
-                                  }),
+                                  inclusions: updateInclusion(
+                                    activeProposal.inclusions,
+                                    inclusion.id,
+                                    {
+                                      blurbId: null,
+                                    },
+                                  ),
                                 })
                               }
                             >
@@ -252,7 +263,9 @@ export function EditorStepContent({
             blurbs={blurbs.filter((blurb) => blurb.isActive)}
             allowedCategories={["Inclusion"]}
             selectedIds={[
-              activeProposal.inclusions.find((item) => item.inclusionId === pickerState.inclusionId)?.blurbId ?? "",
+              activeProposal.inclusions.find(
+                (item) => item.inclusionId === pickerState.inclusionId,
+              )?.blurbId ?? "",
             ].filter(Boolean)}
             selectionMode="single"
             onClose={() => setPickerState(null)}
@@ -260,9 +273,13 @@ export function EditorStepContent({
               if (!pickerState.inclusionId) return;
               onUpsertActive({
                 ...activeProposal,
-                inclusions: updateInclusion(activeProposal.inclusions, pickerState.inclusionId, {
-                  blurbId: selectedIds[0] ?? null,
-                }),
+                inclusions: updateInclusion(
+                  activeProposal.inclusions,
+                  pickerState.inclusionId,
+                  {
+                    blurbId: selectedIds[0] ?? null,
+                  },
+                ),
               });
               setPickerState(null);
             }}
@@ -297,23 +314,21 @@ export function EditorStepContent({
         <label>
           Stakeholders Size
           <select
-            value={activeProposal.complexity.stakeholdersCompanySize}
+            value={activeProposal.complexity.stakeholdersComplexitySize}
             onChange={(event) =>
               onUpsertActive({
                 ...activeProposal,
                 complexity: {
                   ...activeProposal.complexity,
-                  stakeholdersCompanySize: event.target.value as
-                    | "Low"
-                    | "Medium"
-                    | "High",
+                  stakeholdersComplexitySize: Number(event.target.value) as
+                    ProposalDraft["complexity"]["stakeholdersComplexitySize"],
                 },
               })
             }
           >
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
+            <option value="1">1-5</option>
+            <option value="1.25">6-12</option>
+            <option value="1.5">13+</option>
           </select>
         </label>
         <label>
@@ -492,7 +507,10 @@ export function EditorStepContent({
           </button>
           <div className="row">
             <h4>Selected Blurbs</h4>
-            <button type="button" onClick={() => setPickerState({ mode: "rfp" })}>
+            <button
+              type="button"
+              onClick={() => setPickerState({ mode: "rfp" })}
+            >
               Add Blurb
             </button>
           </div>
@@ -512,7 +530,9 @@ export function EditorStepContent({
               })}
             </div>
           ) : (
-            <p className="muted">No library blurbs added to proposal narrative yet.</p>
+            <p className="muted">
+              No library blurbs added to proposal narrative yet.
+            </p>
           )}
           {activeProposal.rfpRequirements.map((req) => (
             <div key={req.id} className="subpanel">
@@ -554,12 +574,17 @@ export function EditorStepContent({
           ))}
 
           <h4>Library Reference</h4>
-          <p className="muted">Blurbs are referenced from the library and can be reused across proposals.</p>
+          <p className="muted">
+            Blurbs are referenced from the library and can be reused across
+            proposals.
+          </p>
         </div>
         {pickerState?.mode === "rfp" && (
           <BlurbPickerModal
             title="Pick Proposal Blurbs"
-            blurbs={blurbs.filter((blurb) => blurb.isActive && blurb.category !== "Inclusion")}
+            blurbs={blurbs.filter(
+              (blurb) => blurb.isActive && blurb.category !== "Inclusion",
+            )}
             selectedIds={activeProposal.pickedBlurbIds}
             selectionMode="multiple"
             onClose={() => setPickerState(null)}

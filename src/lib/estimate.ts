@@ -10,12 +10,13 @@ import {
 import {
   STAKEHOLDER_SIZE_MULTIPLIERS,
   CMS_MULTIPLIERS,
-  COMPANY_SIZE_MULTIPLIERS,
+  PROJECT_SIZE_MULTIPLIERS,
 } from "../config/estimation";
 
 function complexityMultiplier(draft: ProposalDraft): number {
   const bandMult =
-    STAKEHOLDER_SIZE_MULTIPLIERS[draft.complexity.stakeholdersCompanySize] ?? 1;
+    STAKEHOLDER_SIZE_MULTIPLIERS[draft.complexity.stakeholdersComplexitySize] ??
+    1;
   const cmsMult = CMS_MULTIPLIERS[draft.complexity.cmsType] ?? 1;
 
   return bandMult * cmsMult;
@@ -34,9 +35,9 @@ function toFixedMoney(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-function companySizeMultiplier(size: string): number {
+function projectSizeMultiplier(size: string): number {
   return (
-    COMPANY_SIZE_MULTIPLIERS[size as keyof typeof COMPANY_SIZE_MULTIPLIERS] ?? 1
+    PROJECT_SIZE_MULTIPLIERS[size as keyof typeof PROJECT_SIZE_MULTIPLIERS] ?? 1
   );
 }
 
@@ -53,7 +54,7 @@ export function buildReviewModel(draft: ProposalDraft): ReviewModel {
 
   const staff = staffingMap(draft.staffing);
   const multiplier = complexityMultiplier(draft); // ex 1.08
-  const sizeMult = companySizeMultiplier(draft.companySize);
+  const sizeMult = projectSizeMultiplier(draft.projectSize);
 
   const aggregate = new Map<string, number>();
   for (const inclusion of selectedInclusions) {
