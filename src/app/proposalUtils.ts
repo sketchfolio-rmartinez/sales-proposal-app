@@ -8,7 +8,11 @@ export function loadStoredProposals(): ProposalDraft[] {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as ProposalDraft[]) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((proposal) => ({
+      ...proposal,
+      projectBufferPercent: proposal.projectBufferPercent ?? 0,
+    })) as ProposalDraft[];
   } catch {
     return [];
   }

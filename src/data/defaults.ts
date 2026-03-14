@@ -267,6 +267,7 @@ export function createDraftProposal(): ProposalDraft {
     status: "Draft",
     sizeTierId: sizeTiers[2].id,
     projectSize: "Medium",
+    projectBufferPercent: 0,
     timelineOptionId: timelineOptions[1].id,
     complexity: {
       stakeholdersComplexitySize: 1.25,

@@ -135,6 +135,21 @@ export function EditorStepContent({
             <option value="XL">XL (5x)</option>
           </select>
         </label>
+        <label>
+          Project Buffer %
+          <input
+            type="number"
+            min={0}
+            step={5}
+            value={activeProposal.projectBufferPercent}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                projectBufferPercent: Number(event.target.value),
+              })
+            }
+          />
+        </label>
       </div>
     );
   }
@@ -639,8 +654,13 @@ export function EditorStepContent({
           </button>
         </div>
         <p>
-          Total Hours: <strong>{review.totalHours}</strong> | Total Price:{" "}
-          <strong>{formatCurrency(review.totalPrice)}</strong>
+          Total Hours: <strong>{review.totalHours}</strong> | Subtotal:{" "}
+          <strong>{formatCurrency(review.projectSubtotal)}</strong> | Buffer:{" "}
+          <strong>
+            {review.projectBufferPercent}% (
+            {formatCurrency(review.projectBufferAmount)})
+          </strong>{" "}
+          | Total Price: <strong>{formatCurrency(review.totalPrice)}</strong>
         </p>
 
         <h4>Phase Allocation</h4>
@@ -657,7 +677,7 @@ export function EditorStepContent({
               <tr key={row.id}>
                 <td>{row.label}</td>
                 <td>{formatCurrency(row.budget)}</td>
-                <td>{formatPercent(row.budget, review.totalPrice)}</td>
+                <td>{formatPercent(row.budget, review.projectSubtotal)}</td>
               </tr>
             ))}
           </tbody>
@@ -678,7 +698,7 @@ export function EditorStepContent({
               <tr key={row.id}>
                 <td>{row.label}</td>
                 <td>{formatCurrency(row.budget)}</td>
-                <td>{formatPercent(row.budget, review.totalPrice)}</td>
+                <td>{formatPercent(row.budget, review.projectSubtotal)}</td>
                 <td>{row.hours}</td>
               </tr>
             ))}

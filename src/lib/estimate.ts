@@ -109,17 +109,29 @@ export function buildReviewModel(draft: ProposalDraft): ReviewModel {
     0,
   );
   const totalHours = estimateLines.reduce((sum, line) => sum + line.hours, 0);
+  const projectSubtotal = toFixedMoney(totalPrice);
+  const projectBufferPercent = draft.projectBufferPercent ?? 0;
+  const projectBufferAmount = toFixedMoney(
+    projectSubtotal * (projectBufferPercent / 100),
+  );
+  const finalTotalPrice = toFixedMoney(projectSubtotal + projectBufferAmount);
 
   console.log("Review Model:\n\n", {
     estimateLines,
     budgetByPhase,
     totalHours,
-    totalPrice: toFixedMoney(totalPrice),
+    projectSubtotal,
+    projectBufferPercent,
+    projectBufferAmount,
+    totalPrice: finalTotalPrice,
   });
   return {
     estimateLines,
     budgetByPhase,
     totalHours,
-    totalPrice: toFixedMoney(totalPrice),
+    projectSubtotal,
+    projectBufferPercent,
+    projectBufferAmount,
+    totalPrice: finalTotalPrice,
   };
 }

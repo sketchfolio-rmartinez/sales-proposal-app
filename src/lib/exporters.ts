@@ -48,6 +48,10 @@ export function generateProposalText(
 
   lines.push("## Pricing Summary");
   lines.push(`- Estimated Hours: ${review.totalHours}`);
+  lines.push(`- Subtotal: $${review.projectSubtotal.toLocaleString()}`);
+  lines.push(
+    `- Project Buffer: ${review.projectBufferPercent}% ($${review.projectBufferAmount.toLocaleString()})`,
+  );
   lines.push(`- Estimated Price: $${review.totalPrice.toLocaleString()}`);
   lines.push("");
 

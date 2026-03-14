@@ -109,6 +109,7 @@ export interface ProposalDraft {
   status: ProposalStatus;
   sizeTierId: string;
   projectSize: "Small" | "Medium" | "Large" | "XL";
+  projectBufferPercent: number;
   timelineOptionId: string;
   complexity: {
     stakeholdersComplexitySize: ComplexityBand;
@@ -142,5 +143,8 @@ export interface ReviewModel {
   estimateLines: EstimateLine[];
   budgetByPhase: Record<PhaseId, number>;
   totalHours: number;
+  projectSubtotal: number;
+  projectBufferPercent: number;
+  projectBufferAmount: number;
   totalPrice: number;
 }
