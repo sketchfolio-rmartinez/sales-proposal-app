@@ -71,14 +71,16 @@ export function useBlurbLibrary(): BlurbLibraryModel {
 
   const filteredBlurbs = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return blurbs.filter((blurb) => {
-      const matchesCategory = categoryFilter === "All" || blurb.category === categoryFilter;
-      const haystack = [blurb.title, blurb.category, ...(blurb.tags ?? []), blurb.contentPlaintext]
-        .join(" ")
-        .toLowerCase();
-      const matchesQuery = !query || haystack.includes(query);
-      return matchesCategory && matchesQuery;
-    });
+    return [...blurbs]
+      .filter((blurb) => {
+        const matchesCategory = categoryFilter === "All" || blurb.category === categoryFilter;
+        const haystack = [blurb.title, blurb.category, ...(blurb.tags ?? []), blurb.contentPlaintext]
+          .join(" ")
+          .toLowerCase();
+        const matchesQuery = !query || haystack.includes(query);
+        return matchesCategory && matchesQuery;
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
   }, [blurbs, categoryFilter, searchQuery]);
 
   const activeBlurbs = useMemo(

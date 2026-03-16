@@ -27,14 +27,16 @@ export function BlurbPickerModal({
 
   const selectableBlurbs = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return blurbs.filter((blurb) => {
-      const categoryAllowed = !allowedCategories || allowedCategories.includes(blurb.category);
-      const categoryMatches = categoryFilter === "All" || blurb.category === categoryFilter;
-      const haystack = [blurb.title, blurb.category, ...(blurb.tags ?? []), blurb.contentPlaintext]
-        .join(" ")
-        .toLowerCase();
-      return categoryAllowed && categoryMatches && (!query || haystack.includes(query));
-    });
+    return [...blurbs]
+      .filter((blurb) => {
+        const categoryAllowed = !allowedCategories || allowedCategories.includes(blurb.category);
+        const categoryMatches = categoryFilter === "All" || blurb.category === categoryFilter;
+        const haystack = [blurb.title, blurb.category, ...(blurb.tags ?? []), blurb.contentPlaintext]
+          .join(" ")
+          .toLowerCase();
+        return categoryAllowed && categoryMatches && (!query || haystack.includes(query));
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
   }, [allowedCategories, blurbs, categoryFilter, searchQuery]);
 
   const toggleSelection = (blurbId: string) => {
