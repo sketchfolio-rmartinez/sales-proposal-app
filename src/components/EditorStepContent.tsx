@@ -59,9 +59,36 @@ export function EditorStepContent({
     mode: "inclusion" | "rfp";
     inclusionId?: string;
   }>(null);
+  const [draftRequirement, setDraftRequirement] = useState({
+    prompt: "",
+    response: "",
+  });
 
   const resolveBlurb = (blurbId: string | null | undefined) =>
     blurbs.find((blurb) => blurb.id === blurbId) ?? null;
+
+  const addRequirement = () => {
+    const prompt = draftRequirement.prompt.trim();
+    const response = draftRequirement.response.trim();
+    if (!prompt || !response) return;
+
+    onUpsertActive({
+      ...activeProposal,
+      rfpRequirements: [
+        ...activeProposal.rfpRequirements,
+        {
+          id: crypto.randomUUID(),
+          prompt,
+          response,
+        },
+      ],
+    });
+
+    setDraftRequirement({
+      prompt: "",
+      response: "",
+    });
+  };
 
   if (step === 1) {
     return (
@@ -508,55 +535,61 @@ export function EditorStepContent({
       <>
         <div className="panel">
           <h3>RFP Requirements & Blurbs</h3>
-          <button
-            type="button"
-            onClick={() =>
-              onUpsertActive({
-                ...activeProposal,
-                rfpRequirements: [
-                  ...activeProposal.rfpRequirements,
-                  {
-                    id: crypto.randomUUID(),
-                    prompt: "",
-                    response: "",
-                  } as RfpRequirement,
-                ],
-              })
-            }
-          >
-            Add Requirement
-          </button>
-          <div className="row">
-            <h4>Selected Blurbs</h4>
-            <button
-              type="button"
-              onClick={() => setPickerState({ mode: "rfp" })}
-            >
-              Add Blurb
-            </button>
-          </div>
-          {activeProposal.pickedBlurbIds.length > 0 ? (
-            <div className="subpanel">
-              {activeProposal.pickedBlurbIds.map((blurbId) => {
-                const blurb = resolveBlurb(blurbId);
-                if (!blurb) return null;
-                return (
-                  <div key={blurb.id} className="inline-blurb">
-                    <strong>
-                      {blurb.title} <em>{blurb.category}</em>
-                    </strong>
-                    <span>{blurb.contentPlaintext}</span>
-                  </div>
-                );
-              })}
+          <div className="subpanel">
+            <div className="row">
+              <h4>Add Requirement</h4>
+              <button type="button" className="next-btn" onClick={addRequirement}>
+                Save Requirement
+              </button>
             </div>
-          ) : (
-            <p className="muted">
-              No library blurbs added to proposal narrative yet.
-            </p>
+            <label>
+              Prompt
+              <input
+                value={draftRequirement.prompt}
+                onChange={(event) =>
+                  setDraftRequirement((current) => ({
+                    ...current,
+                    prompt: event.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label>
+              Response
+              <textarea
+                value={draftRequirement.response}
+                onChange={(event) =>
+                  setDraftRequirement((current) => ({
+                    ...current,
+                    response: event.target.value,
+                  }))
+                }
+              />
+            </label>
+          </div>
+
+          <h4>Requirements</h4>
+          {activeProposal.rfpRequirements.length === 0 && (
+            <p className="muted">No requirements added yet.</p>
           )}
           {activeProposal.rfpRequirements.map((req) => (
             <div key={req.id} className="subpanel">
+              <div className="row">
+                <h4>Requirement</h4>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onUpsertActive({
+                      ...activeProposal,
+                      rfpRequirements: activeProposal.rfpRequirements.filter(
+                        (item) => item.id !== req.id,
+                      ),
+                    })
+                  }
+                >
+                  Remove
+                </button>
+              </div>
               <label>
                 Prompt
                 <input
@@ -593,12 +626,35 @@ export function EditorStepContent({
               </label>
             </div>
           ))}
-
-          <h4>Library Reference</h4>
-          <p className="muted">
-            Blurbs are referenced from the library and can be reused across
-            proposals.
-          </p>
+          <div className="row">
+            <h4>Selected Blurbs</h4>
+            <button
+              type="button"
+              onClick={() => setPickerState({ mode: "rfp" })}
+            >
+              Add Blurb
+            </button>
+          </div>
+          {activeProposal.pickedBlurbIds.length > 0 ? (
+            <div className="subpanel">
+              {activeProposal.pickedBlurbIds.map((blurbId) => {
+                const blurb = resolveBlurb(blurbId);
+                if (!blurb) return null;
+                return (
+                  <div key={blurb.id} className="inline-blurb">
+                    <strong>
+                      {blurb.title} <em>{blurb.category}</em>
+                    </strong>
+                    <span>{blurb.contentPlaintext}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="muted">
+              No library blurbs added to proposal narrative yet.
+            </p>
+          )}
         </div>
         {pickerState?.mode === "rfp" && (
           <BlurbPickerModal

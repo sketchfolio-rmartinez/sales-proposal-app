@@ -15,8 +15,6 @@ interface ProposalBuilderState {
   activeProposalId: string | null;
   proposalQuery: string;
   step: EditorStep;
-  exportText: string;
-  exportCsv: string;
 }
 
 interface ProposalBuilderView {
@@ -54,8 +52,6 @@ export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderM
   );
   const [proposalQuery, setProposalQuery] = useState("");
   const [step, setStep] = useState<EditorStep>(1);
-  const [exportText, setExportText] = useState("");
-  const [exportCsv, setExportCsv] = useState("");
 
   const activeProposal = useMemo(
     () => proposals.find((item) => item.id === activeProposalId) ?? null,
@@ -70,6 +66,17 @@ export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderM
   const filteredProposals = useMemo(
     () => filterProposals(proposals, proposalQuery),
     [proposalQuery, proposals],
+  );
+  const exportText = useMemo(
+    () =>
+      activeProposal && review
+        ? generateProposalText(activeProposal, review, blurbs)
+        : "",
+    [activeProposal, blurbs, review],
+  );
+  const exportCsv = useMemo(
+    () => (activeProposal ? generateTeamworkCsv(activeProposal) : ""),
+    [activeProposal],
   );
 
   const persist = (next: ProposalDraft[]) => {
@@ -91,8 +98,6 @@ export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderM
     persist(next);
     setActiveProposalId(draft.id);
     setStep(1);
-    setExportText("");
-    setExportCsv("");
   };
 
   const duplicateProposal = (proposal: ProposalDraft) => {
@@ -116,8 +121,6 @@ export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderM
     if (activeProposalId === proposalId) {
       setActiveProposalId(next[0]?.id ?? null);
       setStep(1);
-      setExportText("");
-      setExportCsv("");
     }
   };
 
@@ -133,9 +136,7 @@ export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderM
   };
 
   const regenerate = () => {
-    if (!activeProposal || !review) return;
-    setExportText(generateProposalText(activeProposal, review, blurbs));
-    setExportCsv(generateTeamworkCsv(activeProposal));
+    return;
   };
 
   const downloadCsv = () => {
