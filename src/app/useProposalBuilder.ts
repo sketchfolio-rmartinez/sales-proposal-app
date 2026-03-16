@@ -2,7 +2,12 @@ import { useMemo, useState } from "react";
 import { createDraftProposal } from "../data/defaults";
 import { generateProposalText, generateTeamworkCsv } from "../lib/exporters";
 import { buildReviewModel } from "../lib/estimate";
-import { BlurbLibraryItem, ProposalDraft, ProposalStatus, ReviewModel } from "../types";
+import {
+  BlurbLibraryItem,
+  ProposalDraft,
+  ProposalStatus,
+  ReviewModel,
+} from "../types";
 import { type EditorStep } from "./editorConfig";
 import {
   filterProposals,
@@ -18,10 +23,11 @@ interface ProposalBuilderState {
 }
 
 interface ProposalBuilderView {
-  // este model tiene toda la info
   activeProposal: ProposalDraft | null;
   review: ReviewModel | null;
   filteredProposals: ProposalDraft[];
+  exportText: string;
+  exportCsv: string;
 }
 
 interface ProposalBuilderHandlers {
@@ -33,7 +39,6 @@ interface ProposalBuilderHandlers {
   duplicateProposal: (proposal: ProposalDraft) => void;
   deleteProposal: (proposalId: string) => void;
   transitionStatus: () => void;
-  regenerate: () => void;
   downloadCsv: () => void;
 }
 
@@ -43,7 +48,9 @@ export interface ProposalBuilderModel {
   handlers: ProposalBuilderHandlers;
 }
 
-export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderModel {
+export function useProposalBuilder(
+  blurbs: BlurbLibraryItem[],
+): ProposalBuilderModel {
   const [proposals, setProposals] = useState<ProposalDraft[]>(() =>
     loadStoredProposals(),
   );
@@ -58,7 +65,6 @@ export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderM
     [activeProposalId, proposals],
   );
 
-  // pauy attention here
   const review = useMemo(
     () => (activeProposal ? buildReviewModel(activeProposal) : null),
     [activeProposal],
@@ -129,14 +135,8 @@ export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderM
     const nextStatus: ProposalStatus =
       activeProposal.status === "Draft"
         ? "ReadyForApproval"
-        : activeProposal.status === "ReadyForApproval"
-          ? "Approved"
-          : "Approved";
+        : "Approved";
     upsertActive({ ...activeProposal, status: nextStatus });
-  };
-
-  const regenerate = () => {
-    return;
   };
 
   const downloadCsv = () => {
@@ -157,13 +157,13 @@ export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderM
       activeProposalId,
       proposalQuery,
       step,
-      exportText,
-      exportCsv,
     },
     view: {
       activeProposal,
       review,
       filteredProposals,
+      exportText,
+      exportCsv,
     },
     handlers: {
       setActiveProposalId,
@@ -174,7 +174,6 @@ export function useProposalBuilder(blurbs: BlurbLibraryItem[]): ProposalBuilderM
       duplicateProposal,
       deleteProposal,
       transitionStatus,
-      regenerate,
       downloadCsv,
     },
   };

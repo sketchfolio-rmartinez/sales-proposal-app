@@ -29,7 +29,6 @@ interface EditorStepContentProps {
   exportText: string;
   exportCsv: string;
   onUpsertActive: (draft: ProposalDraft) => void;
-  onRegenerate: () => void;
   onTransitionStatus: () => void;
   onDownloadCsv: () => void;
 }
@@ -51,7 +50,6 @@ export function EditorStepContent({
   exportText,
   exportCsv,
   onUpsertActive,
-  onRegenerate,
   onTransitionStatus,
   onDownloadCsv,
 }: EditorStepContentProps) {
@@ -707,7 +705,6 @@ export function EditorStepContent({
       <div className="panel">
         <h3>Review & Generate</h3>
         <div className="row wrap">
-          <button onClick={onRegenerate}>Regenerate</button>
           <button
             onClick={onTransitionStatus}
             disabled={activeProposal.status === "Approved"}
@@ -810,7 +807,6 @@ export function EditorStepContent({
       <div className="panel">
         <h3>Exports</h3>
         <div className="row wrap">
-          <button onClick={onRegenerate}>Generate Outputs</button>
           <button onClick={onDownloadCsv} disabled={!exportCsv}>
             Download Teamwork CSV
           </button>

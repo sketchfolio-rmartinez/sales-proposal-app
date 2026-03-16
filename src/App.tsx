@@ -71,10 +71,9 @@ export default function App() {
                   activeProposal={view.activeProposal}
                   blurbs={blurbState.blurbs}
                   review={view.review}
-                  exportText={state.exportText}
-                  exportCsv={state.exportCsv}
+                  exportText={view.exportText}
+                  exportCsv={view.exportCsv}
                   onUpsertActive={handlers.upsertActive}
-                  onRegenerate={handlers.regenerate}
                   onTransitionStatus={handlers.transitionStatus}
                   onDownloadCsv={handlers.downloadCsv}
                 />
