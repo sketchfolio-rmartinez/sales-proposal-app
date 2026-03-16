@@ -75,7 +75,7 @@ export interface ProposalInclusionState {
   inclusionId: string;
   selected: boolean;
   overrideReason: string;
-  blurbId: string | null;
+  blurbIds: string[];
 }
 
 export interface ProposalRoleStaffing {

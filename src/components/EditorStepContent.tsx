@@ -195,18 +195,21 @@ export function EditorStepContent({
                       </label>
                       <p className="muted">{inclusion.description}</p>
                       <div className="inclusion-blurb-row">
-                        {state.blurbId ? (
-                          <div className="inline-blurb">
-                            <strong>
-                              {resolveBlurb(state.blurbId)?.title ??
-                                "Selected blurb"}
-                            </strong>
-                            <span>
-                              {resolveBlurb(state.blurbId)?.contentPlaintext}
-                            </span>
+                        {state.blurbIds.length > 0 ? (
+                          <div className="inline-blurb-stack">
+                            {state.blurbIds.map((blurbId) => {
+                              const blurb = resolveBlurb(blurbId);
+                              if (!blurb) return null;
+                              return (
+                                <div key={blurb.id} className="inline-blurb">
+                                  <strong>{blurb.title}</strong>
+                                  <span>{blurb.contentPlaintext}</span>
+                                </div>
+                              );
+                            })}
                           </div>
                         ) : (
-                          <p className="muted">No inclusion blurb attached.</p>
+                          <p className="muted">No inclusion blurbs attached.</p>
                         )}
                         <div className="row">
                           <button
@@ -218,9 +221,11 @@ export function EditorStepContent({
                               })
                             }
                           >
-                            {state.blurbId ? "Change Blurb" : "+ Add Blurb"}
+                            {state.blurbIds.length > 0
+                              ? "Manage Blurbs"
+                              : "+ Add Blurbs"}
                           </button>
-                          {state.blurbId && (
+                          {state.blurbIds.length > 0 && (
                             <button
                               type="button"
                               onClick={() =>
@@ -230,7 +235,7 @@ export function EditorStepContent({
                                     activeProposal.inclusions,
                                     inclusion.id,
                                     {
-                                      blurbId: null,
+                                      blurbIds: [],
                                     },
                                   ),
                                 })
@@ -274,15 +279,15 @@ export function EditorStepContent({
         </div>
         {pickerState?.mode === "inclusion" && (
           <BlurbPickerModal
-            title="Pick Inclusion Blurb"
+            title="Pick Inclusion Blurbs"
             blurbs={blurbs.filter((blurb) => blurb.isActive)}
             allowedCategories={["Inclusion"]}
-            selectedIds={[
+            selectedIds={
               activeProposal.inclusions.find(
                 (item) => item.inclusionId === pickerState.inclusionId,
-              )?.blurbId ?? "",
-            ].filter(Boolean)}
-            selectionMode="single"
+              )?.blurbIds ?? []
+            }
+            selectionMode="multiple"
             onClose={() => setPickerState(null)}
             onConfirm={(selectedIds) => {
               if (!pickerState.inclusionId) return;
@@ -292,7 +297,7 @@ export function EditorStepContent({
                   activeProposal.inclusions,
                   pickerState.inclusionId,
                   {
-                    blurbId: selectedIds[0] ?? null,
+                    blurbIds: selectedIds,
                   },
                 ),
               });

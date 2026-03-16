@@ -16,11 +16,11 @@ export function generateProposalText(
       return inclusion
         ? {
             inclusion,
-            blurb: blurbs.find((blurb) => blurb.id === item.blurbId) ?? null,
+            blurbs: blurbs.filter((blurb) => item.blurbIds.includes(blurb.id)),
           }
         : null;
     })
-    .filter((item): item is { inclusion: NonNullable<typeof inclusions[number]>; blurb: BlurbLibraryItem | null } => Boolean(item));
+    .filter((item): item is { inclusion: NonNullable<typeof inclusions[number]>; blurbs: BlurbLibraryItem[] } => Boolean(item));
 
   const lines: string[] = [];
   lines.push(`# ${draft.projectTitle || draft.name || "Proposal"}`);
@@ -39,8 +39,8 @@ export function generateProposalText(
     lines.push(`### ${phase.name}`);
     for (const item of phaseInclusions) {
       lines.push(`- ${item.inclusion.name}: ${item.inclusion.description}`);
-      if (item.blurb) {
-        lines.push(`  ${item.blurb.contentPlaintext}`);
+      for (const blurb of item.blurbs) {
+        lines.push(`  ${blurb.contentPlaintext}`);
       }
     }
     lines.push("");

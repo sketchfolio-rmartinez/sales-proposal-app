@@ -12,6 +12,16 @@ export function loadStoredProposals(): ProposalDraft[] {
     return parsed.map((proposal) => ({
       ...proposal,
       projectBufferPercent: proposal.projectBufferPercent ?? 0,
+      inclusions: Array.isArray(proposal.inclusions)
+        ? proposal.inclusions.map((item: ProposalInclusionState & { blurbId?: string | null }) => ({
+            ...item,
+            blurbIds: Array.isArray(item.blurbIds)
+              ? item.blurbIds
+              : item.blurbId
+                ? [item.blurbId]
+                : [],
+          }))
+        : [],
     })) as ProposalDraft[];
   } catch {
     return [];

@@ -278,7 +278,7 @@ export function createDraftProposal(): ProposalDraft {
       inclusionId: item.id,
       selected: true,
       overrideReason: "",
-      blurbId: null,
+      blurbIds: [],
     })),
     staffing: roles.map((role) => ({
       roleId: role.id,

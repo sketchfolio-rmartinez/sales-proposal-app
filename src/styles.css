@@ -542,6 +542,12 @@ td {
   padding: 10px;
 }
 
+.inline-blurb-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .inline-blurb em {
   color: #5f6f65;
   font-style: normal;
