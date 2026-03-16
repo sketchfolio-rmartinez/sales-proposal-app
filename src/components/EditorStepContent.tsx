@@ -335,8 +335,9 @@ export function EditorStepContent({
                 ...activeProposal,
                 complexity: {
                   ...activeProposal.complexity,
-                  stakeholdersComplexitySize: Number(event.target.value) as
-                    ProposalDraft["complexity"]["stakeholdersComplexitySize"],
+                  stakeholdersComplexitySize: Number(
+                    event.target.value,
+                  ) as ProposalDraft["complexity"]["stakeholdersComplexitySize"],
                 },
               })
             }
@@ -669,7 +670,7 @@ export function EditorStepContent({
             <tr>
               <th>Phase</th>
               <th>Budget</th>
-              <th>%</th>
+              <th>% of Project</th>
             </tr>
           </thead>
           <tbody>
@@ -689,7 +690,7 @@ export function EditorStepContent({
             <tr>
               <th>Role</th>
               <th>Budget</th>
-              <th>%</th>
+              <th>% of Project</th>
               <th>Hours</th>
             </tr>
           </thead>
