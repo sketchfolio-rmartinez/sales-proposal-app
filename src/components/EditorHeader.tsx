@@ -4,10 +4,16 @@ import { ProposalDraft } from "../types";
 interface EditorHeaderProps {
   activeProposal: ProposalDraft;
   step: EditorStep;
+  maxAccessibleStep: EditorStep;
   onStepChange: (step: EditorStep) => void;
 }
 
-export function EditorHeader({ activeProposal, step, onStepChange }: EditorHeaderProps) {
+export function EditorHeader({
+  activeProposal,
+  step,
+  maxAccessibleStep,
+  onStepChange,
+}: EditorHeaderProps) {
   return (
     <div className="panel">
       <div className="proposal-heading">
@@ -26,11 +32,13 @@ export function EditorHeader({ activeProposal, step, onStepChange }: EditorHeade
         {steps.map((stepItem) => {
           const isActive = step === stepItem.id;
           const isComplete = step > stepItem.id;
+          const isLocked = stepItem.id > maxAccessibleStep;
           return (
             <button
               key={stepItem.id}
               onClick={() => onStepChange(stepItem.id)}
-              className={`step-chip ${isActive ? "active" : ""} ${isComplete ? "complete" : ""}`}
+              disabled={isLocked}
+              className={`step-chip ${isActive ? "active" : ""} ${isComplete ? "complete" : ""} ${isLocked ? "locked" : ""}`}
             >
               <span className="step-chip-number">{stepItem.id}</span>
               <span className="step-chip-label">{stepItem.label}</span>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createDraftProposal } from "../data/defaults";
 import { generateProposalText, generateTeamworkCsv } from "../lib/exporters";
 import { buildReviewModel } from "../lib/estimate";
@@ -11,6 +11,7 @@ import {
 import { type EditorStep } from "./editorConfig";
 import {
   filterProposals,
+  getMaxAccessibleStep,
   loadStoredProposals,
   saveStoredProposals,
   touch,
@@ -64,6 +65,14 @@ export function useProposalBuilder(
     () => proposals.find((item) => item.id === activeProposalId) ?? null,
     [activeProposalId, proposals],
   );
+
+  useEffect(() => {
+    if (!activeProposal) return;
+    const maxAccessibleStep = getMaxAccessibleStep(activeProposal);
+    if (step > maxAccessibleStep) {
+      setStep(maxAccessibleStep);
+    }
+  }, [activeProposal, step]);
 
   const review = useMemo(
     () => (activeProposal ? buildReviewModel(activeProposal) : null),

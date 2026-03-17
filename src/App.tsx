@@ -3,7 +3,12 @@ import { EditorStepContent } from "./components/EditorStepContent";
 import { ProposalSidebar } from "./components/ProposalSidebar";
 import { BlurbAdminPage } from "./components/BlurbAdminPage";
 import { type EditorStep } from "./app/editorConfig";
-import { canAdvanceFromInclusions, formatUpdated, sizeTierLabel } from "./app/proposalUtils";
+import {
+  canAdvanceFromStep,
+  formatUpdated,
+  getMaxAccessibleStep,
+  sizeTierLabel,
+} from "./app/proposalUtils";
 import { useProposalBuilder } from "./app/useProposalBuilder";
 import { useBlurbLibrary } from "./app/useBlurbLibrary";
 import { useAppRoute } from "./app/useAppRoute";
@@ -64,7 +69,12 @@ export default function App() {
               </div>
             ) : (
               <>
-                <EditorHeader activeProposal={view.activeProposal} step={state.step} onStepChange={handlers.setStep} />
+                <EditorHeader
+                  activeProposal={view.activeProposal}
+                  step={state.step}
+                  maxAccessibleStep={getMaxAccessibleStep(view.activeProposal)}
+                  onStepChange={handlers.setStep}
+                />
 
                 <EditorStepContent
                   step={state.step}
@@ -89,7 +99,7 @@ export default function App() {
                     <button
                       className="next-btn"
                       onClick={() => handlers.setStep((value) => (value < 7 ? ((value + 1) as EditorStep) : value))}
-                      disabled={state.step === 2 && !canAdvanceFromInclusions(view.activeProposal)}
+                      disabled={!canAdvanceFromStep(view.activeProposal, state.step)}
                     >
                       Next
                     </button>
