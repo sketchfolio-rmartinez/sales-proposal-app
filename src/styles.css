@@ -348,6 +348,12 @@ button {
   color: #2f7a5b;
 }
 
+.step-chip.locked,
+.step-chip:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .step-chip.complete {
   border-color: #87b89d;
   background: #edf7f0;
@@ -429,6 +435,30 @@ button.danger {
   color: #9d2525;
   font-weight: 600;
 }
+
+.allocation-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.allocation-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.compact-field {
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.compact-field input {
+  width: 100%;
+}
+
 .role-header-title {
   margin-left: 12px;
 }
@@ -439,9 +469,9 @@ button.danger {
 table {
   border-collapse: collapse;
   margin-bottom: 12px;
-  width: 65%;
+  width: min(960px, 100%);
   table-layout: fixed;
-  margin-left: 48px;
+  margin-left: 24px;
 }
 
 th,
@@ -469,13 +499,38 @@ td {
 
 .role-matrix td:nth-child(4) input,
 .role-matrix td:nth-child(5) input {
-  margin-left: 12px;
-  padding-left: 12px;
   width: 100px;
 }
 
 .summary-table {
   width: 72%;
+}
+
+.staffing-table {
+  width: min(1040px, 100%);
+}
+
+.staffing-table th:nth-child(1),
+.staffing-table td:nth-child(1) {
+  width: 70px;
+  text-align: center;
+}
+
+.staffing-table th:nth-child(3),
+.staffing-table td:nth-child(3),
+.staffing-table th:nth-child(4),
+.staffing-table td:nth-child(4),
+.staffing-table th:nth-child(5),
+.staffing-table td:nth-child(5),
+.staffing-table th:nth-child(6),
+.staffing-table td:nth-child(6) {
+  text-align: right;
+}
+
+.staffing-table td:nth-child(3) input,
+.staffing-table td:nth-child(4) input,
+.staffing-table td:nth-child(5) input {
+  width: 96px;
 }
 
 .summary-table th:nth-child(2),
