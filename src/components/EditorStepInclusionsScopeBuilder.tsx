@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { canAdvanceFromInclusions, updateInclusion } from "../app/proposalUtils";
 import { inclusions, phases } from "../data/defaults";
 import { BlurbLibraryItem, ProposalDraft } from "../types";
@@ -11,9 +12,6 @@ interface EditorStepInclusionsScopeBuilderProps {
   blurbs: BlurbLibraryItem[];
   inclusionTotal: number;
   remainingInclusionAllocation: number;
-  inclusionPickerId?: string;
-  onOpenInclusionPicker: (inclusionId: string) => void;
-  onCloseInclusionPicker: () => void;
   onUpsertActive: (draft: ProposalDraft) => void;
 }
 
@@ -26,11 +24,9 @@ export function EditorStepInclusionsScopeBuilder({
   blurbs,
   inclusionTotal,
   remainingInclusionAllocation,
-  inclusionPickerId,
-  onOpenInclusionPicker,
-  onCloseInclusionPicker,
   onUpsertActive,
 }: EditorStepInclusionsScopeBuilderProps) {
+  const [inclusionPickerId, setInclusionPickerId] = useState<string | null>(null);
   const resolveBlurb = (blurbId: string | null | undefined) =>
     blurbs.find((blurb) => blurb.id === blurbId) ?? null;
 
@@ -130,7 +126,7 @@ export function EditorStepInclusionsScopeBuilder({
                         <div className="row">
                           <button
                             type="button"
-                            onClick={() => onOpenInclusionPicker(inclusion.id)}
+                            onClick={() => setInclusionPickerId(inclusion.id)}
                           >
                             {state.blurbIds.length > 0 ? "Manage Blurbs" : "+ Add Blurbs"}
                           </button>
@@ -181,7 +177,7 @@ export function EditorStepInclusionsScopeBuilder({
             )?.blurbIds ?? []
           }
           selectionMode="multiple"
-          onClose={onCloseInclusionPicker}
+          onClose={() => setInclusionPickerId(null)}
           onConfirm={(selectedIds) => {
             onUpsertActive({
               ...activeProposal,
@@ -193,7 +189,7 @@ export function EditorStepInclusionsScopeBuilder({
                 },
               ),
             });
-            onCloseInclusionPicker();
+            setInclusionPickerId(null);
           }}
         />
       )}

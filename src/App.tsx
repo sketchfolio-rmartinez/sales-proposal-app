@@ -1,5 +1,5 @@
 import { EditorHeader } from "./components/EditorHeader";
-import { EditorStepContent } from "./components/EditorStepContent";
+import { ProposalStepView } from "./components/ProposalStepView";
 import { ProposalSidebar } from "./components/ProposalSidebar";
 import { BlurbAdminPage } from "./components/BlurbAdminPage";
 import { steps, type EditorStep } from "./app/editorConfig";
@@ -76,7 +76,7 @@ export default function App() {
                   onStepChange={handlers.setStep}
                 />
 
-                <EditorStepContent
+                <ProposalStepView
                   step={state.step}
                   activeProposal={view.activeProposal}
                   blurbs={blurbState.blurbs}
