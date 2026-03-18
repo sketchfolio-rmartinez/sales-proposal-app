@@ -8,6 +8,7 @@ import {
   getStaffingAllocationTotal,
 } from "../app/proposalUtils";
 import { EditorStepInclusionsScopeBuilder } from "./EditorStepInclusionsScopeBuilder";
+import { EditorStepExports } from "./EditorStepExports";
 import { EditorStepRfpRequirementsBlurbs } from "./EditorStepRfpRequirementsBlurbs";
 import { EditorStepReviewGenerate } from "./EditorStepReviewGenerate";
 import { EditorStepRolesLeadSupport } from "./EditorStepRolesLeadSupport";
@@ -143,22 +144,11 @@ export function EditorStepContent({
 
   if (step === 6) {
     return (
-      <div className="panel">
-        <h3>Exports</h3>
-        <div className="row wrap">
-          <button onClick={onDownloadCsv} disabled={!exportCsv}>
-            Download Teamwork CSV
-          </button>
-        </div>
-        <label>
-          Proposal Text Output
-          <textarea value={exportText} readOnly rows={16} />
-        </label>
-        <label>
-          Teamwork CSV Preview
-          <textarea value={exportCsv} readOnly rows={8} />
-        </label>
-      </div>
+      <EditorStepExports
+        exportText={exportText}
+        exportCsv={exportCsv}
+        onDownloadCsv={onDownloadCsv}
+      />
     );
   }
 
