@@ -250,6 +250,29 @@ label {
   margin-bottom: 10px;
 }
 
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.field-required {
+  color: #5f6f65;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 input,
 select,
 textarea,
@@ -273,8 +296,29 @@ select {
 
 .panel label:not(.checkbox-row) > input,
 .panel label:not(.checkbox-row) > select,
-.panel label:not(.checkbox-row) > textarea {
+.panel label:not(.checkbox-row) > textarea,
+.panel .field-control {
   width: min(620px, 100%);
+}
+
+.field-hint,
+.field-error {
+  margin: 0;
+  font-size: 13px;
+}
+
+.field-hint {
+  color: #5f6f65;
+}
+
+.field-error {
+  color: #9d2525;
+  font-weight: 600;
+}
+
+.field-control.is-invalid {
+  border-color: #cc4f4f;
+  box-shadow: 0 0 0 1px rgba(204, 79, 79, 0.12);
 }
 
 button {
