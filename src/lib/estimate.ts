@@ -1,5 +1,9 @@
-import { inclusions, phases } from "../data/defaults";
+import { getDefaultBudgetAmount, inclusions, phases } from "../data/defaults";
 import { ProposalDraft, ReviewModel } from "../types";
+import {
+  PROJECT_SIZE_MULTIPLIERS,
+  STAKEHOLDER_SIZE_MULTIPLIERS,
+} from "../config/estimation";
 
 function toFixedMoney(value: number): number {
   return Math.round(value * 100) / 100;
@@ -10,7 +14,16 @@ function toFixedHours(value: number): number {
 }
 
 export function buildReviewModel(draft: ProposalDraft): ReviewModel {
-  const projectSubtotal = toFixedMoney(draft.budgetAmount);
+  const baseBudget = getDefaultBudgetAmount(draft.sizeTierId);
+  const projectSizeMultiplier =
+    PROJECT_SIZE_MULTIPLIERS[draft.projectSize] ?? 1;
+  const stakeholderMultiplier =
+    STAKEHOLDER_SIZE_MULTIPLIERS[
+      draft.complexity.stakeholdersComplexitySize
+    ] ?? 1;
+  const projectSubtotal = toFixedMoney(
+    baseBudget * projectSizeMultiplier * stakeholderMultiplier,
+  );
 
   const phaseAllocations = phases.map((phase) => {
     const allocationPercent = draft.inclusions

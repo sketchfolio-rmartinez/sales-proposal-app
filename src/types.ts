@@ -17,6 +17,10 @@ export type RoleId =
   | "developer"
   | "contractor";
 
+export type RoleScope = "lead" | "support";
+
+export type ProjectSize = "Small" | "Medium" | "Large" | "XL";
+
 export type CmsType =
   | "WordPress"
   | "Webflow"
@@ -48,7 +52,6 @@ export interface SizeTier {
   label: string;
   minBudget: number;
   maxBudget?: number;
-  defaultPhaseBudgetPercent: Record<PhaseId, number>; // not sure what this one does?
 }
 
 export interface InclusionItem {
@@ -56,8 +59,6 @@ export interface InclusionItem {
   name: string;
   description: string;
   phaseId: PhaseId;
-  isRequired: boolean;
-  defaultHoursByRole: Partial<Record<RoleId, number>>; // ex defaultHoursByRole: { strategist: 10, project_manager: 6 }
 }
 
 export interface TimelineOption {
@@ -73,15 +74,16 @@ export interface RoleDefinition {
 
 export interface ProposalInclusionState {
   inclusionId: string;
-  selected: boolean;
-  overrideReason: string;
+  allocationPercent: number;
   blurbIds: string[];
 }
 
-export interface ProposalRoleStaffing {
+export interface ProposalStaffingLine {
+  id: string;
   roleId: RoleId;
-  leadSelected: boolean;
-  supportSelected: boolean;
+  scope: RoleScope;
+  selected: boolean;
+  allocationPercent: number;
   baseRate: number;
   markupPercent: number;
 }
@@ -108,7 +110,7 @@ export interface ProposalDraft {
   projectTitle: string;
   status: ProposalStatus;
   sizeTierId: string;
-  projectSize: "Small" | "Medium" | "Large" | "XL";
+  projectSize: ProjectSize;
   projectBufferPercent: number;
   timelineOptionId: string;
   complexity: {
@@ -117,7 +119,7 @@ export interface ProposalDraft {
     notes: string;
   };
   inclusions: ProposalInclusionState[];
-  staffing: ProposalRoleStaffing[];
+  staffing: ProposalStaffingLine[];
   rfpRequirements: RfpRequirement[];
   pickedBlurbIds: string[];
   assumptions: string;
@@ -127,21 +129,27 @@ export interface ProposalDraft {
   updatedAt: string;
 }
 
-export interface EstimateLine {
+export interface PhaseAllocationSummary {
   phaseId: PhaseId;
+  allocationPercent: number;
+  budget: number;
+}
+
+export interface StaffingAllocationSummary {
+  staffingLineId: string;
   roleId: RoleId;
-  hours: number;
+  scope: RoleScope;
+  allocationPercent: number;
   rate: number;
-  cost: number;
-  markup: number;
-  price: number;
-  source: "default" | "rule-adjusted" | "manual-override";
+  markupPercent: number;
+  effectiveRate: number;
+  budget: number;
+  hours: number;
 }
 
 export interface ReviewModel {
-  // okay this is the money model here
-  estimateLines: EstimateLine[];
-  budgetByPhase: Record<PhaseId, number>;
+  phaseAllocations: PhaseAllocationSummary[];
+  staffingAllocations: StaffingAllocationSummary[];
   totalHours: number;
   projectSubtotal: number;
   projectBufferPercent: number;

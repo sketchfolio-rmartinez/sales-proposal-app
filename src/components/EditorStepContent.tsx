@@ -8,6 +8,10 @@ import {
 } from "../data/defaults";
 import {
   canAdvanceFromInclusions,
+  canAdvanceFromRfp,
+  canAdvanceFromRoles,
+  getInclusionAllocationTotal,
+  getStaffingAllocationTotal,
   statusActionLabel,
   updateInclusion,
   updateStaffing,
@@ -18,7 +22,6 @@ import {
   BlurbLibraryItem,
   ProposalDraft,
   ReviewModel,
-  RfpRequirement,
 } from "../types";
 
 interface EditorStepContentProps {
@@ -37,9 +40,25 @@ function formatCurrency(value: number): string {
   return `$${Math.round(value).toLocaleString()}`;
 }
 
-function formatPercent(part: number, total: number): string {
-  if (total <= 0) return "0%";
-  return `${Math.round((part / total) * 100)}%`;
+function formatPercentValue(value: number): string {
+  return `${Math.round(value * 100) / 100}%`;
+}
+
+function normalizePercentInput(value: string): number {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return 0;
+  return Math.min(100, Math.max(0, numericValue));
+}
+
+function normalizeNonNegativeInput(value: string): number {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return 0;
+  return Math.max(0, numericValue);
+}
+
+function lineLabel(roleId: ProposalDraft["staffing"][number]["roleId"], scope: ProposalDraft["staffing"][number]["scope"]): string {
+  const role = roles.find((item) => item.id === roleId);
+  return `${role?.label ?? roleId} ${scope === "lead" ? "Lead" : "Support"}`;
 }
 
 export function EditorStepContent({
@@ -61,6 +80,11 @@ export function EditorStepContent({
     prompt: "",
     response: "",
   });
+
+  const inclusionTotal = getInclusionAllocationTotal(activeProposal);
+  const remainingInclusionAllocation = Math.round((100 - inclusionTotal) * 100) / 100;
+  const staffingTotal = getStaffingAllocationTotal(activeProposal);
+  const remainingStaffingAllocation = Math.round((100 - staffingTotal) * 100) / 100;
 
   const resolveBlurb = (blurbId: string | null | undefined) =>
     blurbs.find((blurb) => blurb.id === blurbId) ?? null;
@@ -154,10 +178,10 @@ export function EditorStepContent({
               })
             }
           >
-            <option value="Small">Small (1x)</option>
-            <option value="Medium">Medium (2x)</option>
-            <option value="Large">Large (3x)</option>
-            <option value="XL">XL (5x)</option>
+            <option value="Small">Small (1.0x)</option>
+            <option value="Medium">Medium (1.15x)</option>
+            <option value="Large">Large (1.3x)</option>
+            <option value="XL">XL (1.5x)</option>
           </select>
         </label>
         <label>
@@ -170,7 +194,7 @@ export function EditorStepContent({
             onChange={(event) =>
               onUpsertActive({
                 ...activeProposal,
-                projectBufferPercent: Number(event.target.value),
+                projectBufferPercent: normalizePercentInput(event.target.value),
               })
             }
           />
@@ -183,42 +207,72 @@ export function EditorStepContent({
     return (
       <>
         <div className="panel">
-          <h3>Inclusions (Scope Builder)</h3>
-          {phases.map((phase) => (
-            <div key={phase.id} className="subpanel">
-              <h4>{phase.name}</h4>
-              {inclusions
-                .filter((item) => item.phaseId === phase.id)
-                .map((inclusion) => {
+          <div className="row wrap">
+            <h3>Inclusions (Scope Builder)</h3>
+            <div className="allocation-summary">
+              <strong>Allocated:</strong> {formatPercentValue(inclusionTotal)}
+              <span className={remainingInclusionAllocation === 0 ? "muted" : "warning"}>
+                {remainingInclusionAllocation >= 0
+                  ? `Remaining: ${formatPercentValue(remainingInclusionAllocation)}`
+                  : `Over by ${formatPercentValue(Math.abs(remainingInclusionAllocation))}`}
+              </span>
+            </div>
+          </div>
+          <p className="muted">
+            All inclusions start at 0%. Allocate the full 100% of the project budget to move forward.
+          </p>
+
+          {phases.map((phase) => {
+            const phaseItems = inclusions.filter((item) => item.phaseId === phase.id);
+            const phaseTotal = activeProposal.inclusions
+              .filter((item) =>
+                phaseItems.some((phaseItem) => phaseItem.id === item.inclusionId),
+              )
+              .reduce((sum, item) => sum + item.allocationPercent, 0);
+
+            return (
+              <div key={phase.id} className="subpanel">
+                <div className="row wrap">
+                  <h4>{phase.name}</h4>
+                  <span className="muted">Phase total: {formatPercentValue(phaseTotal)}</span>
+                </div>
+                {phaseItems.map((inclusion) => {
                   const state = activeProposal.inclusions.find(
                     (item) => item.inclusionId === inclusion.id,
                   );
                   if (!state) return null;
+
                   return (
                     <div key={inclusion.id} className="inclusion-row">
-                      <label className="checkbox-row">
-                        <input
-                          type="checkbox"
-                          checked={state.selected}
-                          onChange={(event) =>
-                            onUpsertActive({
-                              ...activeProposal,
-                              inclusions: updateInclusion(
-                                activeProposal.inclusions,
-                                inclusion.id,
-                                {
-                                  selected: event.target.checked,
-                                },
-                              ),
-                            })
-                          }
-                        />
-                        <span>
-                          {inclusion.name}{" "}
-                          {inclusion.isRequired ? "(Required)" : ""}
-                        </span>
-                      </label>
-                      <p className="muted">{inclusion.description}</p>
+                      <div className="allocation-row">
+                        <div>
+                          <strong>{inclusion.name}</strong>
+                          <p className="muted">{inclusion.description}</p>
+                        </div>
+                        <label className="compact-field">
+                          Allocation %
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={state.allocationPercent}
+                            onChange={(event) =>
+                              onUpsertActive({
+                                ...activeProposal,
+                                inclusions: updateInclusion(
+                                  activeProposal.inclusions,
+                                  inclusion.id,
+                                  {
+                                    allocationPercent: normalizePercentInput(event.target.value),
+                                  },
+                                ),
+                              })
+                            }
+                          />
+                        </label>
+                      </div>
+
                       <div className="inclusion-blurb-row">
                         {state.blurbIds.length > 0 ? (
                           <div className="inline-blurb-stack">
@@ -246,9 +300,7 @@ export function EditorStepContent({
                               })
                             }
                           >
-                            {state.blurbIds.length > 0
-                              ? "Manage Blurbs"
-                              : "+ Add Blurbs"}
+                            {state.blurbIds.length > 0 ? "Manage Blurbs" : "+ Add Blurbs"}
                           </button>
                           {state.blurbIds.length > 0 && (
                             <button
@@ -271,37 +323,20 @@ export function EditorStepContent({
                           )}
                         </div>
                       </div>
-                      {inclusion.isRequired && !state.selected && (
-                        <label>
-                          Reason/Assumption (required to continue)
-                          <input
-                            value={state.overrideReason}
-                            onChange={(event) =>
-                              onUpsertActive({
-                                ...activeProposal,
-                                inclusions: updateInclusion(
-                                  activeProposal.inclusions,
-                                  inclusion.id,
-                                  {
-                                    overrideReason: event.target.value,
-                                  },
-                                ),
-                              })
-                            }
-                          />
-                        </label>
-                      )}
                     </div>
                   );
                 })}
-            </div>
-          ))}
+              </div>
+            );
+          })}
+
           {!canAdvanceFromInclusions(activeProposal) && (
             <p className="warning">
-              Complete required reason fields before moving to next step.
+              Total inclusion allocation must equal 100% before you can continue.
             </p>
           )}
         </div>
+
         {pickerState?.mode === "inclusion" && (
           <BlurbPickerModal
             title="Pick Inclusion Blurbs"
@@ -357,7 +392,7 @@ export function EditorStepContent({
           </select>
         </label>
         <label>
-          Stakeholders Size
+          Stakeholder Count
           <select
             value={activeProposal.complexity.stakeholdersComplexitySize}
             onChange={(event) =>
@@ -372,9 +407,9 @@ export function EditorStepContent({
               })
             }
           >
-            <option value="1">1-5</option>
-            <option value="1.25">6-12</option>
-            <option value="1.5">13+</option>
+            <option value="1">1-5 (1.0x)</option>
+            <option value="1.1">6-12 (1.1x)</option>
+            <option value="1.25">13+ (1.25x)</option>
           </select>
         </label>
         <label>
@@ -386,8 +421,7 @@ export function EditorStepContent({
                 ...activeProposal,
                 complexity: {
                   ...activeProposal.complexity,
-                  cmsType: event.target
-                    .value as ProposalDraft["complexity"]["cmsType"],
+                  cmsType: event.target.value as ProposalDraft["complexity"]["cmsType"],
                 },
               })
             }
@@ -421,62 +455,71 @@ export function EditorStepContent({
   if (step === 4) {
     return (
       <div className="panel">
-        <h3 className="role-header-title">Roles, Lead & Support</h3>
+        <div className="row wrap">
+          <h3 className="role-header-title">Roles, Lead & Support</h3>
+          <div className="allocation-summary">
+            <strong>Allocated:</strong> {formatPercentValue(staffingTotal)}
+            <span className={remainingStaffingAllocation === 0 ? "muted" : "warning"}>
+              {remainingStaffingAllocation >= 0
+                ? `Remaining: ${formatPercentValue(remainingStaffingAllocation)}`
+                : `Over by ${formatPercentValue(Math.abs(remainingStaffingAllocation))}`}
+            </span>
+          </div>
+        </div>
         <p className="role-matrix-description">
-          High-level role structure for planning &nbsp;
-          <strong>(This does not change estimator formula.)</strong>
+          Select the lead/support lines you need, then split the full 100% project allocation across those lines.
         </p>
-        <table className="role-matrix">
+        <table className="role-matrix staffing-table">
           <thead>
             <tr>
-              <th>Role</th>
-              <th>Lead</th>
-              <th>Support</th>
+              <th>Use</th>
+              <th>Line Item</th>
+              <th>Allocation %</th>
               <th>Base Rate</th>
               <th>Markup %</th>
+              <th>Effective Rate</th>
             </tr>
           </thead>
           <tbody>
-            {roles.map((role) => {
-              const staff = activeProposal.staffing.find(
-                (item) => item.roleId === role.id,
+            {activeProposal.staffing.map((line) => {
+              const effectiveRate = Math.round(
+                line.baseRate * (1 + line.markupPercent / 100),
               );
-              if (!staff) return null;
+
               return (
-                <tr key={role.id}>
-                  <td>{role.label}</td>
+                <tr key={line.id}>
                   <td>
                     <input
                       type="checkbox"
-                      checked={Boolean(staff.leadSelected)}
+                      checked={line.selected}
                       onChange={(event) =>
                         onUpsertActive({
                           ...activeProposal,
-                          staffing: updateStaffing(
-                            activeProposal.staffing,
-                            role.id,
-                            {
-                              leadSelected: event.target.checked,
-                            },
-                          ),
+                          staffing: updateStaffing(activeProposal.staffing, line.id, {
+                            selected: event.target.checked,
+                            allocationPercent: event.target.checked
+                              ? line.allocationPercent
+                              : 0,
+                          }),
                         })
                       }
                     />
                   </td>
+                  <td>{lineLabel(line.roleId, line.scope)}</td>
                   <td>
                     <input
-                      type="checkbox"
-                      checked={Boolean(staff.supportSelected)}
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={line.allocationPercent}
+                      disabled={!line.selected}
                       onChange={(event) =>
                         onUpsertActive({
                           ...activeProposal,
-                          staffing: updateStaffing(
-                            activeProposal.staffing,
-                            role.id,
-                            {
-                              supportSelected: event.target.checked,
-                            },
-                          ),
+                          staffing: updateStaffing(activeProposal.staffing, line.id, {
+                            allocationPercent: normalizePercentInput(event.target.value),
+                          }),
                         })
                       }
                     />
@@ -485,17 +528,13 @@ export function EditorStepContent({
                     <input
                       type="number"
                       min={0}
-                      value={staff.baseRate}
+                      value={line.baseRate}
                       onChange={(event) =>
                         onUpsertActive({
                           ...activeProposal,
-                          staffing: updateStaffing(
-                            activeProposal.staffing,
-                            role.id,
-                            {
-                              baseRate: Number(event.target.value),
-                            },
-                          ),
+                          staffing: updateStaffing(activeProposal.staffing, line.id, {
+                            baseRate: normalizeNonNegativeInput(event.target.value),
+                          }),
                         })
                       }
                     />
@@ -504,26 +543,29 @@ export function EditorStepContent({
                     <input
                       type="number"
                       min={0}
-                      value={staff.markupPercent}
+                      value={line.markupPercent}
                       onChange={(event) =>
                         onUpsertActive({
                           ...activeProposal,
-                          staffing: updateStaffing(
-                            activeProposal.staffing,
-                            role.id,
-                            {
-                              markupPercent: Number(event.target.value),
-                            },
-                          ),
+                          staffing: updateStaffing(activeProposal.staffing, line.id, {
+                            markupPercent: normalizePercentInput(event.target.value),
+                          }),
                         })
                       }
                     />
                   </td>
+                  <td>{formatCurrency(effectiveRate)}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+
+        {!canAdvanceFromRoles(activeProposal) && (
+          <p className="warning">
+            Selected role lines must have valid rates and total 100% before you can continue.
+          </p>
+        )}
       </div>
     );
   }
@@ -595,11 +637,10 @@ export function EditorStepContent({
                   onChange={(event) =>
                     onUpsertActive({
                       ...activeProposal,
-                      rfpRequirements: activeProposal.rfpRequirements.map(
-                        (item) =>
-                          item.id === req.id
-                            ? { ...item, prompt: event.target.value }
-                            : item,
+                      rfpRequirements: activeProposal.rfpRequirements.map((item) =>
+                        item.id === req.id
+                          ? { ...item, prompt: event.target.value }
+                          : item,
                       ),
                     })
                   }
@@ -612,11 +653,10 @@ export function EditorStepContent({
                   onChange={(event) =>
                     onUpsertActive({
                       ...activeProposal,
-                      rfpRequirements: activeProposal.rfpRequirements.map(
-                        (item) =>
-                          item.id === req.id
-                            ? { ...item, response: event.target.value }
-                            : item,
+                      rfpRequirements: activeProposal.rfpRequirements.map((item) =>
+                        item.id === req.id
+                          ? { ...item, response: event.target.value }
+                          : item,
                       ),
                     })
                   }
@@ -626,10 +666,7 @@ export function EditorStepContent({
           ))}
           <div className="row">
             <h4>Selected Blurbs</h4>
-            <button
-              type="button"
-              onClick={() => setPickerState({ mode: "rfp" })}
-            >
+            <button type="button" onClick={() => setPickerState({ mode: "rfp" })}>
               Add Blurb
             </button>
           </div>
@@ -651,6 +688,12 @@ export function EditorStepContent({
           ) : (
             <p className="muted">
               No library blurbs added to proposal narrative yet.
+            </p>
+          )}
+
+          {!canAdvanceFromRfp(activeProposal) && (
+            <p className="warning">
+              Each saved requirement needs both a prompt and a response.
             </p>
           )}
         </div>
@@ -677,29 +720,10 @@ export function EditorStepContent({
   }
 
   if (step === 6 && review) {
-    const phaseRows = phases
-      .map((phase) => ({
-        id: phase.id,
-        label: phase.name,
-        budget: review.budgetByPhase[phase.id],
-      }))
-      .filter((row) => row.budget > 0);
-
-    const roleRows = roles
-      .map((role) => {
-        const matchingLines = review.estimateLines.filter(
-          (line) => line.roleId === role.id,
-        );
-        const hours = matchingLines.reduce((sum, line) => sum + line.hours, 0);
-        const budget = matchingLines.reduce((sum, line) => sum + line.price, 0);
-        return {
-          id: role.id,
-          label: role.label,
-          hours,
-          budget,
-        };
-      })
-      .filter((row) => row.hours > 0 || row.budget > 0);
+    const phaseRows = review.phaseAllocations.filter(
+      (row) => row.allocationPercent > 0,
+    );
+    const roleRows = review.staffingAllocations;
 
     return (
       <div className="panel">
@@ -732,13 +756,16 @@ export function EditorStepContent({
             </tr>
           </thead>
           <tbody>
-            {phaseRows.map((row) => (
-              <tr key={row.id}>
-                <td>{row.label}</td>
-                <td>{formatCurrency(row.budget)}</td>
-                <td>{formatPercent(row.budget, review.projectSubtotal)}</td>
-              </tr>
-            ))}
+            {phaseRows.map((row) => {
+              const phase = phases.find((item) => item.id === row.phaseId);
+              return (
+                <tr key={row.phaseId}>
+                  <td>{phase?.name ?? row.phaseId}</td>
+                  <td>{formatCurrency(row.budget)}</td>
+                  <td>{formatPercentValue(row.allocationPercent)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
@@ -746,7 +773,7 @@ export function EditorStepContent({
         <table className="summary-table">
           <thead>
             <tr>
-              <th>Role</th>
+              <th>Role Line</th>
               <th>Budget</th>
               <th>% of Project</th>
               <th>Hours</th>
@@ -754,10 +781,10 @@ export function EditorStepContent({
           </thead>
           <tbody>
             {roleRows.map((row) => (
-              <tr key={row.id}>
-                <td>{row.label}</td>
+              <tr key={row.staffingLineId}>
+                <td>{lineLabel(row.roleId, row.scope)}</td>
                 <td>{formatCurrency(row.budget)}</td>
-                <td>{formatPercent(row.budget, review.projectSubtotal)}</td>
+                <td>{formatPercentValue(row.allocationPercent)}</td>
                 <td>{row.hours}</td>
               </tr>
             ))}

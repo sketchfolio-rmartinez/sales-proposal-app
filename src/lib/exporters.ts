@@ -10,17 +10,18 @@ export function generateProposalText(
   const timeline = timelineOptions.find((item) => item.id === draft.timelineOptionId);
   const pickedBlurbs = blurbs.filter((item) => draft.pickedBlurbIds.includes(item.id));
   const selectedInclusions = draft.inclusions
-    .filter((item) => item.selected)
+    .filter((item) => item.allocationPercent > 0)
     .map((item) => {
       const inclusion = inclusions.find((inc) => inc.id === item.inclusionId);
       return inclusion
         ? {
             inclusion,
+            allocationPercent: item.allocationPercent,
             blurbs: blurbs.filter((blurb) => item.blurbIds.includes(blurb.id)),
           }
         : null;
     })
-    .filter((item): item is { inclusion: NonNullable<typeof inclusions[number]>; blurbs: BlurbLibraryItem[] } => Boolean(item));
+    .filter((item): item is { inclusion: NonNullable<typeof inclusions[number]>; allocationPercent: number; blurbs: BlurbLibraryItem[] } => Boolean(item));
 
   const lines: string[] = [];
   lines.push(`# ${draft.projectTitle || draft.name || "Proposal"}`);
@@ -38,7 +39,7 @@ export function generateProposalText(
     if (phaseInclusions.length === 0) continue;
     lines.push(`### ${phase.name}`);
     for (const item of phaseInclusions) {
-      lines.push(`- ${item.inclusion.name}: ${item.inclusion.description}`);
+      lines.push(`- ${item.inclusion.name} (${item.allocationPercent}%): ${item.inclusion.description}`);
       for (const blurb of item.blurbs) {
         lines.push(`  ${blurb.contentPlaintext}`);
       }
@@ -78,13 +79,10 @@ export function generateProposalText(
   }
 
   lines.push("## Role Rates");
-  for (const staff of draft.staffing) {
+  for (const staff of draft.staffing.filter((item) => item.selected || item.allocationPercent > 0)) {
     const role = roles.find((r) => r.id === staff.roleId);
-    const leadSupport = [staff.leadSelected ? "Lead" : "", staff.supportSelected ? "Support" : ""]
-      .filter(Boolean)
-      .join(" + ");
     lines.push(
-      `- ${role?.label ?? staff.roleId}: ${leadSupport || "Not selected"}, base $${staff.baseRate}/hr, markup ${staff.markupPercent}%`
+      `- ${role?.label ?? staff.roleId} ${staff.scope === "lead" ? "Lead" : "Support"}: ${staff.allocationPercent}% of project, base $${staff.baseRate}/hr, markup ${staff.markupPercent}%`
     );
   }
 
@@ -93,7 +91,7 @@ export function generateProposalText(
 
 export function generateTeamworkCsv(draft: ProposalDraft): string {
   const selectedInclusions = draft.inclusions
-    .filter((item) => item.selected)
+    .filter((item) => item.allocationPercent > 0)
     .map((item) => inclusions.find((inc) => inc.id === item.inclusionId))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
