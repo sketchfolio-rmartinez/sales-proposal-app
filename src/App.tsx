@@ -2,7 +2,7 @@ import { EditorHeader } from "./components/EditorHeader";
 import { EditorStepContent } from "./components/EditorStepContent";
 import { ProposalSidebar } from "./components/ProposalSidebar";
 import { BlurbAdminPage } from "./components/BlurbAdminPage";
-import { type EditorStep } from "./app/editorConfig";
+import { steps, type EditorStep } from "./app/editorConfig";
 import {
   canAdvanceFromStep,
   formatUpdated,
@@ -95,10 +95,16 @@ export default function App() {
                   >
                     Back
                   </button>
-                  {state.step < 7 && (
+                  {state.step < steps.length && (
                     <button
                       className="next-btn"
-                      onClick={() => handlers.setStep((value) => (value < 7 ? ((value + 1) as EditorStep) : value))}
+                      onClick={() =>
+                        handlers.setStep((value) =>
+                          value < steps.length
+                            ? ((value + 1) as EditorStep)
+                            : value,
+                        )
+                      }
                       disabled={!canAdvanceFromStep(view.activeProposal, state.step)}
                     >
                       Next

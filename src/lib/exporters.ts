@@ -32,6 +32,12 @@ export function generateProposalText(
   lines.push("## Scope Summary");
   lines.push(`- Size Tier: ${tier?.label ?? "TBD"}`);
   lines.push(`- Timeline: ${timeline?.label ?? "TBD"}`);
+  if (draft.startDate) {
+    lines.push(`- Start Date: ${draft.startDate}`);
+  }
+  if (draft.endDate) {
+    lines.push(`- End Date / Event Date: ${draft.endDate}`);
+  }
   lines.push("");
 
   for (const phase of phases) {

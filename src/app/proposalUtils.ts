@@ -183,6 +183,10 @@ function normalizeProposal(rawProposal: unknown): ProposalDraft | null {
         ? proposal.status
         : "Draft",
     sizeTierId,
+    startDate:
+      typeof proposal.startDate === "string" ? proposal.startDate : "",
+    endDate:
+      typeof proposal.endDate === "string" ? proposal.endDate : "",
     projectSize:
       proposal.projectSize === "Small" ||
       proposal.projectSize === "Medium" ||
@@ -325,21 +329,16 @@ export function canAdvanceFromSetup(draft: ProposalDraft): boolean {
     draft.name.trim() &&
       draft.clientName.trim() &&
       draft.projectTitle.trim() &&
-      draft.sizeTierId,
+      draft.sizeTierId &&
+      draft.timelineOptionId &&
+      draft.projectSize &&
+      draft.complexity.stakeholdersComplexitySize &&
+      draft.complexity.cmsType,
   );
 }
 
 export function canAdvanceFromInclusions(draft: ProposalDraft): boolean {
   return isPercentComplete(getInclusionAllocationTotal(draft));
-}
-
-export function canAdvanceFromTimeline(draft: ProposalDraft): boolean {
-  return Boolean(
-    draft.timelineOptionId &&
-      draft.projectSize &&
-      draft.complexity.stakeholdersComplexitySize &&
-      draft.complexity.cmsType,
-  );
 }
 
 export function canAdvanceFromRoles(draft: ProposalDraft): boolean {
@@ -364,18 +363,17 @@ export function canAdvanceFromStep(
 ): boolean {
   if (step === 1) return canAdvanceFromSetup(draft);
   if (step === 2) return canAdvanceFromInclusions(draft);
-  if (step === 3) return canAdvanceFromTimeline(draft);
-  if (step === 4) return canAdvanceFromRoles(draft);
-  if (step === 5) return canAdvanceFromRfp(draft);
-  if (step === 6) return true;
+  if (step === 3) return canAdvanceFromRoles(draft);
+  if (step === 4) return canAdvanceFromRfp(draft);
+  if (step === 5) return true;
   return false;
 }
 
 export function getMaxAccessibleStep(draft: ProposalDraft): EditorStep {
-  for (const step of [1, 2, 3, 4, 5, 6] as const) {
+  for (const step of [1, 2, 3, 4, 5] as const) {
     if (!canAdvanceFromStep(draft, step)) return step;
   }
-  return 7;
+  return 6;
 }
 
 export function canOpenStep(

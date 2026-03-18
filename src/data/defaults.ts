@@ -219,6 +219,8 @@ export function createDraftProposal(): ProposalDraft {
     projectTitle: "",
     status: "Draft",
     sizeTierId: defaultTierId,
+    startDate: "",
+    endDate: "",
     projectSize: "Medium",
     projectBufferPercent: 0,
     timelineOptionId: timelineOptions[1].id,

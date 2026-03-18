@@ -110,6 +110,8 @@ export interface ProposalDraft {
   projectTitle: string;
   status: ProposalStatus;
   sizeTierId: string;
+  startDate: string;
+  endDate: string;
   projectSize: ProjectSize;
   projectBufferPercent: number;
   timelineOptionId: string;

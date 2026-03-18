@@ -115,7 +115,9 @@ export function EditorStepContent({
   if (step === 1) {
     return (
       <div className="panel">
-        <h3>New Proposal Setup</h3>
+        <h3>Setup & Complexity</h3>
+        <div className="subpanel">
+          <h4>Proposal Setup</h4>
         <label>
           Proposal Name (Internal)
           <input
@@ -167,6 +169,56 @@ export function EditorStepContent({
             ))}
           </select>
         </label>
+        </div>
+        <div className="subpanel">
+          <h4>Timeline</h4>
+          <label>
+            Timeline Option
+            <select
+              value={activeProposal.timelineOptionId}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  timelineOptionId: event.target.value,
+                })
+              }
+            >
+              {timelineOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Start Date
+            <input
+              type="date"
+              value={activeProposal.startDate}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  startDate: event.target.value,
+                })
+              }
+            />
+          </label>
+          <label>
+            End Date / Event Date
+            <input
+              type="date"
+              value={activeProposal.endDate}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  endDate: event.target.value,
+                })
+              }
+            />
+          </label>
+        </div>
+        <div className="subpanel">
+          <h4>Complexity</h4>
         <label>
           Project Size
           <select
@@ -185,6 +237,63 @@ export function EditorStepContent({
           </select>
         </label>
         <label>
+          Stakeholder Count
+          <select
+            value={activeProposal.complexity.stakeholdersComplexitySize}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                complexity: {
+                  ...activeProposal.complexity,
+                  stakeholdersComplexitySize: Number(
+                    event.target.value,
+                  ) as ProposalDraft["complexity"]["stakeholdersComplexitySize"],
+                },
+              })
+            }
+          >
+            <option value="1">1-5 (1.0x)</option>
+            <option value="1.1">6-12 (1.1x)</option>
+            <option value="1.25">13+ (1.25x)</option>
+          </select>
+        </label>
+        <label>
+          CMS Type
+          <select
+            value={activeProposal.complexity.cmsType}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                complexity: {
+                  ...activeProposal.complexity,
+                  cmsType: event.target.value as ProposalDraft["complexity"]["cmsType"],
+                },
+              })
+            }
+          >
+            <option value="WordPress">WordPress</option>
+            <option value="Webflow">Webflow</option>
+            <option value="Shopify">Shopify</option>
+            <option value="Headless">Headless</option>
+            <option value="Custom">Custom</option>
+          </select>
+        </label>
+        <label>
+          Complexity Notes
+          <textarea
+            value={activeProposal.complexity.notes}
+            onChange={(event) =>
+              onUpsertActive({
+                ...activeProposal,
+                complexity: {
+                  ...activeProposal.complexity,
+                  notes: event.target.value,
+                },
+              })
+            }
+          />
+        </label>
+        <label>
           Project Buffer %
           <input
             type="number"
@@ -199,6 +308,7 @@ export function EditorStepContent({
             }
           />
         </label>
+        </div>
       </div>
     );
   }
@@ -372,89 +482,6 @@ export function EditorStepContent({
   if (step === 3) {
     return (
       <div className="panel">
-        <h3>Timeline & Complexity</h3>
-        <label>
-          Timeline Option
-          <select
-            value={activeProposal.timelineOptionId}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                timelineOptionId: event.target.value,
-              })
-            }
-          >
-            {timelineOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Stakeholder Count
-          <select
-            value={activeProposal.complexity.stakeholdersComplexitySize}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                complexity: {
-                  ...activeProposal.complexity,
-                  stakeholdersComplexitySize: Number(
-                    event.target.value,
-                  ) as ProposalDraft["complexity"]["stakeholdersComplexitySize"],
-                },
-              })
-            }
-          >
-            <option value="1">1-5 (1.0x)</option>
-            <option value="1.1">6-12 (1.1x)</option>
-            <option value="1.25">13+ (1.25x)</option>
-          </select>
-        </label>
-        <label>
-          CMS Type
-          <select
-            value={activeProposal.complexity.cmsType}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                complexity: {
-                  ...activeProposal.complexity,
-                  cmsType: event.target.value as ProposalDraft["complexity"]["cmsType"],
-                },
-              })
-            }
-          >
-            <option value="WordPress">WordPress</option>
-            <option value="Webflow">Webflow</option>
-            <option value="Shopify">Shopify</option>
-            <option value="Headless">Headless</option>
-            <option value="Custom">Custom</option>
-          </select>
-        </label>
-        <label>
-          Complexity Notes
-          <textarea
-            value={activeProposal.complexity.notes}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                complexity: {
-                  ...activeProposal.complexity,
-                  notes: event.target.value,
-                },
-              })
-            }
-          />
-        </label>
-      </div>
-    );
-  }
-
-  if (step === 4) {
-    return (
-      <div className="panel">
         <div className="row wrap">
           <h3 className="role-header-title">Roles, Lead & Support</h3>
           <div className="allocation-summary">
@@ -570,7 +597,7 @@ export function EditorStepContent({
     );
   }
 
-  if (step === 5) {
+  if (step === 4) {
     return (
       <>
         <div className="panel">
@@ -719,7 +746,7 @@ export function EditorStepContent({
     );
   }
 
-  if (step === 6 && review) {
+  if (step === 5 && review) {
     const phaseRows = review.phaseAllocations.filter(
       (row) => row.allocationPercent > 0,
     );
@@ -829,7 +856,7 @@ export function EditorStepContent({
     );
   }
 
-  if (step === 7) {
+  if (step === 6) {
     return (
       <div className="panel">
         <h3>Exports</h3>
