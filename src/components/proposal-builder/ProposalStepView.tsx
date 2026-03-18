@@ -27,6 +27,7 @@ interface ProposalStepViewProps {
   onUpsertActive: (draft: ProposalDraft) => void;
   onTransitionStatus: () => void;
   onDownloadCsv: () => void;
+  onStepValidityChange?: (step: EditorStep, isValid: boolean) => void;
 }
 
 export function ProposalStepView({
@@ -39,6 +40,7 @@ export function ProposalStepView({
   onUpsertActive,
   onTransitionStatus,
   onDownloadCsv,
+  onStepValidityChange,
 }: ProposalStepViewProps) {
   const inclusionTotal = getInclusionAllocationTotal(activeProposal);
   const remainingInclusionAllocation = Math.round((100 - inclusionTotal) * 100) / 100;
@@ -53,6 +55,7 @@ export function ProposalStepView({
         setupReady={setupReady}
         roughEstimate={roughEstimate}
         onUpsertActive={onUpsertActive}
+        onValidationChange={(isValid) => onStepValidityChange?.(1, isValid)}
       />
     ),
     2: () => (

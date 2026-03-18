@@ -20,6 +20,7 @@ interface EditorStepSetupComplexityProps {
   setupReady: boolean;
   roughEstimate: string;
   onUpsertActive: (draft: ProposalDraft) => void;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
 export function EditorStepSetupComplexity({
@@ -27,8 +28,10 @@ export function EditorStepSetupComplexity({
   setupReady,
   roughEstimate,
   onUpsertActive,
+  onValidationChange,
 }: EditorStepSetupComplexityProps) {
   const {
+    watch,
     register,
     reset,
     formState: { errors },
@@ -42,6 +45,13 @@ export function EditorStepSetupComplexity({
   useEffect(() => {
     reset(getSetupStepFormValues(activeProposal));
   }, [activeProposal.id, reset]);
+
+  const values = watch();
+
+  useEffect(() => {
+    if (!onValidationChange) return;
+    onValidationChange(setupStepSchema.safeParse(values).success);
+  }, [onValidationChange, values]);
 
   return (
     <div className="step-section">

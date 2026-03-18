@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ProposalHeader } from "./components/proposal-builder/ProposalHeader";
 import { ProposalStepView } from "./components/proposal-builder/ProposalStepView";
 import { ProposalSidebar } from "./components/ProposalSidebar";
@@ -21,6 +22,16 @@ export default function App() {
   } = useBlurbLibrary();
   const { state, view, handlers } = useProposalBuilder(blurbState.blurbs);
   const { route, navigate } = useAppRoute();
+  const [stepValidity, setStepValidity] = useState<Partial<Record<EditorStep, boolean>>>({});
+
+  useEffect(() => {
+    setStepValidity({});
+  }, [state.activeProposalId]);
+
+  const canAdvance =
+    view.activeProposal
+      ? (stepValidity[state.step] ?? canAdvanceFromStep(view.activeProposal, state.step))
+      : false;
 
   return (
     <div className="page">
@@ -96,6 +107,11 @@ export default function App() {
                   onUpsertActive={handlers.upsertActive}
                   onTransitionStatus={handlers.transitionStatus}
                   onDownloadCsv={handlers.downloadCsv}
+                  onStepValidityChange={(step, isValid) =>
+                    setStepValidity((current) =>
+                      current[step] === isValid ? current : { ...current, [step]: isValid },
+                    )
+                  }
                 />
 
                 <div className="step-nav">
@@ -119,9 +135,7 @@ export default function App() {
                             : value,
                         )
                       }
-                      disabled={
-                        !canAdvanceFromStep(view.activeProposal, state.step)
-                      }
+                      disabled={!canAdvance}
                     >
                       Next
                     </button>
