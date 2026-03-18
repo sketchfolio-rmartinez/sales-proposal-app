@@ -6,13 +6,12 @@ import {
 } from "../data/defaults";
 import {
   canAdvanceFromSetup,
-  canAdvanceFromRfp,
   getInclusionAllocationTotal,
   getStaffingAllocationTotal,
   statusActionLabel,
 } from "../app/proposalUtils";
-import { BlurbPickerModal } from "./BlurbPickerModal";
 import { EditorStepInclusionsScopeBuilder } from "./EditorStepInclusionsScopeBuilder";
+import { EditorStepRfpRequirementsBlurbs } from "./EditorStepRfpRequirementsBlurbs";
 import { EditorStepRolesLeadSupport } from "./EditorStepRolesLeadSupport";
 import { EditorStepSetupComplexity } from "./EditorStepSetupComplexity";
 import { EditorStep } from "../app/editorConfig";
@@ -66,13 +65,9 @@ export function EditorStepContent({
   onDownloadCsv,
 }: EditorStepContentProps) {
   const [pickerState, setPickerState] = useState<null | {
-    mode: "inclusion" | "rfp";
+    mode: "inclusion";
     inclusionId?: string;
   }>(null);
-  const [draftRequirement, setDraftRequirement] = useState({
-    prompt: "",
-    response: "",
-  });
 
   const inclusionTotal = getInclusionAllocationTotal(activeProposal);
   const remainingInclusionAllocation = Math.round((100 - inclusionTotal) * 100) / 100;
@@ -94,32 +89,6 @@ export function EditorStepContent({
         stakeholderMultiplier *
         (1 + activeProposal.projectBufferPercent / 100),
   );
-
-  const resolveBlurb = (blurbId: string | null | undefined) =>
-    blurbs.find((blurb) => blurb.id === blurbId) ?? null;
-
-  const addRequirement = () => {
-    const prompt = draftRequirement.prompt.trim();
-    const response = draftRequirement.response.trim();
-    if (!prompt || !response) return;
-
-    onUpsertActive({
-      ...activeProposal,
-      rfpRequirements: [
-        ...activeProposal.rfpRequirements,
-        {
-          id: crypto.randomUUID(),
-          prompt,
-          response,
-        },
-      ],
-    });
-
-    setDraftRequirement({
-      prompt: "",
-      response: "",
-    });
-  };
 
   if (step === 1) {
     return (
@@ -167,150 +136,11 @@ export function EditorStepContent({
 
   if (step === 4) {
     return (
-      <>
-        <div className="panel">
-          <h3>RFP Requirements & Blurbs</h3>
-          <div className="subpanel">
-            <div className="row">
-              <h4>Add Requirement</h4>
-              <button type="button" className="next-btn" onClick={addRequirement}>
-                Save Requirement
-              </button>
-            </div>
-            <label>
-              Prompt
-              <input
-                value={draftRequirement.prompt}
-                onChange={(event) =>
-                  setDraftRequirement((current) => ({
-                    ...current,
-                    prompt: event.target.value,
-                  }))
-                }
-              />
-            </label>
-            <label>
-              Response
-              <textarea
-                value={draftRequirement.response}
-                onChange={(event) =>
-                  setDraftRequirement((current) => ({
-                    ...current,
-                    response: event.target.value,
-                  }))
-                }
-              />
-            </label>
-          </div>
-
-          <h4>Requirements</h4>
-          {activeProposal.rfpRequirements.length === 0 && (
-            <p className="muted">No requirements added yet.</p>
-          )}
-          {activeProposal.rfpRequirements.map((req) => (
-            <div key={req.id} className="subpanel">
-              <div className="row">
-                <h4>Requirement</h4>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onUpsertActive({
-                      ...activeProposal,
-                      rfpRequirements: activeProposal.rfpRequirements.filter(
-                        (item) => item.id !== req.id,
-                      ),
-                    })
-                  }
-                >
-                  Remove
-                </button>
-              </div>
-              <label>
-                Prompt
-                <input
-                  value={req.prompt}
-                  onChange={(event) =>
-                    onUpsertActive({
-                      ...activeProposal,
-                      rfpRequirements: activeProposal.rfpRequirements.map((item) =>
-                        item.id === req.id
-                          ? { ...item, prompt: event.target.value }
-                          : item,
-                      ),
-                    })
-                  }
-                />
-              </label>
-              <label>
-                Response
-                <textarea
-                  value={req.response}
-                  onChange={(event) =>
-                    onUpsertActive({
-                      ...activeProposal,
-                      rfpRequirements: activeProposal.rfpRequirements.map((item) =>
-                        item.id === req.id
-                          ? { ...item, response: event.target.value }
-                          : item,
-                      ),
-                    })
-                  }
-                />
-              </label>
-            </div>
-          ))}
-          <div className="row">
-            <h4>Selected Blurbs</h4>
-            <button type="button" onClick={() => setPickerState({ mode: "rfp" })}>
-              Add Blurb
-            </button>
-          </div>
-          {activeProposal.pickedBlurbIds.length > 0 ? (
-            <div className="subpanel">
-              {activeProposal.pickedBlurbIds.map((blurbId) => {
-                const blurb = resolveBlurb(blurbId);
-                if (!blurb) return null;
-                return (
-                  <div key={blurb.id} className="inline-blurb">
-                    <strong>
-                      {blurb.title} <em>{blurb.category}</em>
-                    </strong>
-                    <span>{blurb.contentPlaintext}</span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="muted">
-              No library blurbs added to proposal narrative yet.
-            </p>
-          )}
-
-          {!canAdvanceFromRfp(activeProposal) && (
-            <p className="warning">
-              Each saved requirement needs both a prompt and a response.
-            </p>
-          )}
-        </div>
-        {pickerState?.mode === "rfp" && (
-          <BlurbPickerModal
-            title="Pick Proposal Blurbs"
-            blurbs={blurbs.filter(
-              (blurb) => blurb.isActive && blurb.category !== "Inclusion",
-            )}
-            selectedIds={activeProposal.pickedBlurbIds}
-            selectionMode="multiple"
-            onClose={() => setPickerState(null)}
-            onConfirm={(selectedIds) => {
-              onUpsertActive({
-                ...activeProposal,
-                pickedBlurbIds: selectedIds,
-              });
-              setPickerState(null);
-            }}
-          />
-        )}
-      </>
+      <EditorStepRfpRequirementsBlurbs
+        activeProposal={activeProposal}
+        blurbs={blurbs}
+        onUpsertActive={onUpsertActive}
+      />
     );
   }
 
