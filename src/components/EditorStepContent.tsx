@@ -19,6 +19,7 @@ import {
 } from "../app/proposalUtils";
 import { BlurbPickerModal } from "./BlurbPickerModal";
 import { EditorStep } from "../app/editorConfig";
+import { SummaryPill } from "./SummaryPill";
 import {
   PROJECT_SIZE_MULTIPLIERS,
   STAKEHOLDER_SIZE_MULTIPLIERS,
@@ -66,17 +67,6 @@ function lineLabel(roleId: ProposalDraft["staffing"][number]["roleId"], scope: P
   return `${role?.label ?? roleId} ${scope === "lead" ? "Lead" : "Support"}`;
 }
 
-function formatEstimateRange(
-  minValue: number,
-  maxValue: number | null,
-): string {
-  if (maxValue === null) {
-    return `${formatCurrency(minValue)}+`;
-  }
-
-  return `${formatCurrency(minValue)} - ${formatCurrency(maxValue)}`;
-}
-
 export function EditorStepContent({
   step,
   activeProposal,
@@ -109,12 +99,14 @@ export function EditorStepContent({
     STAKEHOLDER_SIZE_MULTIPLIERS[
       activeProposal.complexity.stakeholdersComplexitySize
     ] ?? 1;
-  const adjustedRangeMin =
-    selectedTier.minBudget * projectSizeMultiplier * stakeholderMultiplier;
-  const adjustedRangeMax = selectedTier.maxBudget
-    ? selectedTier.maxBudget * projectSizeMultiplier * stakeholderMultiplier
-    : null;
   const setupReady = canAdvanceFromSetup(activeProposal);
+  const roughEstimate = formatCurrency(
+    review?.totalPrice ??
+      (selectedTier.maxBudget ?? selectedTier.minBudget) *
+        projectSizeMultiplier *
+        stakeholderMultiplier *
+        (1 + activeProposal.projectBufferPercent / 100),
+  );
 
   const resolveBlurb = (blurbId: string | null | undefined) =>
     blurbs.find((blurb) => blurb.id === blurbId) ?? null;
@@ -147,38 +139,10 @@ export function EditorStepContent({
       <div className="panel">
         <div className="row align-start setup-header">
           <h3>Setup & Complexity</h3>
-          <div className="setup-estimate-card">
-            <strong>Running Estimate</strong>
-            {setupReady ? (
-              <>
-                <span>
-                  Estimated range:{" "}
-                  {formatEstimateRange(adjustedRangeMin, adjustedRangeMax)}
-                </span>
-                <span>
-                  Working subtotal:{" "}
-                  {formatCurrency(review?.projectSubtotal ?? adjustedRangeMax ?? adjustedRangeMin)}
-                </span>
-                <span>
-                  With buffer:{" "}
-                  {formatCurrency(review?.totalPrice ?? adjustedRangeMax ?? adjustedRangeMin)}
-                </span>
-                <span className="muted">
-                  Tier basis {selectedTier.maxBudget
-                    ? formatEstimateRange(selectedTier.minBudget, selectedTier.maxBudget)
-                    : `${formatCurrency(selectedTier.minBudget)}+`}
-                </span>
-                <span className="muted">
-                  Multipliers: {projectSizeMultiplier}x project size,{" "}
-                  {stakeholderMultiplier}x stakeholders
-                </span>
-              </>
-            ) : (
-              <span className="muted">
-                Fill the core setup fields to preview the estimate range.
-              </span>
-            )}
-          </div>
+          <SummaryPill
+            primaryLabel="Rough Estimate"
+            primaryValue={setupReady ? roughEstimate : "Complete setup"}
+          />
         </div>
         <div className="subpanel">
           <h4>Proposal Setup</h4>
@@ -383,14 +347,19 @@ export function EditorStepContent({
         <div className="panel">
           <div className="row wrap">
             <h3>Inclusions (Scope Builder)</h3>
-            <div className="allocation-summary">
-              <strong>Allocated:</strong> {formatPercentValue(inclusionTotal)}
-              <span className={remainingInclusionAllocation === 0 ? "muted" : "warning"}>
-                {remainingInclusionAllocation >= 0
-                  ? `Remaining: ${formatPercentValue(remainingInclusionAllocation)}`
-                  : `Over by ${formatPercentValue(Math.abs(remainingInclusionAllocation))}`}
-              </span>
-            </div>
+            <SummaryPill
+              primaryLabel="Allocated"
+              primaryValue={formatPercentValue(inclusionTotal)}
+              secondaryLabel={
+                remainingInclusionAllocation >= 0 ? "Remaining" : "Over"
+              }
+              secondaryValue={formatPercentValue(
+                Math.abs(remainingInclusionAllocation),
+              )}
+              secondaryTone={
+                remainingInclusionAllocation === 0 ? "default" : "warning"
+              }
+            />
           </div>
           <p className="muted">
             All inclusions start at 0%. Allocate the full 100% of the project budget to move forward.
@@ -554,16 +523,19 @@ export function EditorStepContent({
               project allocation across those lines.
             </p>
           </div>
-          <div className="roles-summary-inline">
-            <span>
-              <strong>Allocated:</strong> {formatPercentValue(staffingTotal)}
-            </span>
-            <span className={remainingStaffingAllocation === 0 ? "muted" : "warning"}>
-              {remainingStaffingAllocation >= 0
-                ? `Remaining: ${formatPercentValue(remainingStaffingAllocation)}`
-                : `Over by ${formatPercentValue(Math.abs(remainingStaffingAllocation))}`}
-            </span>
-          </div>
+          <SummaryPill
+            primaryLabel="Allocated"
+            primaryValue={formatPercentValue(staffingTotal)}
+            secondaryLabel={
+              remainingStaffingAllocation >= 0 ? "Remaining" : "Over"
+            }
+            secondaryValue={formatPercentValue(
+              Math.abs(remainingStaffingAllocation),
+            )}
+            secondaryTone={
+              remainingStaffingAllocation === 0 ? "default" : "warning"
+            }
+          />
         </div>
         <table className="role-matrix staffing-table polished-staffing-table">
           <thead>

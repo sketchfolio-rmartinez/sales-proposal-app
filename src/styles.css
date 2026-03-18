@@ -444,22 +444,22 @@ button.danger {
   margin-bottom: 12px;
 }
 
-.setup-estimate-card {
-  min-width: 280px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
-  border: 1px solid #dce7dc;
-  border-radius: 12px;
-  background: #f8fbf8;
-}
-
-.allocation-summary {
+.summary-pill {
   display: flex;
   align-items: center;
   gap: 12px;
   font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid #dce7dc;
+  border-radius: 999px;
+  background: #f8fbf8;
+  white-space: nowrap;
+}
+
+.summary-pill-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .allocation-row {
@@ -488,16 +488,6 @@ button.danger {
 
 .roles-panel-top {
   margin-bottom: 14px;
-}
-
-.roles-summary-inline {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 8px 12px;
-  border: 1px solid #dce7dc;
-  border-radius: 999px;
-  background: #f8fbf8;
 }
 
 table {
