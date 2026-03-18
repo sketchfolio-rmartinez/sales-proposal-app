@@ -20,6 +20,7 @@ import {
 import { BlurbPickerModal } from "./BlurbPickerModal";
 import { EditorStep } from "../app/editorConfig";
 import { SummaryPill } from "./SummaryPill";
+import { StepSectionHeader } from "./StepSectionHeader";
 import {
   PROJECT_SIZE_MULTIPLIERS,
   STAKEHOLDER_SIZE_MULTIPLIERS,
@@ -136,70 +137,76 @@ export function EditorStepContent({
 
   if (step === 1) {
     return (
-      <div className="panel">
-        <div className="row align-start setup-header">
-          <h3>Setup & Complexity</h3>
-          <SummaryPill
-            primaryLabel="Rough Estimate"
-            primaryValue={setupReady ? roughEstimate : "Complete setup"}
+      <div className="step-section">
+        <div className="panel step-section-shell">
+          <StepSectionHeader
+            title="Setup & Complexity"
+            description="Set the proposal basics, timeline, and complexity inputs that drive the working estimate."
+            summary={
+              <SummaryPill
+                primaryLabel="Rough Estimate"
+                primaryValue={setupReady ? roughEstimate : "Complete setup"}
+              />
+            }
           />
         </div>
-        <div className="subpanel">
-          <h4>Proposal Setup</h4>
-        <label>
-          Proposal Name (Internal)
-          <input
-            value={activeProposal.name}
-            onChange={(event) =>
-              onUpsertActive({ ...activeProposal, name: event.target.value })
-            }
-          />
-        </label>
-        <label>
-          Client Name
-          <input
-            value={activeProposal.clientName}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                clientName: event.target.value,
-              })
-            }
-          />
-        </label>
-        <label>
-          Project Title
-          <input
-            value={activeProposal.projectTitle}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                projectTitle: event.target.value,
-              })
-            }
-          />
-        </label>
-        <label>
-          Size Tier
-          <select
-            value={activeProposal.sizeTierId}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                sizeTierId: event.target.value,
-              })
-            }
-          >
-            {sizeTiers.map((tier) => (
-              <option key={tier.id} value={tier.id}>
-                {tier.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        </div>
-        <div className="subpanel">
-          <h4>Timeline</h4>
+        <div className="panel">
+          <div className="subpanel">
+            <h4>Proposal Setup</h4>
+          <label>
+            Proposal Name (Internal)
+            <input
+              value={activeProposal.name}
+              onChange={(event) =>
+                onUpsertActive({ ...activeProposal, name: event.target.value })
+              }
+            />
+          </label>
+          <label>
+            Client Name
+            <input
+              value={activeProposal.clientName}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  clientName: event.target.value,
+                })
+              }
+            />
+          </label>
+          <label>
+            Project Title
+            <input
+              value={activeProposal.projectTitle}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  projectTitle: event.target.value,
+                })
+              }
+            />
+          </label>
+          <label>
+            Size Tier
+            <select
+              value={activeProposal.sizeTierId}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  sizeTierId: event.target.value,
+                })
+              }
+            >
+              {sizeTiers.map((tier) => (
+                <option key={tier.id} value={tier.id}>
+                  {tier.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          </div>
+          <div className="subpanel">
+            <h4>Timeline</h4>
           <label>
             Timeline Option
             <select
@@ -244,98 +251,99 @@ export function EditorStepContent({
               }
             />
           </label>
-        </div>
-        <div className="subpanel">
-          <h4>Complexity</h4>
-        <label>
-          Project Size
-          <select
-            value={activeProposal.projectSize}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                projectSize: event.target.value as ProposalDraft["projectSize"],
-              })
-            }
-          >
-            <option value="Small">Small (1.0x)</option>
-            <option value="Medium">Medium (1.25x)</option>
-            <option value="Large">Large (1.5x)</option>
-            <option value="XL">XL (1.75x)</option>
-          </select>
-        </label>
-        <label>
-          Stakeholder Count
-          <select
-            value={activeProposal.complexity.stakeholdersComplexitySize}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                complexity: {
-                  ...activeProposal.complexity,
-                  stakeholdersComplexitySize: Number(
-                    event.target.value,
-                  ) as ProposalDraft["complexity"]["stakeholdersComplexitySize"],
-                },
-              })
-            }
-          >
-            <option value="1">1-5 (1.0x)</option>
-            <option value="1.1">6-12 (1.15x)</option>
-            <option value="1.25">13+ (1.3x)</option>
-          </select>
-        </label>
-        <label>
-          CMS Type
-          <select
-            value={activeProposal.complexity.cmsType}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                complexity: {
-                  ...activeProposal.complexity,
-                  cmsType: event.target.value as ProposalDraft["complexity"]["cmsType"],
-                },
-              })
-            }
-          >
-            <option value="WordPress">WordPress</option>
-            <option value="Webflow">Webflow</option>
-            <option value="Shopify">Shopify</option>
-            <option value="Headless">Headless</option>
-            <option value="Custom">Custom</option>
-          </select>
-        </label>
-        <label>
-          Complexity Notes
-          <textarea
-            value={activeProposal.complexity.notes}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                complexity: {
-                  ...activeProposal.complexity,
-                  notes: event.target.value,
-                },
-              })
-            }
-          />
-        </label>
-        <label>
-          Project Buffer %
-          <input
-            type="number"
-            min={0}
-            step={5}
-            value={activeProposal.projectBufferPercent}
-            onChange={(event) =>
-              onUpsertActive({
-                ...activeProposal,
-                projectBufferPercent: normalizePercentInput(event.target.value),
-              })
-            }
-          />
-        </label>
+          </div>
+          <div className="subpanel">
+            <h4>Complexity</h4>
+          <label>
+            Project Size
+            <select
+              value={activeProposal.projectSize}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  projectSize: event.target.value as ProposalDraft["projectSize"],
+                })
+              }
+            >
+              <option value="Small">Small (1.0x)</option>
+              <option value="Medium">Medium (1.25x)</option>
+              <option value="Large">Large (1.5x)</option>
+              <option value="XL">XL (1.75x)</option>
+            </select>
+          </label>
+          <label>
+            Stakeholder Count
+            <select
+              value={activeProposal.complexity.stakeholdersComplexitySize}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  complexity: {
+                    ...activeProposal.complexity,
+                    stakeholdersComplexitySize: Number(
+                      event.target.value,
+                    ) as ProposalDraft["complexity"]["stakeholdersComplexitySize"],
+                  },
+                })
+              }
+            >
+              <option value="1">1-5 (1.0x)</option>
+              <option value="1.1">6-12 (1.15x)</option>
+              <option value="1.25">13+ (1.3x)</option>
+            </select>
+          </label>
+          <label>
+            CMS Type
+            <select
+              value={activeProposal.complexity.cmsType}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  complexity: {
+                    ...activeProposal.complexity,
+                    cmsType: event.target.value as ProposalDraft["complexity"]["cmsType"],
+                  },
+                })
+              }
+            >
+              <option value="WordPress">WordPress</option>
+              <option value="Webflow">Webflow</option>
+              <option value="Shopify">Shopify</option>
+              <option value="Headless">Headless</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </label>
+          <label>
+            Complexity Notes
+            <textarea
+              value={activeProposal.complexity.notes}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  complexity: {
+                    ...activeProposal.complexity,
+                    notes: event.target.value,
+                  },
+                })
+              }
+            />
+          </label>
+          <label>
+            Project Buffer %
+            <input
+              type="number"
+              min={0}
+              step={5}
+              value={activeProposal.projectBufferPercent}
+              onChange={(event) =>
+                onUpsertActive({
+                  ...activeProposal,
+                  projectBufferPercent: normalizePercentInput(event.target.value),
+                })
+              }
+            />
+          </label>
+          </div>
         </div>
       </div>
     );
@@ -344,140 +352,143 @@ export function EditorStepContent({
   if (step === 2) {
     return (
       <>
-        <div className="panel">
-          <div className="row wrap">
-            <h3>Inclusions (Scope Builder)</h3>
-            <SummaryPill
-              primaryLabel="Allocated"
-              primaryValue={formatPercentValue(inclusionTotal)}
-              secondaryLabel={
-                remainingInclusionAllocation >= 0 ? "Remaining" : "Over"
-              }
-              secondaryValue={formatPercentValue(
-                Math.abs(remainingInclusionAllocation),
-              )}
-              secondaryTone={
-                remainingInclusionAllocation === 0 ? "default" : "warning"
+        <div className="step-section">
+          <div className="panel step-section-shell">
+            <StepSectionHeader
+              title="Inclusions (Scope Builder)"
+              description="All inclusions start at 0%. Allocate the full 100% of the project budget to move forward."
+              summary={
+                <SummaryPill
+                  primaryLabel="Allocated"
+                  primaryValue={formatPercentValue(inclusionTotal)}
+                  secondaryLabel={
+                    remainingInclusionAllocation >= 0 ? "Remaining" : "Over"
+                  }
+                  secondaryValue={formatPercentValue(
+                    Math.abs(remainingInclusionAllocation),
+                  )}
+                  secondaryTone={
+                    remainingInclusionAllocation === 0 ? "default" : "warning"
+                  }
+                />
               }
             />
           </div>
-          <p className="muted">
-            All inclusions start at 0%. Allocate the full 100% of the project budget to move forward.
-          </p>
+          <div className="panel">
+            {phases.map((phase) => {
+              const phaseItems = inclusions.filter((item) => item.phaseId === phase.id);
+              const phaseTotal = activeProposal.inclusions
+                .filter((item) =>
+                  phaseItems.some((phaseItem) => phaseItem.id === item.inclusionId),
+                )
+                .reduce((sum, item) => sum + item.allocationPercent, 0);
 
-          {phases.map((phase) => {
-            const phaseItems = inclusions.filter((item) => item.phaseId === phase.id);
-            const phaseTotal = activeProposal.inclusions
-              .filter((item) =>
-                phaseItems.some((phaseItem) => phaseItem.id === item.inclusionId),
-              )
-              .reduce((sum, item) => sum + item.allocationPercent, 0);
+              return (
+                <div key={phase.id} className="subpanel">
+                  <div className="row wrap">
+                    <h4>{phase.name}</h4>
+                    <span className="muted">Phase total: {formatPercentValue(phaseTotal)}</span>
+                  </div>
+                  {phaseItems.map((inclusion) => {
+                    const state = activeProposal.inclusions.find(
+                      (item) => item.inclusionId === inclusion.id,
+                    );
+                    if (!state) return null;
 
-            return (
-              <div key={phase.id} className="subpanel">
-                <div className="row wrap">
-                  <h4>{phase.name}</h4>
-                  <span className="muted">Phase total: {formatPercentValue(phaseTotal)}</span>
-                </div>
-                {phaseItems.map((inclusion) => {
-                  const state = activeProposal.inclusions.find(
-                    (item) => item.inclusionId === inclusion.id,
-                  );
-                  if (!state) return null;
-
-                  return (
-                    <div key={inclusion.id} className="inclusion-row">
-                      <div className="allocation-row">
-                        <div>
-                          <strong>{inclusion.name}</strong>
-                          <p className="muted">{inclusion.description}</p>
-                        </div>
-                        <label className="compact-field">
-                          Allocation %
-                          <input
-                            type="number"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={state.allocationPercent}
-                            onChange={(event) =>
-                              onUpsertActive({
-                                ...activeProposal,
-                                inclusions: updateInclusion(
-                                  activeProposal.inclusions,
-                                  inclusion.id,
-                                  {
-                                    allocationPercent: normalizePercentInput(event.target.value),
-                                  },
-                                ),
-                              })
-                            }
-                          />
-                        </label>
-                      </div>
-
-                      <div className="inclusion-blurb-row">
-                        {state.blurbIds.length > 0 ? (
-                          <div className="inline-blurb-stack">
-                            {state.blurbIds.map((blurbId) => {
-                              const blurb = resolveBlurb(blurbId);
-                              if (!blurb) return null;
-                              return (
-                                <div key={blurb.id} className="inline-blurb">
-                                  <strong>{blurb.title}</strong>
-                                  <span>{blurb.contentPlaintext}</span>
-                                </div>
-                              );
-                            })}
+                    return (
+                      <div key={inclusion.id} className="inclusion-row">
+                        <div className="allocation-row">
+                          <div>
+                            <strong>{inclusion.name}</strong>
+                            <p className="muted">{inclusion.description}</p>
                           </div>
-                        ) : (
-                          <p className="muted">No inclusion blurbs attached.</p>
-                        )}
-                        <div className="row">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setPickerState({
-                                mode: "inclusion",
-                                inclusionId: inclusion.id,
-                              })
-                            }
-                          >
-                            {state.blurbIds.length > 0 ? "Manage Blurbs" : "+ Add Blurbs"}
-                          </button>
-                          {state.blurbIds.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() =>
+                          <label className="compact-field">
+                            Allocation %
+                            <input
+                              type="number"
+                              min={0}
+                              max={100}
+                              step={1}
+                              value={state.allocationPercent}
+                              onChange={(event) =>
                                 onUpsertActive({
                                   ...activeProposal,
                                   inclusions: updateInclusion(
                                     activeProposal.inclusions,
                                     inclusion.id,
                                     {
-                                      blurbIds: [],
+                                      allocationPercent: normalizePercentInput(event.target.value),
                                     },
                                   ),
                                 })
                               }
-                            >
-                              Remove
-                            </button>
+                            />
+                          </label>
+                        </div>
+
+                        <div className="inclusion-blurb-row">
+                          {state.blurbIds.length > 0 ? (
+                            <div className="inline-blurb-stack">
+                              {state.blurbIds.map((blurbId) => {
+                                const blurb = resolveBlurb(blurbId);
+                                if (!blurb) return null;
+                                return (
+                                  <div key={blurb.id} className="inline-blurb">
+                                    <strong>{blurb.title}</strong>
+                                    <span>{blurb.contentPlaintext}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="muted">No inclusion blurbs attached.</p>
                           )}
+                          <div className="row">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPickerState({
+                                  mode: "inclusion",
+                                  inclusionId: inclusion.id,
+                                })
+                              }
+                            >
+                              {state.blurbIds.length > 0 ? "Manage Blurbs" : "+ Add Blurbs"}
+                            </button>
+                            {state.blurbIds.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  onUpsertActive({
+                                    ...activeProposal,
+                                    inclusions: updateInclusion(
+                                      activeProposal.inclusions,
+                                      inclusion.id,
+                                      {
+                                        blurbIds: [],
+                                      },
+                                    ),
+                                  })
+                                }
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
+                    );
+                  })}
+                </div>
+              );
+            })}
 
-          {!canAdvanceFromInclusions(activeProposal) && (
-            <p className="warning">
-              Total inclusion allocation must equal 100% before you can continue.
-            </p>
-          )}
+            {!canAdvanceFromInclusions(activeProposal) && (
+              <p className="warning">
+                Total inclusion allocation must equal 100% before you can continue.
+              </p>
+            )}
+          </div>
         </div>
 
         {pickerState?.mode === "inclusion" && (
@@ -514,126 +525,127 @@ export function EditorStepContent({
 
   if (step === 3) {
     return (
-      <div className="panel">
-        <div className="row wrap roles-panel-top">
-          <div>
-            <h3 className="role-header-title">Roles, Lead & Support</h3>
-            <p className="role-matrix-description">
-              Select the lead/support lines you need, then split the full 100%
-              project allocation across those lines.
-            </p>
-          </div>
-          <SummaryPill
-            primaryLabel="Allocated"
-            primaryValue={formatPercentValue(staffingTotal)}
-            secondaryLabel={
-              remainingStaffingAllocation >= 0 ? "Remaining" : "Over"
-            }
-            secondaryValue={formatPercentValue(
-              Math.abs(remainingStaffingAllocation),
-            )}
-            secondaryTone={
-              remainingStaffingAllocation === 0 ? "default" : "warning"
+      <div className="step-section">
+        <div className="panel step-section-shell">
+          <StepSectionHeader
+            title="Roles, Lead & Support"
+            description="Select the lead/support lines you need, then split the full 100% project allocation across those lines."
+            summary={
+              <SummaryPill
+                primaryLabel="Allocated"
+                primaryValue={formatPercentValue(staffingTotal)}
+                secondaryLabel={
+                  remainingStaffingAllocation >= 0 ? "Remaining" : "Over"
+                }
+                secondaryValue={formatPercentValue(
+                  Math.abs(remainingStaffingAllocation),
+                )}
+                secondaryTone={
+                  remainingStaffingAllocation === 0 ? "default" : "warning"
+                }
+              />
             }
           />
         </div>
-        <table className="role-matrix staffing-table polished-staffing-table">
-          <thead>
-            <tr>
-              <th>Use</th>
-              <th>Line Item</th>
-              <th>Alloc %</th>
-              <th>Rate</th>
-              <th>Markup</th>
-              <th>Effective Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            {activeProposal.staffing.map((line) => {
-              const effectiveRate = Math.round(
-                line.baseRate * (1 + line.markupPercent / 100),
-              );
+        <div className="panel">
+          <table className="role-matrix staffing-table polished-staffing-table">
+            <thead>
+              <tr>
+                <th>Use</th>
+                <th>Line Item</th>
+                <th>Alloc %</th>
+                <th>Rate</th>
+                <th>Markup</th>
+                <th>Effective Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activeProposal.staffing.map((line) => {
+                const effectiveRate = Math.round(
+                  line.baseRate * (1 + line.markupPercent / 100),
+                );
 
-              return (
-                <tr key={line.id} className={line.selected ? "is-selected" : "is-idle"}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={line.selected}
-                      onChange={(event) =>
-                        onUpsertActive({
-                          ...activeProposal,
-                          staffing: updateStaffing(activeProposal.staffing, line.id, {
-                            selected: event.target.checked,
-                            allocationPercent: event.target.checked
-                              ? line.allocationPercent
-                              : 0,
-                          }),
-                        })
-                      }
-                    />
-                  </td>
-                  <td className="staffing-line-label">{lineLabel(line.roleId, line.scope)}</td>
-                  <td>
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      step={1}
-                      value={line.allocationPercent}
-                      disabled={!line.selected}
-                      onChange={(event) =>
-                        onUpsertActive({
-                          ...activeProposal,
-                          staffing: updateStaffing(activeProposal.staffing, line.id, {
-                            allocationPercent: normalizePercentInput(event.target.value),
-                          }),
-                        })
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      min={0}
-                      value={line.baseRate}
-                      onChange={(event) =>
-                        onUpsertActive({
-                          ...activeProposal,
-                          staffing: updateStaffing(activeProposal.staffing, line.id, {
-                            baseRate: normalizeNonNegativeInput(event.target.value),
-                          }),
-                        })
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      min={0}
-                      value={line.markupPercent}
-                      onChange={(event) =>
-                        onUpsertActive({
-                          ...activeProposal,
-                          staffing: updateStaffing(activeProposal.staffing, line.id, {
-                            markupPercent: normalizePercentInput(event.target.value),
-                          }),
-                        })
-                      }
-                    />
-                  </td>
-                  <td className="staffing-effective-cell">{formatCurrency(effectiveRate)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                return (
+                  <tr key={line.id} className={line.selected ? "is-selected" : "is-idle"}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={line.selected}
+                        onChange={(event) =>
+                          onUpsertActive({
+                            ...activeProposal,
+                            staffing: updateStaffing(activeProposal.staffing, line.id, {
+                              selected: event.target.checked,
+                              allocationPercent: event.target.checked
+                                ? line.allocationPercent
+                                : 0,
+                            }),
+                          })
+                        }
+                      />
+                    </td>
+                    <td className="staffing-line-label">{lineLabel(line.roleId, line.scope)}</td>
+                    <td>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={line.allocationPercent}
+                        disabled={!line.selected}
+                        onChange={(event) =>
+                          onUpsertActive({
+                            ...activeProposal,
+                            staffing: updateStaffing(activeProposal.staffing, line.id, {
+                              allocationPercent: normalizePercentInput(event.target.value),
+                            }),
+                          })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        min={0}
+                        value={line.baseRate}
+                        onChange={(event) =>
+                          onUpsertActive({
+                            ...activeProposal,
+                            staffing: updateStaffing(activeProposal.staffing, line.id, {
+                              baseRate: normalizeNonNegativeInput(event.target.value),
+                            }),
+                          })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        min={0}
+                        value={line.markupPercent}
+                        onChange={(event) =>
+                          onUpsertActive({
+                            ...activeProposal,
+                            staffing: updateStaffing(activeProposal.staffing, line.id, {
+                              markupPercent: normalizePercentInput(event.target.value),
+                            }),
+                          })
+                        }
+                      />
+                    </td>
+                    <td className="staffing-effective-cell">{formatCurrency(effectiveRate)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
 
-        {!canAdvanceFromRoles(activeProposal) && (
-          <p className="warning">
-            Selected role lines must have valid rates and total 100% before you can continue.
-          </p>
-        )}
+          {!canAdvanceFromRoles(activeProposal) && (
+            <p className="warning">
+              Selected role lines must have valid rates and total 100% before you can continue.
+            </p>
+          )}
+        </div>
       </div>
     );
   }
