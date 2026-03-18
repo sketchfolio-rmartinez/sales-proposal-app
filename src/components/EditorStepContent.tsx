@@ -231,9 +231,9 @@ export function EditorStepContent({
             }
           >
             <option value="Small">Small (1.0x)</option>
-            <option value="Medium">Medium (1.15x)</option>
-            <option value="Large">Large (1.3x)</option>
-            <option value="XL">XL (1.5x)</option>
+            <option value="Medium">Medium (1.25x)</option>
+            <option value="Large">Large (1.5x)</option>
+            <option value="XL">XL (1.75x)</option>
           </select>
         </label>
         <label>
@@ -253,8 +253,8 @@ export function EditorStepContent({
             }
           >
             <option value="1">1-5 (1.0x)</option>
-            <option value="1.1">6-12 (1.1x)</option>
-            <option value="1.25">13+ (1.25x)</option>
+            <option value="1.1">6-12 (1.15x)</option>
+            <option value="1.25">13+ (1.3x)</option>
           </select>
         </label>
         <label>

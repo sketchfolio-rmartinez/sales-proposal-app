@@ -190,8 +190,7 @@ export function getStaffingLineId(roleId: RoleId, scope: RoleScope): string {
 
 export function getDefaultBudgetAmount(sizeTierId: string): number {
   const tier = sizeTiers.find((item) => item.id === sizeTierId) ?? sizeTiers[0];
-  if (!tier.maxBudget) return tier.minBudget;
-  return Math.round((tier.minBudget + tier.maxBudget) / 2);
+  return tier.maxBudget ?? tier.minBudget;
 }
 
 export function createDefaultStaffingLines(): ProposalStaffingLine[] {
