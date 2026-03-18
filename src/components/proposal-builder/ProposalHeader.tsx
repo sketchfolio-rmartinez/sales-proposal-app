@@ -1,19 +1,19 @@
-import { steps, type EditorStep } from "../app/editorConfig";
-import { ProposalDraft } from "../types";
+import { steps, type EditorStep } from "../../app/editorConfig";
+import { ProposalDraft } from "../../types";
 
-interface EditorHeaderProps {
+interface ProposalHeaderProps {
   activeProposal: ProposalDraft;
   step: EditorStep;
   maxAccessibleStep: EditorStep;
   onStepChange: (step: EditorStep) => void;
 }
 
-export function EditorHeader({
+export function ProposalHeader({
   activeProposal,
   step,
   maxAccessibleStep,
   onStepChange,
-}: EditorHeaderProps) {
+}: ProposalHeaderProps) {
   return (
     <div className="panel">
       <div className="proposal-heading">

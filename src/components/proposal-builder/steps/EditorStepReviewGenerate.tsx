@@ -1,6 +1,6 @@
-import { phases, roles } from "../data/defaults";
-import { statusActionLabel } from "../app/proposalUtils";
-import { ProposalDraft, ReviewModel } from "../types";
+import { phases, roles } from "../../../data/defaults";
+import { statusActionLabel } from "../../../app/proposalUtils";
+import { ProposalDraft, ReviewModel } from "../../../types";
 
 interface EditorStepReviewGenerateProps {
   activeProposal: ProposalDraft;

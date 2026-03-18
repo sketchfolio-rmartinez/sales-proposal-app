@@ -1,12 +1,12 @@
-import { canAdvanceFromRoles, updateStaffing } from "../app/proposalUtils";
-import { roles } from "../data/defaults";
-import { ProposalDraft } from "../types";
+import { canAdvanceFromRoles, updateStaffing } from "../../../app/proposalUtils";
+import { roles } from "../../../data/defaults";
+import { ProposalDraft } from "../../../types";
 import {
   normalizeNonNegativeInput,
   normalizePercentInput,
-} from "./editorStepFieldUtils";
-import { StepSectionHeader } from "./StepSectionHeader";
-import { SummaryPill } from "./SummaryPill";
+} from "../../../lib/editorStepFieldUtils";
+import { StepSectionHeader } from "../../shared/StepSectionHeader";
+import { SummaryPill } from "../../shared/SummaryPill";
 
 interface EditorStepRolesLeadSupportProps {
   activeProposal: ProposalDraft;

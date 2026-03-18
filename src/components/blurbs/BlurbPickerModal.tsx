@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { blurbCategories } from "../app/blurbConfig";
-import { BlurbCategory, BlurbLibraryItem } from "../types";
+import { blurbCategories } from "../../app/blurbConfig";
+import { BlurbCategory, BlurbLibraryItem } from "../../types";
 
 interface BlurbPickerModalProps {
   title: string;

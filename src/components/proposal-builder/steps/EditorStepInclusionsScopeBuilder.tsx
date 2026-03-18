@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { canAdvanceFromInclusions, updateInclusion } from "../app/proposalUtils";
-import { inclusions, phases } from "../data/defaults";
-import { BlurbLibraryItem, ProposalDraft } from "../types";
-import { BlurbPickerModal } from "./BlurbPickerModal";
-import { normalizePercentInput } from "./editorStepFieldUtils";
-import { StepSectionHeader } from "./StepSectionHeader";
-import { SummaryPill } from "./SummaryPill";
+import { canAdvanceFromInclusions, updateInclusion } from "../../../app/proposalUtils";
+import { inclusions, phases } from "../../../data/defaults";
+import { BlurbLibraryItem, ProposalDraft } from "../../../types";
+import { normalizePercentInput } from "../../../lib/editorStepFieldUtils";
+import { BlurbPickerModal } from "../../blurbs/BlurbPickerModal";
+import { StepSectionHeader } from "../../shared/StepSectionHeader";
+import { SummaryPill } from "../../shared/SummaryPill";
 
 interface EditorStepInclusionsScopeBuilderProps {
   activeProposal: ProposalDraft;

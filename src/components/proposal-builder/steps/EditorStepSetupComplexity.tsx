@@ -1,8 +1,8 @@
-import { sizeTiers, timelineOptions } from "../data/defaults";
-import { ProposalDraft } from "../types";
-import { SummaryPill } from "./SummaryPill";
-import { StepSectionHeader } from "./StepSectionHeader";
-import { normalizePercentInput } from "./editorStepFieldUtils";
+import { sizeTiers, timelineOptions } from "../../../data/defaults";
+import { ProposalDraft } from "../../../types";
+import { normalizePercentInput } from "../../../lib/editorStepFieldUtils";
+import { StepSectionHeader } from "../../shared/StepSectionHeader";
+import { SummaryPill } from "../../shared/SummaryPill";
 
 interface EditorStepSetupComplexityProps {
   activeProposal: ProposalDraft;

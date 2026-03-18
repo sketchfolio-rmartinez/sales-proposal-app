@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { canAdvanceFromRfp } from "../app/proposalUtils";
-import { BlurbLibraryItem, ProposalDraft } from "../types";
-import { BlurbPickerModal } from "./BlurbPickerModal";
+import { canAdvanceFromRfp } from "../../../app/proposalUtils";
+import { BlurbLibraryItem, ProposalDraft } from "../../../types";
+import { BlurbPickerModal } from "../../blurbs/BlurbPickerModal";
 
 interface EditorStepRfpRequirementsBlurbsProps {
   activeProposal: ProposalDraft;

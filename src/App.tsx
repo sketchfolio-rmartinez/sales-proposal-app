@@ -1,7 +1,7 @@
-import { EditorHeader } from "./components/EditorHeader";
-import { ProposalStepView } from "./components/ProposalStepView";
+import { ProposalHeader } from "./components/proposal-builder/ProposalHeader";
+import { ProposalStepView } from "./components/proposal-builder/ProposalStepView";
 import { ProposalSidebar } from "./components/ProposalSidebar";
-import { BlurbAdminPage } from "./components/BlurbAdminPage";
+import { BlurbAdminPage } from "./components/blurbs/BlurbAdminPage";
 import { steps, type EditorStep } from "./app/editorConfig";
 import {
   canAdvanceFromStep,
@@ -14,7 +14,11 @@ import { useBlurbLibrary } from "./app/useBlurbLibrary";
 import { useAppRoute } from "./app/useAppRoute";
 
 export default function App() {
-  const { state: blurbState, view: blurbView, handlers: blurbHandlers } = useBlurbLibrary();
+  const {
+    state: blurbState,
+    view: blurbView,
+    handlers: blurbHandlers,
+  } = useBlurbLibrary();
   const { state, view, handlers } = useProposalBuilder(blurbState.blurbs);
   const { route, navigate } = useAppRoute();
 
@@ -24,10 +28,16 @@ export default function App() {
         <div className="row">
           <h1>Proposal & Project Seeding App (v1)</h1>
           <div className="app-nav">
-            <button className={route === "builder" ? "active-step" : ""} onClick={() => navigate("builder")}>
+            <button
+              className={route === "builder" ? "active-step" : ""}
+              onClick={() => navigate("builder")}
+            >
               Builder
             </button>
-            <button className={route === "blurbs" ? "active-step" : ""} onClick={() => navigate("blurbs")}>
+            <button
+              className={route === "blurbs" ? "active-step" : ""}
+              onClick={() => navigate("blurbs")}
+            >
               Blurb Library
             </button>
           </div>
@@ -69,7 +79,7 @@ export default function App() {
               </div>
             ) : (
               <>
-                <EditorHeader
+                <ProposalHeader
                   activeProposal={view.activeProposal}
                   step={state.step}
                   maxAccessibleStep={getMaxAccessibleStep(view.activeProposal)}
@@ -90,7 +100,11 @@ export default function App() {
 
                 <div className="step-nav">
                   <button
-                    onClick={() => handlers.setStep((value) => (value > 1 ? ((value - 1) as EditorStep) : value))}
+                    onClick={() =>
+                      handlers.setStep((value) =>
+                        value > 1 ? ((value - 1) as EditorStep) : value,
+                      )
+                    }
                     disabled={state.step === 1}
                   >
                     Back
@@ -105,7 +119,9 @@ export default function App() {
                             : value,
                         )
                       }
-                      disabled={!canAdvanceFromStep(view.activeProposal, state.step)}
+                      disabled={
+                        !canAdvanceFromStep(view.activeProposal, state.step)
+                      }
                     >
                       Next
                     </button>

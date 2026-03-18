@@ -2,20 +2,20 @@ import { ReactNode } from "react";
 import {
   getInclusionAllocationTotal,
   getStaffingAllocationTotal,
-} from "../app/proposalUtils";
-import { EditorStepInclusionsScopeBuilder } from "./EditorStepInclusionsScopeBuilder";
-import { EditorStepExports } from "./EditorStepExports";
-import { EditorStepRfpRequirementsBlurbs } from "./EditorStepRfpRequirementsBlurbs";
-import { EditorStepReviewGenerate } from "./EditorStepReviewGenerate";
-import { EditorStepRolesLeadSupport } from "./EditorStepRolesLeadSupport";
-import { EditorStepSetupComplexity } from "./EditorStepSetupComplexity";
-import { EditorStep } from "../app/editorConfig";
+} from "../../app/proposalUtils";
+import { EditorStepInclusionsScopeBuilder } from "./steps/EditorStepInclusionsScopeBuilder";
+import { EditorStepExports } from "./steps/EditorStepExports";
+import { EditorStepRfpRequirementsBlurbs } from "./steps/EditorStepRfpRequirementsBlurbs";
+import { EditorStepReviewGenerate } from "./steps/EditorStepReviewGenerate";
+import { EditorStepRolesLeadSupport } from "./steps/EditorStepRolesLeadSupport";
+import { EditorStepSetupComplexity } from "./steps/EditorStepSetupComplexity";
+import { EditorStep } from "../../app/editorConfig";
 import {
   BlurbLibraryItem,
   ProposalDraft,
   ReviewModel,
-} from "../types";
-import { getSetupEstimate } from "./proposalStepViewUtils";
+} from "../../types";
+import { getSetupEstimate } from "../../lib/proposalStepViewUtils";
 
 interface ProposalStepViewProps {
   step: EditorStep;
