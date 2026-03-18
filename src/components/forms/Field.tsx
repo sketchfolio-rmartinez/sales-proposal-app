@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import "./Field.css";
 
 interface FieldProps {
   label?: ReactNode;
@@ -20,13 +21,15 @@ export function Field({
   children,
 }: FieldProps) {
   const classes = ["field"];
+  if (required) classes.push("field--required");
+  if (error) classes.push("field--invalid");
   if (className) classes.push(className);
 
   return (
     <div className={classes.join(" ")}>
       {label ? (
         <label className="field-label" htmlFor={htmlFor}>
-          <span>{label}</span>
+          <span className="field-label-text">{label}</span>
           {required ? <span className="field-required">Required</span> : null}
         </label>
       ) : null}
