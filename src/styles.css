@@ -479,10 +479,25 @@ button.danger {
 }
 
 .role-header-title {
-  margin-left: 12px;
+  margin: 0 0 6px;
 }
 .role-matrix-description {
-  margin-left: 24px;
+  margin: 0;
+  color: #4e615d;
+}
+
+.roles-panel-top {
+  margin-bottom: 14px;
+}
+
+.roles-summary-inline {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  border: 1px solid #dce7dc;
+  border-radius: 999px;
+  background: #f8fbf8;
 }
 
 table {
@@ -490,13 +505,13 @@ table {
   margin-bottom: 12px;
   width: min(960px, 100%);
   table-layout: fixed;
-  margin-left: 24px;
+  margin-left: 0;
 }
 
 th,
 td {
   border: 1px solid #dce7dc;
-  padding: 6px 8px;
+  padding: 8px 10px;
   text-align: left;
   overflow-wrap: anywhere;
 }
@@ -526,13 +541,35 @@ td {
 }
 
 .staffing-table {
-  width: min(1040px, 100%);
+  width: 100%;
 }
 
 .staffing-table th:nth-child(1),
 .staffing-table td:nth-child(1) {
-  width: 70px;
+  width: 58px;
   text-align: center;
+}
+
+.staffing-table th:nth-child(2),
+.staffing-table td:nth-child(2) {
+  width: 250px;
+}
+
+.staffing-table th:nth-child(3),
+.staffing-table td:nth-child(3) {
+  width: 110px;
+}
+
+.staffing-table th:nth-child(4),
+.staffing-table td:nth-child(4),
+.staffing-table th:nth-child(5),
+.staffing-table td:nth-child(5) {
+  width: 150px;
+}
+
+.staffing-table th:nth-child(6),
+.staffing-table td:nth-child(6) {
+  width: 160px;
 }
 
 .staffing-table th:nth-child(3),
@@ -549,7 +586,56 @@ td {
 .staffing-table td:nth-child(3) input,
 .staffing-table td:nth-child(4) input,
 .staffing-table td:nth-child(5) input {
-  width: 96px;
+  width: 100px;
+  padding: 6px 8px;
+  text-align: right;
+}
+
+.staffing-table td:nth-child(3) input {
+  border-radius: 14px;
+}
+
+.polished-staffing-table thead th {
+  background: #f7faf7;
+  color: #314542;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.polished-staffing-table tbody tr:nth-child(even) {
+  background: #fbfdfb;
+}
+
+.polished-staffing-table tbody tr.is-idle {
+  color: #70807b;
+}
+
+.polished-staffing-table tbody tr.is-selected {
+  background: #f5fbf6;
+}
+
+.polished-staffing-table td {
+  vertical-align: middle;
+}
+
+.polished-staffing-table td:first-child input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.staffing-line-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.staffing-effective-cell {
+  font-weight: 700;
+  white-space: nowrap;
+  color: #2f4f42;
 }
 
 .summary-table th:nth-child(2),

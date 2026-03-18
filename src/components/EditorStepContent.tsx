@@ -546,10 +546,18 @@ export function EditorStepContent({
   if (step === 3) {
     return (
       <div className="panel">
-        <div className="row wrap">
-          <h3 className="role-header-title">Roles, Lead & Support</h3>
-          <div className="allocation-summary">
-            <strong>Allocated:</strong> {formatPercentValue(staffingTotal)}
+        <div className="row wrap roles-panel-top">
+          <div>
+            <h3 className="role-header-title">Roles, Lead & Support</h3>
+            <p className="role-matrix-description">
+              Select the lead/support lines you need, then split the full 100%
+              project allocation across those lines.
+            </p>
+          </div>
+          <div className="roles-summary-inline">
+            <span>
+              <strong>Allocated:</strong> {formatPercentValue(staffingTotal)}
+            </span>
             <span className={remainingStaffingAllocation === 0 ? "muted" : "warning"}>
               {remainingStaffingAllocation >= 0
                 ? `Remaining: ${formatPercentValue(remainingStaffingAllocation)}`
@@ -557,17 +565,14 @@ export function EditorStepContent({
             </span>
           </div>
         </div>
-        <p className="role-matrix-description">
-          Select the lead/support lines you need, then split the full 100% project allocation across those lines.
-        </p>
-        <table className="role-matrix staffing-table">
+        <table className="role-matrix staffing-table polished-staffing-table">
           <thead>
             <tr>
               <th>Use</th>
               <th>Line Item</th>
-              <th>Allocation %</th>
-              <th>Base Rate</th>
-              <th>Markup %</th>
+              <th>Alloc %</th>
+              <th>Rate</th>
+              <th>Markup</th>
               <th>Effective Rate</th>
             </tr>
           </thead>
@@ -578,7 +583,7 @@ export function EditorStepContent({
               );
 
               return (
-                <tr key={line.id}>
+                <tr key={line.id} className={line.selected ? "is-selected" : "is-idle"}>
                   <td>
                     <input
                       type="checkbox"
@@ -596,7 +601,7 @@ export function EditorStepContent({
                       }
                     />
                   </td>
-                  <td>{lineLabel(line.roleId, line.scope)}</td>
+                  <td className="staffing-line-label">{lineLabel(line.roleId, line.scope)}</td>
                   <td>
                     <input
                       type="number"
@@ -645,7 +650,7 @@ export function EditorStepContent({
                       }
                     />
                   </td>
-                  <td>{formatCurrency(effectiveRate)}</td>
+                  <td className="staffing-effective-cell">{formatCurrency(effectiveRate)}</td>
                 </tr>
               );
             })}
