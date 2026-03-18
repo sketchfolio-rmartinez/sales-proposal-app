@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { sizeTiers, timelineOptions } from "../../../data/defaults";
+import { sizeTiers } from "../../../data/defaults";
 import { ProposalDraft } from "../../../types";
 import { normalizePercentInput } from "../../../lib/editorStepFieldUtils";
 import {
@@ -59,7 +59,7 @@ export function EditorStepSetupComplexity({
       <div className="panel step-section-shell setup-step-shell">
         <StepSectionHeader
           title="Setup & Complexity"
-          description="Set the proposal basics, timeline, and complexity inputs that drive the working estimate."
+          description="Set the core proposal details that shape the working estimate."
           summary={
             <SummaryPill
               primaryLabel="Rough Estimate"
@@ -76,16 +76,12 @@ export function EditorStepSetupComplexity({
               <p className="setup-step-card-kicker">Foundation</p>
               <h4>Proposal Setup</h4>
             </div>
-            <p className="setup-step-card-description">
-              Lock in the working title, client context, and budget band before
-              the estimate starts taking shape.
-            </p>
           </div>
 
           <div className="setup-step-form-grid setup-step-form-grid--setup">
+            <input type="hidden" {...register("timelineOptionId")} />
             <TextField
               label="Proposal Name (Internal)"
-              hint="Internal working name used inside the builder."
               error={errors.name?.message}
               required
               fieldClassName="setup-step-field setup-step-field--span-2"
@@ -96,7 +92,6 @@ export function EditorStepSetupComplexity({
             />
             <TextField
               label="Client Name"
-              hint="Organization or client account name."
               error={errors.clientName?.message}
               required
               fieldClassName="setup-step-field"
@@ -110,7 +105,6 @@ export function EditorStepSetupComplexity({
             />
             <TextField
               label="Project Title"
-              hint="Client-facing title for the engagement."
               error={errors.projectTitle?.message}
               required
               fieldClassName="setup-step-field"
@@ -122,12 +116,37 @@ export function EditorStepSetupComplexity({
                   }),
               })}
             />
+            <TextField
+              type="date"
+              label="Start Date"
+              error={errors.startDate?.message}
+              fieldClassName="setup-step-field"
+              {...register("startDate", {
+                onChange: (event) =>
+                  onUpsertActive({
+                    ...activeProposal,
+                    startDate: event.target.value,
+                  }),
+              })}
+            />
+            <TextField
+              type="date"
+              label="End Date / Event Date"
+              error={errors.endDate?.message}
+              fieldClassName="setup-step-field"
+              {...register("endDate", {
+                onChange: (event) =>
+                  onUpsertActive({
+                    ...activeProposal,
+                    endDate: event.target.value,
+                  }),
+              })}
+            />
             <SelectField
               label="Size Tier"
-              hint="Budget band that seeds the working estimate."
               error={errors.sizeTierId?.message}
               required
-              fieldClassName="setup-step-field setup-step-field--span-2"
+              fieldClassName="setup-step-field"
               {...register("sizeTierId", {
                 onChange: (event) =>
                   onUpsertActive({
@@ -145,70 +164,6 @@ export function EditorStepSetupComplexity({
           </div>
         </section>
 
-        <section className="panel setup-step-card">
-          <div className="setup-step-card-header">
-            <div className="setup-step-card-copy">
-              <p className="setup-step-card-kicker">Scheduling</p>
-              <h4>Timeline</h4>
-            </div>
-            <p className="setup-step-card-description">
-              Set the expected pace of delivery and capture key dates when they
-              are already known.
-            </p>
-          </div>
-
-          <div className="setup-step-form-grid">
-            <SelectField
-              label="Timeline Option"
-              hint="Baseline delivery window for the proposal."
-              error={errors.timelineOptionId?.message}
-              required
-              fieldClassName="setup-step-field setup-step-field--span-2"
-              {...register("timelineOptionId", {
-                onChange: (event) =>
-                  onUpsertActive({
-                    ...activeProposal,
-                    timelineOptionId: event.target.value,
-                  }),
-              })}
-            >
-              {timelineOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </SelectField>
-            <TextField
-              type="date"
-              label="Start Date"
-              hint="Leave blank if the start window is still flexible."
-              error={errors.startDate?.message}
-              fieldClassName="setup-step-field"
-              {...register("startDate", {
-                onChange: (event) =>
-                  onUpsertActive({
-                    ...activeProposal,
-                    startDate: event.target.value,
-                  }),
-              })}
-            />
-            <TextField
-              type="date"
-              label="End Date / Event Date"
-              hint="Optional target launch date or event date."
-              error={errors.endDate?.message}
-              fieldClassName="setup-step-field"
-              {...register("endDate", {
-                onChange: (event) =>
-                  onUpsertActive({
-                    ...activeProposal,
-                    endDate: event.target.value,
-                  }),
-              })}
-            />
-          </div>
-        </section>
-
         <section className="panel setup-step-card setup-step-card--accent">
           <div className="setup-step-card-header">
             <div className="setup-step-card-copy">
@@ -216,15 +171,13 @@ export function EditorStepSetupComplexity({
               <h4>Complexity</h4>
             </div>
             <p className="setup-step-card-description">
-              Capture the factors that most directly affect level of effort,
-              coordination, and contingency.
+              Inputs that shape effort, coordination, and buffer.
             </p>
           </div>
 
           <div className="setup-step-form-grid setup-step-form-grid--complexity">
             <SelectField
               label="Project Size"
-              hint="Overall breadth and build intensity."
               error={errors.projectSize?.message}
               required
               fieldClassName="setup-step-field"
@@ -243,7 +196,6 @@ export function EditorStepSetupComplexity({
             </SelectField>
             <SelectField
               label="Stakeholder Count"
-              hint="How many approvers and collaborators are involved."
               error={errors.stakeholdersComplexitySize?.message}
               required
               fieldClassName="setup-step-field"
@@ -266,7 +218,6 @@ export function EditorStepSetupComplexity({
             </SelectField>
             <SelectField
               label="CMS Type"
-              hint="Primary platform or implementation model."
               error={errors.cmsType?.message}
               required
               fieldClassName="setup-step-field"
@@ -289,7 +240,6 @@ export function EditorStepSetupComplexity({
             </SelectField>
             <TextareaField
               label="Complexity Notes"
-              hint="Anything atypical that meaningfully changes the estimate."
               error={errors.notes?.message}
               fieldClassName="setup-step-field setup-step-field--span-3"
               {...register("notes", {
@@ -308,7 +258,6 @@ export function EditorStepSetupComplexity({
               min={0}
               step={5}
               label="Project Buffer %"
-              hint="Recommended cushion for coordination and unknowns."
               error={errors.projectBufferPercent?.message}
               required
               fieldClassName="setup-step-field setup-step-field--buffer"

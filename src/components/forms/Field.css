@@ -7,8 +7,10 @@
 
 .field-label {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
   gap: 12px;
   margin: 0;
   color: #1f2f2f;
@@ -26,15 +28,15 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  min-height: 22px;
-  padding: 0 10px;
+  min-height: 16px;
+  padding: 0 6px;
   border: 1px solid #d7e3db;
   border-radius: 999px;
   background: #f4f8f5;
   color: #587266;
-  font-size: 0.7rem;
+  font-size: 0.55rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
