@@ -219,12 +219,11 @@ export function createDraftProposal(): ProposalDraft {
     projectTitle: "",
     status: "Draft",
     sizeTierId: defaultTierId,
-    budgetAmount: getDefaultBudgetAmount(defaultTierId),
     projectSize: "Medium",
     projectBufferPercent: 0,
     timelineOptionId: timelineOptions[1].id,
     complexity: {
-      stakeholdersComplexitySize: 1.25,
+      stakeholdersComplexitySize: 1.1,
       cmsType: "WordPress",
       notes: "",
     },

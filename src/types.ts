@@ -24,7 +24,7 @@ export type CmsType =
   | "Headless"
   | "Custom";
 
-export type ComplexityBand = 1 | 1.25 | 1.5;
+export type ComplexityBand = 1 | 1.1 | 1.25;
 
 export type BlurbCategory =
   | "Inclusion"
