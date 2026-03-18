@@ -73,6 +73,10 @@ body {
   flex-wrap: wrap;
 }
 
+.row.align-start {
+  align-items: flex-start;
+}
+
 .linklike {
   background: transparent;
   border: 0;
@@ -434,6 +438,21 @@ button.danger {
 .warning {
   color: #9d2525;
   font-weight: 600;
+}
+
+.setup-header {
+  margin-bottom: 12px;
+}
+
+.setup-estimate-card {
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid #dce7dc;
+  border-radius: 12px;
+  background: #f8fbf8;
 }
 
 .allocation-summary {

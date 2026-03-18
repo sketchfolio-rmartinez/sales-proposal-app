@@ -7,6 +7,7 @@ import {
   timelineOptions,
 } from "../data/defaults";
 import {
+  canAdvanceFromSetup,
   canAdvanceFromInclusions,
   canAdvanceFromRfp,
   canAdvanceFromRoles,
@@ -18,6 +19,10 @@ import {
 } from "../app/proposalUtils";
 import { BlurbPickerModal } from "./BlurbPickerModal";
 import { EditorStep } from "../app/editorConfig";
+import {
+  PROJECT_SIZE_MULTIPLIERS,
+  STAKEHOLDER_SIZE_MULTIPLIERS,
+} from "../config/estimation";
 import {
   BlurbLibraryItem,
   ProposalDraft,
@@ -61,6 +66,17 @@ function lineLabel(roleId: ProposalDraft["staffing"][number]["roleId"], scope: P
   return `${role?.label ?? roleId} ${scope === "lead" ? "Lead" : "Support"}`;
 }
 
+function formatEstimateRange(
+  minValue: number,
+  maxValue: number | null,
+): string {
+  if (maxValue === null) {
+    return `${formatCurrency(minValue)}+`;
+  }
+
+  return `${formatCurrency(minValue)} - ${formatCurrency(maxValue)}`;
+}
+
 export function EditorStepContent({
   step,
   activeProposal,
@@ -85,6 +101,20 @@ export function EditorStepContent({
   const remainingInclusionAllocation = Math.round((100 - inclusionTotal) * 100) / 100;
   const staffingTotal = getStaffingAllocationTotal(activeProposal);
   const remainingStaffingAllocation = Math.round((100 - staffingTotal) * 100) / 100;
+  const selectedTier =
+    sizeTiers.find((tier) => tier.id === activeProposal.sizeTierId) ?? sizeTiers[0];
+  const projectSizeMultiplier =
+    PROJECT_SIZE_MULTIPLIERS[activeProposal.projectSize] ?? 1;
+  const stakeholderMultiplier =
+    STAKEHOLDER_SIZE_MULTIPLIERS[
+      activeProposal.complexity.stakeholdersComplexitySize
+    ] ?? 1;
+  const adjustedRangeMin =
+    selectedTier.minBudget * projectSizeMultiplier * stakeholderMultiplier;
+  const adjustedRangeMax = selectedTier.maxBudget
+    ? selectedTier.maxBudget * projectSizeMultiplier * stakeholderMultiplier
+    : null;
+  const setupReady = canAdvanceFromSetup(activeProposal);
 
   const resolveBlurb = (blurbId: string | null | undefined) =>
     blurbs.find((blurb) => blurb.id === blurbId) ?? null;
@@ -115,7 +145,41 @@ export function EditorStepContent({
   if (step === 1) {
     return (
       <div className="panel">
-        <h3>Setup & Complexity</h3>
+        <div className="row align-start setup-header">
+          <h3>Setup & Complexity</h3>
+          <div className="setup-estimate-card">
+            <strong>Running Estimate</strong>
+            {setupReady ? (
+              <>
+                <span>
+                  Estimated range:{" "}
+                  {formatEstimateRange(adjustedRangeMin, adjustedRangeMax)}
+                </span>
+                <span>
+                  Working subtotal:{" "}
+                  {formatCurrency(review?.projectSubtotal ?? adjustedRangeMax ?? adjustedRangeMin)}
+                </span>
+                <span>
+                  With buffer:{" "}
+                  {formatCurrency(review?.totalPrice ?? adjustedRangeMax ?? adjustedRangeMin)}
+                </span>
+                <span className="muted">
+                  Tier basis {selectedTier.maxBudget
+                    ? formatEstimateRange(selectedTier.minBudget, selectedTier.maxBudget)
+                    : `${formatCurrency(selectedTier.minBudget)}+`}
+                </span>
+                <span className="muted">
+                  Multipliers: {projectSizeMultiplier}x project size,{" "}
+                  {stakeholderMultiplier}x stakeholders
+                </span>
+              </>
+            ) : (
+              <span className="muted">
+                Fill the core setup fields to preview the estimate range.
+              </span>
+            )}
+          </div>
+        </div>
         <div className="subpanel">
           <h4>Proposal Setup</h4>
         <label>
