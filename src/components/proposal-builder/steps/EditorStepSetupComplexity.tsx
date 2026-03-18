@@ -1,6 +1,17 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { sizeTiers, timelineOptions } from "../../../data/defaults";
 import { ProposalDraft } from "../../../types";
 import { normalizePercentInput } from "../../../lib/editorStepFieldUtils";
+import {
+  getSetupStepFormValues,
+  setupStepSchema,
+  SetupStepFormValues,
+} from "../../../lib/validation/setupStepSchema";
+import { SelectField } from "../../forms/SelectField";
+import { TextareaField } from "../../forms/TextareaField";
+import { TextField } from "../../forms/TextField";
 import { StepSectionHeader } from "../../shared/StepSectionHeader";
 import { SummaryPill } from "../../shared/SummaryPill";
 
@@ -17,6 +28,21 @@ export function EditorStepSetupComplexity({
   roughEstimate,
   onUpsertActive,
 }: EditorStepSetupComplexityProps) {
+  const {
+    register,
+    reset,
+    formState: { errors },
+  } = useForm<SetupStepFormValues>({
+    resolver: zodResolver(setupStepSchema),
+    mode: "onBlur",
+    reValidateMode: "onChange",
+    defaultValues: getSetupStepFormValues(activeProposal),
+  });
+
+  useEffect(() => {
+    reset(getSetupStepFormValues(activeProposal));
+  }, [activeProposal.id, reset]);
+
   return (
     <div className="step-section">
       <div className="panel step-section-shell">
@@ -34,129 +60,128 @@ export function EditorStepSetupComplexity({
       <div className="panel">
         <div className="subpanel">
           <h4>Proposal Setup</h4>
-          <label>
-            Proposal Name (Internal)
-            <input
-              value={activeProposal.name}
-              onChange={(event) =>
-                onUpsertActive({ ...activeProposal, name: event.target.value })
-              }
-            />
-          </label>
-          <label>
-            Client Name
-            <input
-              value={activeProposal.clientName}
-              onChange={(event) =>
+          <TextField
+            label="Proposal Name (Internal)"
+            error={errors.name?.message}
+            required
+            {...register("name", {
+              onChange: (event) =>
+                onUpsertActive({ ...activeProposal, name: event.target.value }),
+            })}
+          />
+          <TextField
+            label="Client Name"
+            error={errors.clientName?.message}
+            required
+            {...register("clientName", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   clientName: event.target.value,
-                })
-              }
-            />
-          </label>
-          <label>
-            Project Title
-            <input
-              value={activeProposal.projectTitle}
-              onChange={(event) =>
+                }),
+            })}
+          />
+          <TextField
+            label="Project Title"
+            error={errors.projectTitle?.message}
+            required
+            {...register("projectTitle", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   projectTitle: event.target.value,
-                })
-              }
-            />
-          </label>
-          <label>
-            Size Tier
-            <select
-              value={activeProposal.sizeTierId}
-              onChange={(event) =>
+                }),
+            })}
+          />
+          <SelectField
+            label="Size Tier"
+            error={errors.sizeTierId?.message}
+            required
+            {...register("sizeTierId", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   sizeTierId: event.target.value,
-                })
-              }
-            >
-              {sizeTiers.map((tier) => (
-                <option key={tier.id} value={tier.id}>
-                  {tier.label}
-                </option>
-              ))}
-            </select>
-          </label>
+                }),
+            })}
+          >
+            {sizeTiers.map((tier) => (
+              <option key={tier.id} value={tier.id}>
+                {tier.label}
+              </option>
+            ))}
+          </SelectField>
         </div>
         <div className="subpanel">
           <h4>Timeline</h4>
-          <label>
-            Timeline Option
-            <select
-              value={activeProposal.timelineOptionId}
-              onChange={(event) =>
+          <SelectField
+            label="Timeline Option"
+            error={errors.timelineOptionId?.message}
+            required
+            {...register("timelineOptionId", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   timelineOptionId: event.target.value,
-                })
-              }
-            >
-              {timelineOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Start Date
-            <input
-              type="date"
-              value={activeProposal.startDate}
-              onChange={(event) =>
+                }),
+            })}
+          >
+            {timelineOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </SelectField>
+          <TextField
+            type="date"
+            label="Start Date"
+            error={errors.startDate?.message}
+            {...register("startDate", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   startDate: event.target.value,
-                })
-              }
-            />
-          </label>
-          <label>
-            End Date / Event Date
-            <input
-              type="date"
-              value={activeProposal.endDate}
-              onChange={(event) =>
+                }),
+            })}
+          />
+          <TextField
+            type="date"
+            label="End Date / Event Date"
+            error={errors.endDate?.message}
+            {...register("endDate", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   endDate: event.target.value,
-                })
-              }
-            />
-          </label>
+                }),
+            })}
+          />
         </div>
         <div className="subpanel">
           <h4>Complexity</h4>
-          <label>
-            Project Size
-            <select
-              value={activeProposal.projectSize}
-              onChange={(event) =>
+          <SelectField
+            label="Project Size"
+            error={errors.projectSize?.message}
+            required
+            {...register("projectSize", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   projectSize: event.target.value as ProposalDraft["projectSize"],
-                })
-              }
-            >
-              <option value="Small">Small (1.0x)</option>
-              <option value="Medium">Medium (1.25x)</option>
-              <option value="Large">Large (1.5x)</option>
-              <option value="XL">XL (1.75x)</option>
-            </select>
-          </label>
-          <label>
-            Stakeholder Count
-            <select
-              value={activeProposal.complexity.stakeholdersComplexitySize}
-              onChange={(event) =>
+                }),
+            })}
+          >
+            <option value="Small">Small (1.0x)</option>
+            <option value="Medium">Medium (1.25x)</option>
+            <option value="Large">Large (1.5x)</option>
+            <option value="XL">XL (1.75x)</option>
+          </SelectField>
+          <SelectField
+            label="Stakeholder Count"
+            error={errors.stakeholdersComplexitySize?.message}
+            required
+            {...register("stakeholdersComplexitySize", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   complexity: {
@@ -165,65 +190,63 @@ export function EditorStepSetupComplexity({
                       event.target.value,
                     ) as ProposalDraft["complexity"]["stakeholdersComplexitySize"],
                   },
-                })
-              }
-            >
-              <option value="1">1-5 (1.0x)</option>
-              <option value="1.1">6-12 (1.15x)</option>
-              <option value="1.25">13+ (1.3x)</option>
-            </select>
-          </label>
-          <label>
-            CMS Type
-            <select
-              value={activeProposal.complexity.cmsType}
-              onChange={(event) =>
+                }),
+            })}
+          >
+            <option value="1">1-5 (1.0x)</option>
+            <option value="1.1">6-12 (1.15x)</option>
+            <option value="1.25">13+ (1.3x)</option>
+          </SelectField>
+          <SelectField
+            label="CMS Type"
+            error={errors.cmsType?.message}
+            required
+            {...register("cmsType", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   complexity: {
                     ...activeProposal.complexity,
                     cmsType: event.target.value as ProposalDraft["complexity"]["cmsType"],
                   },
-                })
-              }
-            >
-              <option value="WordPress">WordPress</option>
-              <option value="Webflow">Webflow</option>
-              <option value="Shopify">Shopify</option>
-              <option value="Headless">Headless</option>
-              <option value="Custom">Custom</option>
-            </select>
-          </label>
-          <label>
-            Complexity Notes
-            <textarea
-              value={activeProposal.complexity.notes}
-              onChange={(event) =>
+                }),
+            })}
+          >
+            <option value="WordPress">WordPress</option>
+            <option value="Webflow">Webflow</option>
+            <option value="Shopify">Shopify</option>
+            <option value="Headless">Headless</option>
+            <option value="Custom">Custom</option>
+          </SelectField>
+          <TextareaField
+            label="Complexity Notes"
+            error={errors.notes?.message}
+            {...register("notes", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   complexity: {
                     ...activeProposal.complexity,
                     notes: event.target.value,
                   },
-                })
-              }
-            />
-          </label>
-          <label>
-            Project Buffer %
-            <input
-              type="number"
-              min={0}
-              step={5}
-              value={activeProposal.projectBufferPercent}
-              onChange={(event) =>
+                }),
+            })}
+          />
+          <TextField
+            type="number"
+            min={0}
+            step={5}
+            label="Project Buffer %"
+            error={errors.projectBufferPercent?.message}
+            required
+            {...register("projectBufferPercent", {
+              onChange: (event) =>
                 onUpsertActive({
                   ...activeProposal,
                   projectBufferPercent: normalizePercentInput(event.target.value),
-                })
-              }
-            />
-          </label>
+                }),
+            })}
+          />
         </div>
       </div>
     </div>

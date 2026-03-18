@@ -409,8 +409,6 @@ button {
 }
 
 .step-nav {
-  position: sticky;
-  bottom: 12px;
   display: flex;
   justify-content: center;
   gap: 12px;
@@ -427,6 +425,15 @@ button {
   border-color: #2f7a5b;
   color: #fff;
   font-weight: 600;
+}
+
+button:disabled,
+.next-btn:disabled {
+  background: #eef2ee;
+  border-color: #cdd8cd;
+  color: #7a897f;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 button.danger {
