@@ -16,7 +16,6 @@ export const setupStepSchema = z.object({
   clientName: z.string().trim().min(1, "Client name is required."),
   projectTitle: z.string().trim().min(1, "Project title is required."),
   sizeTierId: z.string().trim().min(1, "Select a size tier."),
-  timelineOptionId: z.string().trim().min(1, "Select a timeline option."),
   startDate: z.string(),
   endDate: z.string(),
   projectSize: z.enum(projectSizes),
@@ -26,8 +25,8 @@ export const setupStepSchema = z.object({
   projectBufferPercent: z
     .string()
     .trim()
-    .min(1, "Project buffer is required.")
     .refine((value) => {
+      if (value.length === 0) return true;
       const numericValue = Number(value);
       return Number.isFinite(numericValue) && numericValue >= 0 && numericValue <= 100;
     }, "Project buffer must be between 0 and 100."),
@@ -43,7 +42,6 @@ export function getSetupStepFormValues(
     clientName: draft.clientName,
     projectTitle: draft.projectTitle,
     sizeTierId: draft.sizeTierId,
-    timelineOptionId: draft.timelineOptionId,
     startDate: draft.startDate,
     endDate: draft.endDate,
     projectSize: draft.projectSize,

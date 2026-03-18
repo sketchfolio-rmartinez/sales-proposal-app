@@ -79,7 +79,6 @@ export function EditorStepSetupComplexity({
           </div>
 
           <div className="setup-step-form-grid setup-step-form-grid--setup">
-            <input type="hidden" {...register("timelineOptionId")} />
             <TextField
               label="Proposal Name (Internal)"
               error={errors.name?.message}
@@ -259,7 +258,6 @@ export function EditorStepSetupComplexity({
               step={5}
               label="Project Buffer %"
               error={errors.projectBufferPercent?.message}
-              required
               fieldClassName="setup-step-field setup-step-field--buffer"
               {...register("projectBufferPercent", {
                 onChange: (event) =>

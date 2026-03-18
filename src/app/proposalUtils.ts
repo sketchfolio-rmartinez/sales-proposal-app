@@ -4,7 +4,6 @@ import {
   getStaffingLineId,
   inclusions,
   sizeTiers,
-  timelineOptions,
 } from "../data/defaults";
 import {
   ProposalDraft,
@@ -197,11 +196,6 @@ function normalizeProposal(rawProposal: unknown): ProposalDraft | null {
     projectBufferPercent: clampPercent(
       toNumber(proposal.projectBufferPercent, 0),
     ),
-    timelineOptionId:
-      typeof proposal.timelineOptionId === "string" &&
-      timelineOptions.some((option) => option.id === proposal.timelineOptionId)
-        ? proposal.timelineOptionId
-        : timelineOptions[1].id,
     complexity: {
       stakeholdersComplexitySize: normalizeStakeholderComplexity(
         proposal.complexity?.stakeholdersComplexitySize,
@@ -330,7 +324,6 @@ export function canAdvanceFromSetup(draft: ProposalDraft): boolean {
       draft.clientName.trim() &&
       draft.projectTitle.trim() &&
       draft.sizeTierId &&
-      draft.timelineOptionId &&
       draft.projectSize &&
       draft.complexity.stakeholdersComplexitySize &&
       draft.complexity.cmsType,

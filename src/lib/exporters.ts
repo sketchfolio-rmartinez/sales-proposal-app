@@ -1,4 +1,4 @@
-import { inclusions, phases, roles, sizeTiers, timelineOptions } from "../data/defaults";
+import { inclusions, phases, roles, sizeTiers } from "../data/defaults";
 import { BlurbLibraryItem, ProposalDraft, ReviewModel } from "../types";
 
 export function generateProposalText(
@@ -7,7 +7,6 @@ export function generateProposalText(
   blurbs: BlurbLibraryItem[],
 ): string {
   const tier = sizeTiers.find((item) => item.id === draft.sizeTierId);
-  const timeline = timelineOptions.find((item) => item.id === draft.timelineOptionId);
   const pickedBlurbs = blurbs.filter((item) => draft.pickedBlurbIds.includes(item.id));
   const selectedInclusions = draft.inclusions
     .filter((item) => item.allocationPercent > 0)
@@ -31,7 +30,6 @@ export function generateProposalText(
   lines.push("");
   lines.push("## Scope Summary");
   lines.push(`- Size Tier: ${tier?.label ?? "TBD"}`);
-  lines.push(`- Timeline: ${timeline?.label ?? "TBD"}`);
   if (draft.startDate) {
     lines.push(`- Start Date: ${draft.startDate}`);
   }

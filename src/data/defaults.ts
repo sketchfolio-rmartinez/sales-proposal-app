@@ -8,7 +8,6 @@ import {
   RoleId,
   RoleScope,
   SizeTier,
-  TimelineOption,
 } from "../types";
 
 export const phases: Phase[] = [
@@ -62,13 +61,6 @@ export const sizeTiers: SizeTier[] = [
     label: "$130k+",
     minBudget: 130000,
   },
-];
-
-export const timelineOptions: TimelineOption[] = [
-  { id: "8_weeks", label: "8 weeks" },
-  { id: "12_weeks", label: "12 weeks" },
-  { id: "16_weeks", label: "16 weeks" },
-  { id: "20_weeks", label: "20+ weeks" },
 ];
 
 export const roles: RoleDefinition[] = [
@@ -222,7 +214,6 @@ export function createDraftProposal(): ProposalDraft {
     endDate: "",
     projectSize: "Medium",
     projectBufferPercent: 0,
-    timelineOptionId: timelineOptions[1].id,
     complexity: {
       stakeholdersComplexitySize: 1.1,
       cmsType: "WordPress",

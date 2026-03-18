@@ -61,11 +61,6 @@ export interface InclusionItem {
   phaseId: PhaseId;
 }
 
-export interface TimelineOption {
-  id: string;
-  label: string;
-}
-
 export interface RoleDefinition {
   id: RoleId;
   label: string;
@@ -114,7 +109,6 @@ export interface ProposalDraft {
   endDate: string;
   projectSize: ProjectSize;
   projectBufferPercent: number;
-  timelineOptionId: string;
   complexity: {
     stakeholdersComplexitySize: ComplexityBand;
     cmsType: CmsType;
