@@ -83,17 +83,20 @@ export function EditorStepSetupComplexity({
               label="Proposal Name (Internal)"
               error={errors.name?.message}
               required
-              fieldClassName="setup-step-field setup-step-field--span-2"
+              fieldClassName="setup-step-field setup-step-field--setup-full"
               {...register("name", {
                 onChange: (event) =>
-                  onUpsertActive({ ...activeProposal, name: event.target.value }),
+                  onUpsertActive({
+                    ...activeProposal,
+                    name: event.target.value,
+                  }),
               })}
             />
             <TextField
               label="Client Name"
               error={errors.clientName?.message}
               required
-              fieldClassName="setup-step-field"
+              fieldClassName="setup-step-field setup-step-field--setup-half"
               {...register("clientName", {
                 onChange: (event) =>
                   onUpsertActive({
@@ -106,7 +109,7 @@ export function EditorStepSetupComplexity({
               label="Project Title"
               error={errors.projectTitle?.message}
               required
-              fieldClassName="setup-step-field"
+              fieldClassName="setup-step-field setup-step-field--setup-half"
               {...register("projectTitle", {
                 onChange: (event) =>
                   onUpsertActive({
@@ -119,7 +122,7 @@ export function EditorStepSetupComplexity({
               type="date"
               label="Start Date"
               error={errors.startDate?.message}
-              fieldClassName="setup-step-field"
+              fieldClassName="setup-step-field setup-step-field--setup-third"
               {...register("startDate", {
                 onChange: (event) =>
                   onUpsertActive({
@@ -132,7 +135,7 @@ export function EditorStepSetupComplexity({
               type="date"
               label="End Date / Event Date"
               error={errors.endDate?.message}
-              fieldClassName="setup-step-field"
+              fieldClassName="setup-step-field setup-step-field--setup-third"
               {...register("endDate", {
                 onChange: (event) =>
                   onUpsertActive({
@@ -145,7 +148,7 @@ export function EditorStepSetupComplexity({
               label="Size Tier"
               error={errors.sizeTierId?.message}
               required
-              fieldClassName="setup-step-field"
+              fieldClassName="setup-step-field setup-step-field--setup-third"
               {...register("sizeTierId", {
                 onChange: (event) =>
                   onUpsertActive({
@@ -168,10 +171,10 @@ export function EditorStepSetupComplexity({
             <div className="setup-step-card-copy">
               <p className="setup-step-card-kicker">Effort Drivers</p>
               <h4>Complexity</h4>
+              <p className="setup-step-card-description">
+                Inputs that shape effort, coordination, and buffer.
+              </p>
             </div>
-            <p className="setup-step-card-description">
-              Inputs that shape effort, coordination, and buffer.
-            </p>
           </div>
 
           <div className="setup-step-form-grid setup-step-form-grid--complexity">
@@ -184,7 +187,8 @@ export function EditorStepSetupComplexity({
                 onChange: (event) =>
                   onUpsertActive({
                     ...activeProposal,
-                    projectSize: event.target.value as ProposalDraft["projectSize"],
+                    projectSize: event.target
+                      .value as ProposalDraft["projectSize"],
                   }),
               })}
             >
@@ -226,7 +230,8 @@ export function EditorStepSetupComplexity({
                     ...activeProposal,
                     complexity: {
                       ...activeProposal.complexity,
-                      cmsType: event.target.value as ProposalDraft["complexity"]["cmsType"],
+                      cmsType: event.target
+                        .value as ProposalDraft["complexity"]["cmsType"],
                     },
                   }),
               })}
@@ -263,7 +268,9 @@ export function EditorStepSetupComplexity({
                 onChange: (event) =>
                   onUpsertActive({
                     ...activeProposal,
-                    projectBufferPercent: normalizePercentInput(event.target.value),
+                    projectBufferPercent: normalizePercentInput(
+                      event.target.value,
+                    ),
                   }),
               })}
             />
