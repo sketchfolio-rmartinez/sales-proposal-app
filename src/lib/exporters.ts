@@ -1,14 +1,26 @@
-import { blurbLibrary, inclusions, phases, roles, sizeTiers, timelineOptions } from "../data/defaults";
-import { ProposalDraft, ReviewModel } from "../types";
+import { inclusions, phases, roles, sizeTiers } from "../data/defaults";
+import { BlurbLibraryItem, ProposalDraft, ReviewModel } from "../types";
 
-export function generateProposalText(draft: ProposalDraft, review: ReviewModel): string {
+export function generateProposalText(
+  draft: ProposalDraft,
+  review: ReviewModel,
+  blurbs: BlurbLibraryItem[],
+): string {
   const tier = sizeTiers.find((item) => item.id === draft.sizeTierId);
-  const timeline = timelineOptions.find((item) => item.id === draft.timelineOptionId);
-  const pickedBlurbs = blurbLibrary.filter((item) => draft.pickedBlurbIds.includes(item.id));
+  const pickedBlurbs = blurbs.filter((item) => draft.pickedBlurbIds.includes(item.id));
   const selectedInclusions = draft.inclusions
-    .filter((item) => item.selected)
-    .map((item) => inclusions.find((inc) => inc.id === item.inclusionId))
-    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+    .filter((item) => item.allocationPercent > 0)
+    .map((item) => {
+      const inclusion = inclusions.find((inc) => inc.id === item.inclusionId);
+      return inclusion
+        ? {
+            inclusion,
+            allocationPercent: item.allocationPercent,
+            blurbs: blurbs.filter((blurb) => item.blurbIds.includes(blurb.id)),
+          }
+        : null;
+    })
+    .filter((item): item is { inclusion: NonNullable<typeof inclusions[number]>; allocationPercent: number; blurbs: BlurbLibraryItem[] } => Boolean(item));
 
   const lines: string[] = [];
   lines.push(`# ${draft.projectTitle || draft.name || "Proposal"}`);
@@ -18,21 +30,33 @@ export function generateProposalText(draft: ProposalDraft, review: ReviewModel):
   lines.push("");
   lines.push("## Scope Summary");
   lines.push(`- Size Tier: ${tier?.label ?? "TBD"}`);
-  lines.push(`- Timeline: ${timeline?.label ?? "TBD"}`);
+  if (draft.startDate) {
+    lines.push(`- Start Date: ${draft.startDate}`);
+  }
+  if (draft.endDate) {
+    lines.push(`- End Date / Event Date: ${draft.endDate}`);
+  }
   lines.push("");
 
   for (const phase of phases) {
-    const phaseInclusions = selectedInclusions.filter((inc) => inc.phaseId === phase.id);
+    const phaseInclusions = selectedInclusions.filter((item) => item.inclusion.phaseId === phase.id);
     if (phaseInclusions.length === 0) continue;
     lines.push(`### ${phase.name}`);
-    for (const inclusion of phaseInclusions) {
-      lines.push(`- ${inclusion.name}: ${inclusion.description}`);
+    for (const item of phaseInclusions) {
+      lines.push(`- ${item.inclusion.name} (${item.allocationPercent}%): ${item.inclusion.description}`);
+      for (const blurb of item.blurbs) {
+        lines.push(`  ${blurb.contentPlaintext}`);
+      }
     }
     lines.push("");
   }
 
   lines.push("## Pricing Summary");
   lines.push(`- Estimated Hours: ${review.totalHours}`);
+  lines.push(`- Subtotal: $${review.projectSubtotal.toLocaleString()}`);
+  lines.push(
+    `- Project Buffer: ${review.projectBufferPercent}% ($${review.projectBufferAmount.toLocaleString()})`,
+  );
   lines.push(`- Estimated Price: $${review.totalPrice.toLocaleString()}`);
   lines.push("");
 
@@ -59,10 +83,10 @@ export function generateProposalText(draft: ProposalDraft, review: ReviewModel):
   }
 
   lines.push("## Role Rates");
-  for (const staff of draft.staffing) {
+  for (const staff of draft.staffing.filter((item) => item.selected || item.allocationPercent > 0)) {
     const role = roles.find((r) => r.id === staff.roleId);
     lines.push(
-      `- ${role?.label ?? staff.roleId}: ${staff.seniority}, base $${staff.baseRate}/hr, markup ${staff.markupPercent}%`
+      `- ${role?.label ?? staff.roleId} ${staff.scope === "lead" ? "Lead" : "Support"}: ${staff.allocationPercent}% of project, base $${staff.baseRate}/hr, markup ${staff.markupPercent}%`
     );
   }
 
@@ -71,7 +95,7 @@ export function generateProposalText(draft: ProposalDraft, review: ReviewModel):
 
 export function generateTeamworkCsv(draft: ProposalDraft): string {
   const selectedInclusions = draft.inclusions
-    .filter((item) => item.selected)
+    .filter((item) => item.allocationPercent > 0)
     .map((item) => inclusions.find((inc) => inc.id === item.inclusionId))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 

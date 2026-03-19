@@ -17,7 +17,9 @@ export type RoleId =
   | "developer"
   | "contractor";
 
-export type Seniority = "Standard" | "Senior";
+export type RoleScope = "lead" | "support";
+
+export type ProjectSize = "Small" | "Medium" | "Large" | "XL";
 
 export type CmsType =
   | "WordPress"
@@ -26,7 +28,18 @@ export type CmsType =
   | "Headless"
   | "Custom";
 
-export type ComplexityBand = "Low" | "Medium" | "High";
+export type ComplexityBand = 1 | 1.1 | 1.25;
+
+export type BlurbCategory =
+  | "Inclusion"
+  | "Assumptions"
+  | "Exclusions"
+  | "Security"
+  | "Accessibility"
+  | "Hosting"
+  | "Training"
+  | "Migration"
+  | "General RFP";
 
 export interface Phase {
   id: PhaseId;
@@ -39,7 +52,6 @@ export interface SizeTier {
   label: string;
   minBudget: number;
   maxBudget?: number;
-  defaultPhaseBudgetPercent: Record<PhaseId, number>;
 }
 
 export interface InclusionItem {
@@ -47,13 +59,6 @@ export interface InclusionItem {
   name: string;
   description: string;
   phaseId: PhaseId;
-  isRequired: boolean;
-  defaultHoursByRole: Partial<Record<RoleId, number>>;
-}
-
-export interface TimelineOption {
-  id: string;
-  label: string;
 }
 
 export interface RoleDefinition {
@@ -64,13 +69,16 @@ export interface RoleDefinition {
 
 export interface ProposalInclusionState {
   inclusionId: string;
-  selected: boolean;
-  overrideReason: string;
+  allocationPercent: number;
+  blurbIds: string[];
 }
 
-export interface ProposalRoleStaffing {
+export interface ProposalStaffingLine {
+  id: string;
   roleId: RoleId;
-  seniority: Seniority;
+  scope: RoleScope;
+  selected: boolean;
+  allocationPercent: number;
   baseRate: number;
   markupPercent: number;
 }
@@ -84,7 +92,8 @@ export interface RfpRequirement {
 export interface BlurbLibraryItem {
   id: string;
   title: string;
-  tags: string[];
+  category: BlurbCategory;
+  tags?: string[];
   contentPlaintext: string;
   isActive: boolean;
 }
@@ -96,14 +105,17 @@ export interface ProposalDraft {
   projectTitle: string;
   status: ProposalStatus;
   sizeTierId: string;
-  timelineOptionId: string;
+  startDate: string;
+  endDate: string;
+  projectSize: ProjectSize;
+  projectBufferPercent: number;
   complexity: {
-    stakeholdersCompanySize: ComplexityBand;
+    stakeholdersComplexitySize: ComplexityBand;
     cmsType: CmsType;
     notes: string;
   };
   inclusions: ProposalInclusionState[];
-  staffing: ProposalRoleStaffing[];
+  staffing: ProposalStaffingLine[];
   rfpRequirements: RfpRequirement[];
   pickedBlurbIds: string[];
   assumptions: string;
@@ -113,21 +125,30 @@ export interface ProposalDraft {
   updatedAt: string;
 }
 
-export interface EstimateLine {
+export interface PhaseAllocationSummary {
   phaseId: PhaseId;
+  allocationPercent: number;
+  budget: number;
+}
+
+export interface StaffingAllocationSummary {
+  staffingLineId: string;
   roleId: RoleId;
-  seniority: Seniority;
-  hours: number;
+  scope: RoleScope;
+  allocationPercent: number;
   rate: number;
-  cost: number;
-  markup: number;
-  price: number;
-  source: "default" | "rule-adjusted" | "manual-override";
+  markupPercent: number;
+  effectiveRate: number;
+  budget: number;
+  hours: number;
 }
 
 export interface ReviewModel {
-  estimateLines: EstimateLine[];
-  budgetByPhase: Record<PhaseId, number>;
+  phaseAllocations: PhaseAllocationSummary[];
+  staffingAllocations: StaffingAllocationSummary[];
   totalHours: number;
+  projectSubtotal: number;
+  projectBufferPercent: number;
+  projectBufferAmount: number;
   totalPrice: number;
 }

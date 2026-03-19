@@ -1,694 +1,155 @@
-import { useMemo, useState } from "react";
-import { blurbLibrary, createDraftProposal, inclusions, phases, roles, sizeTiers, timelineOptions } from "./data/defaults";
-import { generateProposalText, generateTeamworkCsv } from "./lib/exporters";
-import { buildReviewModel } from "./lib/estimate";
-import { ProposalDraft, ProposalInclusionState, ProposalRoleStaffing, ProposalStatus, RfpRequirement } from "./types";
-
-const STORAGE_KEY = "sales-proposal-app:v1";
-const steps = [
-  { id: 1, label: "Setup" },
-  { id: 2, label: "Inclusions" },
-  { id: 3, label: "Timeline" },
-  { id: 4, label: "Roles & Rates" },
-  { id: 5, label: "RFP Responses" },
-  { id: 6, label: "Review" },
-  { id: 7, label: "Exports" },
-] as const;
-
-type EditorStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
-function loadStoredProposals(): ProposalDraft[] {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as ProposalDraft[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveStoredProposals(proposals: ProposalDraft[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(proposals));
-}
-
-function touch(draft: ProposalDraft): ProposalDraft {
-  return { ...draft, updatedAt: new Date().toISOString() };
-}
-
-function updateInclusion(
-  inclusionsState: ProposalInclusionState[],
-  inclusionId: string,
-  patch: Partial<ProposalInclusionState>
-): ProposalInclusionState[] {
-  return inclusionsState.map((item) => (item.inclusionId === inclusionId ? { ...item, ...patch } : item));
-}
-
-function updateStaffing(
-  staffingState: ProposalRoleStaffing[],
-  roleId: ProposalRoleStaffing["roleId"],
-  patch: Partial<ProposalRoleStaffing>
-): ProposalRoleStaffing[] {
-  return staffingState.map((item) => (item.roleId === roleId ? { ...item, ...patch } : item));
-}
-
-function canAdvanceFromInclusions(draft: ProposalDraft): boolean {
-  for (const state of draft.inclusions) {
-    const inclusion = inclusions.find((item) => item.id === state.inclusionId);
-    if (!inclusion?.isRequired) continue;
-    if (!state.selected && !state.overrideReason.trim()) return false;
-  }
-  return true;
-}
-
-function statusActionLabel(status: ProposalStatus): string {
-  if (status === "Draft") return "Mark Ready";
-  if (status === "ReadyForApproval") return "Approve";
-  return "Approved";
-}
+import { useEffect, useState } from "react";
+import { ProposalHeader } from "./components/proposal-builder/ProposalHeader";
+import { ProposalStepView } from "./components/proposal-builder/ProposalStepView";
+import { ProposalSidebar } from "./components/ProposalSidebar";
+import { BlurbAdminPage } from "./components/blurbs/BlurbAdminPage";
+import { steps, type EditorStep } from "./app/editorConfig";
+import {
+  canAdvanceFromStep,
+  formatUpdated,
+  getMaxAccessibleStep,
+  sizeTierLabel,
+} from "./app/proposalUtils";
+import { useProposalBuilder } from "./app/useProposalBuilder";
+import { useBlurbLibrary } from "./app/useBlurbLibrary";
+import { useAppRoute } from "./app/useAppRoute";
 
 export default function App() {
-  const [proposals, setProposals] = useState<ProposalDraft[]>(() => loadStoredProposals());
-  const [activeProposalId, setActiveProposalId] = useState<string | null>(proposals[0]?.id ?? null);
-  const [proposalQuery, setProposalQuery] = useState("");
-  const [step, setStep] = useState<EditorStep>(1);
-  const [exportText, setExportText] = useState("");
-  const [exportCsv, setExportCsv] = useState("");
+  const {
+    state: blurbState,
+    view: blurbView,
+    handlers: blurbHandlers,
+  } = useBlurbLibrary();
+  const { state, view, handlers } = useProposalBuilder(blurbState.blurbs);
+  const { route, navigate } = useAppRoute();
+  const [stepValidity, setStepValidity] = useState<
+    Partial<Record<EditorStep, boolean>>
+  >({});
 
-  const activeProposal = useMemo(
-    () => proposals.find((item) => item.id === activeProposalId) ?? null,
-    [activeProposalId, proposals]
-  );
+  useEffect(() => {
+    setStepValidity({});
+  }, [state.activeProposalId]);
 
-  const review = useMemo(() => (activeProposal ? buildReviewModel(activeProposal) : null), [activeProposal]);
-  const filteredProposals = useMemo(() => {
-    const query = proposalQuery.trim().toLowerCase();
-    if (!query) return proposals;
-    return proposals.filter((proposal) => {
-      const name = proposal.name.toLowerCase();
-      const title = proposal.projectTitle.toLowerCase();
-      const client = proposal.clientName.toLowerCase();
-      return name.includes(query) || title.includes(query) || client.includes(query);
-    });
-  }, [proposalQuery, proposals]);
-
-  const persist = (next: ProposalDraft[]) => {
-    setProposals(next);
-    saveStoredProposals(next);
-  };
-
-  const upsertActive = (nextDraft: ProposalDraft) => {
-    if (!activeProposal) return;
-    const next = proposals.map((item) => (item.id === activeProposal.id ? touch(nextDraft) : item));
-    persist(next);
-  };
-
-  const newProposal = () => {
-    const draft = createDraftProposal();
-    const next = [draft, ...proposals];
-    persist(next);
-    setActiveProposalId(draft.id);
-    setStep(1);
-    setExportText("");
-    setExportCsv("");
-  };
-
-  const duplicateProposal = (proposal: ProposalDraft) => {
-    const duplicate = {
-      ...proposal,
-      id: crypto.randomUUID(),
-      name: `${proposal.name || proposal.projectTitle || "Proposal"} (Copy)`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      status: "Draft" as ProposalStatus,
-    };
-    const next = [duplicate, ...proposals];
-    persist(next);
-    setActiveProposalId(duplicate.id);
-    setStep(1);
-  };
-
-  const deleteProposal = (proposalId: string) => {
-    const next = proposals.filter((item) => item.id !== proposalId);
-    persist(next);
-    if (activeProposalId === proposalId) {
-      setActiveProposalId(next[0]?.id ?? null);
-      setStep(1);
-      setExportText("");
-      setExportCsv("");
-    }
-  };
-
-  const formatUpdated = (iso: string): string => {
-    const date = new Date(iso);
-    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  };
-
-  const sizeTierLabel = (sizeTierId: string): string => {
-    return sizeTiers.find((tier) => tier.id === sizeTierId)?.label ?? "";
-  };
-
-  const transitionStatus = () => {
-    if (!activeProposal) return;
-    const nextStatus: ProposalStatus =
-      activeProposal.status === "Draft"
-        ? "ReadyForApproval"
-        : activeProposal.status === "ReadyForApproval"
-        ? "Approved"
-        : "Approved";
-    upsertActive({ ...activeProposal, status: nextStatus });
-  };
-
-  const regenerate = () => {
-    if (!activeProposal || !review) return;
-    setExportText(generateProposalText(activeProposal, review));
-    setExportCsv(generateTeamworkCsv(activeProposal));
-  };
-
-  const downloadCsv = () => {
-    if (!exportCsv) return;
-    const blob = new Blob([exportCsv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${activeProposal?.projectTitle || "teamwork-import"}.csv`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    URL.revokeObjectURL(url);
-  };
+  const canAdvance = view.activeProposal
+    ? (stepValidity[state.step] ??
+      canAdvanceFromStep(view.activeProposal, state.step))
+    : false;
 
   return (
     <div className="page">
       <header className="app-header">
-        <h1>Proposal & Project Seeding App (v1)</h1>
-      </header>
-
-      <main className="layout">
-        <aside className="sidebar">
-          <div className="sidebar-head">
-            <h2>Proposals</h2>
-            <button className="new-proposal-btn" onClick={newProposal}>
-              New
+        <div className="row">
+          <h1>Sketchfolio Proposal Builder</h1>
+          <div className="app-nav">
+            <button
+              className={route === "builder" ? "active-step" : ""}
+              onClick={() => navigate("builder")}
+            >
+              Builder
+            </button>
+            <button
+              className={route === "blurbs" ? "active-step" : ""}
+              onClick={() => navigate("blurbs")}
+            >
+              Blurb Library
             </button>
           </div>
-          <label className="sidebar-search">
-            <input
-              placeholder="Search proposals"
-              value={proposalQuery}
-              onChange={(event) => setProposalQuery(event.target.value)}
-            />
-          </label>
-          <div className="proposal-list-head" aria-hidden="true">
-            <span>Name</span>
-          </div>
-          <div className="proposal-list">
-            {filteredProposals.map((proposal) => (
-              <div key={proposal.id} className={`proposal-row ${proposal.id === activeProposalId ? "active" : ""}`}>
-                <button className="proposal-row-main" onClick={() => setActiveProposalId(proposal.id)}>
-                  <div className="proposal-primary">
-                    <span className="proposal-title">{proposal.name || proposal.projectTitle || "New Proposal"}</span>
-                    <span className="proposal-meta">
-                      <span className="proposal-client">{proposal.clientName || "Client pending"}</span>
-                      <span className="proposal-tier">{sizeTierLabel(proposal.sizeTierId)}</span>
-                      <span className="proposal-updated">{formatUpdated(proposal.updatedAt)}</span>
-                    </span>
-                  </div>
-                </button>
-                <div className="proposal-row-actions">
-                  <span className={`status-dot status-${proposal.status.toLowerCase()}`}>{proposal.status}</span>
-                  <button onClick={() => duplicateProposal(proposal)}>Dup</button>
-                  <button className="danger" onClick={() => deleteProposal(proposal.id)}>
-                    Del
-                  </button>
-                </div>
-              </div>
-            ))}
-            {filteredProposals.length === 0 && <p className="muted">No matches</p>}
-          </div>
-        </aside>
+        </div>
+      </header>
 
-        <section className="content">
-          {!activeProposal ? (
-            <div className="panel">
-              <p>Create a proposal to begin.</p>
-            </div>
-          ) : (
-            <>
+      {route === "blurbs" ? (
+        <main className="admin-layout">
+          <BlurbAdminPage
+            blurbs={blurbView.filteredBlurbs}
+            searchQuery={blurbState.searchQuery}
+            categoryFilter={blurbState.categoryFilter}
+            onSearchQueryChange={blurbHandlers.setSearchQuery}
+            onCategoryFilterChange={blurbHandlers.setCategoryFilter}
+            onCreateBlurb={blurbHandlers.createBlurb}
+            onUpdateBlurb={blurbHandlers.updateBlurb}
+            onDeactivateBlurb={blurbHandlers.deactivateBlurb}
+          />
+        </main>
+      ) : (
+        <main className="layout">
+          <ProposalSidebar
+            proposals={view.filteredProposals}
+            activeProposalId={state.activeProposalId}
+            proposalQuery={state.proposalQuery}
+            onProposalQueryChange={handlers.setProposalQuery}
+            onNewProposal={handlers.newProposal}
+            onSelectProposal={handlers.setActiveProposalId}
+            onDuplicateProposal={handlers.duplicateProposal}
+            onDeleteProposal={handlers.deleteProposal}
+            formatUpdated={formatUpdated}
+            sizeTierLabel={sizeTierLabel}
+          />
+
+          <section className="content">
+            {!view.activeProposal ? (
               <div className="panel">
-                <div className="proposal-heading">
-                  <h2>{activeProposal.name || activeProposal.projectTitle || "New Proposal"}</h2>
-                  <span className="status-pill">{activeProposal.status}</span>
-                </div>
-                <div className="stepper-header">
-                  <p className="stepper-title">
-                    Step {step} of {steps.length}: <strong>{steps[step - 1].label}</strong>
-                  </p>
-                  <div className="stepper-progress-track" aria-hidden="true">
-                    <div className="stepper-progress-fill" style={{ width: `${(step / steps.length) * 100}%` }} />
-                  </div>
-                </div>
-                <div className="stepper-grid" role="tablist" aria-label="Proposal steps">
-                  {steps.map((stepItem) => {
-                    const isActive = step === stepItem.id;
-                    const isComplete = step > stepItem.id;
-                    return (
-                      <button
-                        key={stepItem.id}
-                        onClick={() => setStep(stepItem.id as EditorStep)}
-                        className={`step-chip ${isActive ? "active" : ""} ${isComplete ? "complete" : ""}`}
-                      >
-                        <span className="step-chip-number">{stepItem.id}</span>
-                        <span className="step-chip-label">{stepItem.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <p>Create a proposal to begin.</p>
               </div>
+            ) : (
+              <>
+                <ProposalHeader
+                  activeProposal={view.activeProposal}
+                  step={state.step}
+                  maxAccessibleStep={getMaxAccessibleStep(view.activeProposal)}
+                  onStepChange={handlers.setStep}
+                />
 
-              {step === 1 && (
-                <div className="panel">
-                  <h3>New Proposal Setup</h3>
-                  <label>
-                    Proposal Name (Internal)
-                    <input
-                      value={activeProposal.name}
-                      onChange={(event) => upsertActive({ ...activeProposal, name: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    Client Name
-                    <input
-                      value={activeProposal.clientName}
-                      onChange={(event) => upsertActive({ ...activeProposal, clientName: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    Project Title
-                    <input
-                      value={activeProposal.projectTitle}
-                      onChange={(event) => upsertActive({ ...activeProposal, projectTitle: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    Size Tier
-                    <select
-                      value={activeProposal.sizeTierId}
-                      onChange={(event) => upsertActive({ ...activeProposal, sizeTierId: event.target.value })}
-                    >
-                      {sizeTiers.map((tier) => (
-                        <option key={tier.id} value={tier.id}>
-                          {tier.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-              )}
+                <ProposalStepView
+                  step={state.step}
+                  activeProposal={view.activeProposal}
+                  blurbs={blurbState.blurbs}
+                  review={view.review}
+                  exportText={view.exportText}
+                  exportCsv={view.exportCsv}
+                  onUpsertActive={handlers.upsertActive}
+                  onTransitionStatus={handlers.transitionStatus}
+                  onDownloadCsv={handlers.downloadCsv}
+                  onStepValidityChange={(step, isValid) =>
+                    setStepValidity((current) =>
+                      current[step] === isValid
+                        ? current
+                        : { ...current, [step]: isValid },
+                    )
+                  }
+                />
 
-              {step === 2 && (
-                <div className="panel">
-                  <h3>Inclusions (Scope Builder)</h3>
-                  {phases.map((phase) => (
-                    <div key={phase.id} className="subpanel">
-                      <h4>{phase.name}</h4>
-                      {inclusions
-                        .filter((item) => item.phaseId === phase.id)
-                        .map((inclusion) => {
-                          const state = activeProposal.inclusions.find((item) => item.inclusionId === inclusion.id);
-                          if (!state) return null;
-                          return (
-                            <div key={inclusion.id} className="inclusion-row">
-                              <label className="checkbox-row">
-                                <input
-                                  type="checkbox"
-                                  checked={state.selected}
-                                  onChange={(event) =>
-                                    upsertActive({
-                                      ...activeProposal,
-                                      inclusions: updateInclusion(activeProposal.inclusions, inclusion.id, {
-                                        selected: event.target.checked,
-                                      }),
-                                    })
-                                  }
-                                />
-                                <span>
-                                  {inclusion.name} {inclusion.isRequired ? "(Required)" : ""}
-                                </span>
-                              </label>
-                              <p className="muted">{inclusion.description}</p>
-                              {inclusion.isRequired && !state.selected && (
-                                <label>
-                                  Reason/Assumption (required to continue)
-                                  <input
-                                    value={state.overrideReason}
-                                    onChange={(event) =>
-                                      upsertActive({
-                                        ...activeProposal,
-                                        inclusions: updateInclusion(activeProposal.inclusions, inclusion.id, {
-                                          overrideReason: event.target.value,
-                                        }),
-                                      })
-                                    }
-                                  />
-                                </label>
-                              )}
-                            </div>
-                          );
-                        })}
-                    </div>
-                  ))}
-                  {!canAdvanceFromInclusions(activeProposal) && (
-                    <p className="warning">Complete required reason fields before moving to next step.</p>
-                  )}
-                </div>
-              )}
-
-              {step === 3 && (
-                <div className="panel">
-                  <h3>Timeline & Complexity</h3>
-                  <label>
-                    Timeline Option
-                    <select
-                      value={activeProposal.timelineOptionId}
-                      onChange={(event) => upsertActive({ ...activeProposal, timelineOptionId: event.target.value })}
-                    >
-                      {timelineOptions.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Stakeholders / Company Size
-                    <select
-                      value={activeProposal.complexity.stakeholdersCompanySize}
-                      onChange={(event) =>
-                        upsertActive({
-                          ...activeProposal,
-                          complexity: { ...activeProposal.complexity, stakeholdersCompanySize: event.target.value as "Low" | "Medium" | "High" },
-                        })
-                      }
-                    >
-                      <option value="Low">Low</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                    </select>
-                  </label>
-                  <label>
-                    CMS Type
-                    <select
-                      value={activeProposal.complexity.cmsType}
-                      onChange={(event) =>
-                        upsertActive({
-                          ...activeProposal,
-                          complexity: { ...activeProposal.complexity, cmsType: event.target.value as ProposalDraft["complexity"]["cmsType"] },
-                        })
-                      }
-                    >
-                      <option value="WordPress">WordPress</option>
-                      <option value="Webflow">Webflow</option>
-                      <option value="Shopify">Shopify</option>
-                      <option value="Headless">Headless</option>
-                      <option value="Custom">Custom</option>
-                    </select>
-                  </label>
-                  <label>
-                    Complexity Notes
-                    <textarea
-                      value={activeProposal.complexity.notes}
-                      onChange={(event) =>
-                        upsertActive({
-                          ...activeProposal,
-                          complexity: { ...activeProposal.complexity, notes: event.target.value },
-                        })
-                      }
-                    />
-                  </label>
-                </div>
-              )}
-
-              {step === 4 && (
-                <div className="panel">
-                  <h3>Roles, Seniority & Rates</h3>
-                  {roles.map((role) => {
-                    const staff = activeProposal.staffing.find((item) => item.roleId === role.id);
-                    if (!staff) return null;
-                    const effectiveRate = Math.round(staff.baseRate * (staff.seniority === "Senior" ? 1.25 : 1));
-                    return (
-                      <div key={role.id} className="staff-row">
-                        <h4>{role.label}</h4>
-                        <label>
-                          Seniority
-                          <select
-                            value={staff.seniority}
-                            onChange={(event) =>
-                              upsertActive({
-                                ...activeProposal,
-                                staffing: updateStaffing(activeProposal.staffing, role.id, {
-                                  seniority: event.target.value as ProposalRoleStaffing["seniority"],
-                                }),
-                              })
-                            }
-                          >
-                            <option value="Standard">Standard</option>
-                            <option value="Senior">Senior</option>
-                          </select>
-                        </label>
-                        <label>
-                          Base Rate
-                          <input
-                            type="number"
-                            min={0}
-                            value={staff.baseRate}
-                            onChange={(event) =>
-                              upsertActive({
-                                ...activeProposal,
-                                staffing: updateStaffing(activeProposal.staffing, role.id, {
-                                  baseRate: Number(event.target.value),
-                                }),
-                              })
-                            }
-                          />
-                        </label>
-                        <label>
-                          Markup %
-                          <input
-                            type="number"
-                            min={0}
-                            value={staff.markupPercent}
-                            onChange={(event) =>
-                              upsertActive({
-                                ...activeProposal,
-                                staffing: updateStaffing(activeProposal.staffing, role.id, {
-                                  markupPercent: Number(event.target.value),
-                                }),
-                              })
-                            }
-                          />
-                        </label>
-                        <div className="effective">Effective rate: ${effectiveRate}/hr</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {step === 5 && (
-                <div className="panel">
-                  <h3>RFP Requirements & Blurbs</h3>
+                <div className="step-nav">
                   <button
                     onClick={() =>
-                      upsertActive({
-                        ...activeProposal,
-                        rfpRequirements: [
-                          ...activeProposal.rfpRequirements,
-                          { id: crypto.randomUUID(), prompt: "", response: "" } as RfpRequirement,
-                        ],
-                      })
+                      handlers.setStep((value) =>
+                        value > 1 ? ((value - 1) as EditorStep) : value,
+                      )
                     }
+                    disabled={state.step === 1}
                   >
-                    Add Requirement
+                    Back
                   </button>
-                  {activeProposal.rfpRequirements.map((req) => (
-                    <div key={req.id} className="subpanel">
-                      <label>
-                        Prompt
-                        <input
-                          value={req.prompt}
-                          onChange={(event) =>
-                            upsertActive({
-                              ...activeProposal,
-                              rfpRequirements: activeProposal.rfpRequirements.map((item) =>
-                                item.id === req.id ? { ...item, prompt: event.target.value } : item
-                              ),
-                            })
-                          }
-                        />
-                      </label>
-                      <label>
-                        Response
-                        <textarea
-                          value={req.response}
-                          onChange={(event) =>
-                            upsertActive({
-                              ...activeProposal,
-                              rfpRequirements: activeProposal.rfpRequirements.map((item) =>
-                                item.id === req.id ? { ...item, response: event.target.value } : item
-                              ),
-                            })
-                          }
-                        />
-                      </label>
-                    </div>
-                  ))}
-
-                  <h4>Saved Blurbs</h4>
-                  {blurbLibrary.map((blurb) => {
-                    const selected = activeProposal.pickedBlurbIds.includes(blurb.id);
-                    return (
-                      <label key={blurb.id} className="checkbox-row">
-                        <input
-                          type="checkbox"
-                          checked={selected}
-                          onChange={(event) =>
-                            upsertActive({
-                              ...activeProposal,
-                              pickedBlurbIds: event.target.checked
-                                ? [...activeProposal.pickedBlurbIds, blurb.id]
-                                : activeProposal.pickedBlurbIds.filter((id) => id !== blurb.id),
-                            })
-                          }
-                        />
-                        <span>
-                          <strong>{blurb.title}</strong> - {blurb.contentPlaintext}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
-
-              {step === 6 && review && (
-                <div className="panel">
-                  <h3>Review & Generate</h3>
-                  <div className="row wrap">
-                    <button onClick={regenerate}>Regenerate</button>
-                    <button onClick={transitionStatus} disabled={activeProposal.status === "Approved"}>
-                      {statusActionLabel(activeProposal.status)}
+                  {state.step < steps.length && (
+                    <button
+                      className="next-btn"
+                      onClick={() =>
+                        handlers.setStep((value) =>
+                          value < steps.length
+                            ? ((value + 1) as EditorStep)
+                            : value,
+                        )
+                      }
+                      disabled={!canAdvance}
+                    >
+                      Next
                     </button>
-                  </div>
-                  <p>
-                    Total Hours: <strong>{review.totalHours}</strong> | Total Price:{" "}
-                    <strong>${review.totalPrice.toLocaleString()}</strong>
-                  </p>
-
-                  <h4>Estimates by Phase and Role</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Phase</th>
-                        <th>Role</th>
-                        <th>Hours</th>
-                        <th>Rate</th>
-                        <th>Markup</th>
-                        <th>Price</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {review.estimateLines.map((line) => (
-                        <tr key={`${line.phaseId}-${line.roleId}`}>
-                          <td>{phases.find((phase) => phase.id === line.phaseId)?.name}</td>
-                          <td>{roles.find((role) => role.id === line.roleId)?.label}</td>
-                          <td>{line.hours}</td>
-                          <td>${line.rate}</td>
-                          <td>{line.markup}%</td>
-                          <td>${line.price.toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <h4>Budget Allocation by Phase</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Phase</th>
-                        <th>Budget</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {phases.map((phase) => (
-                        <tr key={phase.id}>
-                          <td>{phase.name}</td>
-                          <td>${review.budgetByPhase[phase.id].toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <h4>Assumptions / Exclusions / Risks</h4>
-                  <label>
-                    Assumptions
-                    <textarea
-                      value={activeProposal.assumptions}
-                      onChange={(event) => upsertActive({ ...activeProposal, assumptions: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    Exclusions
-                    <textarea
-                      value={activeProposal.exclusions}
-                      onChange={(event) => upsertActive({ ...activeProposal, exclusions: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    Risks
-                    <textarea value={activeProposal.risks} onChange={(event) => upsertActive({ ...activeProposal, risks: event.target.value })} />
-                  </label>
+                  )}
                 </div>
-              )}
-
-              {step === 7 && (
-                <div className="panel">
-                  <h3>Exports</h3>
-                  <div className="row wrap">
-                    <button onClick={regenerate}>Generate Outputs</button>
-                    <button onClick={downloadCsv} disabled={!exportCsv}>
-                      Download Teamwork CSV
-                    </button>
-                  </div>
-                  <label>
-                    Proposal Text Output
-                    <textarea value={exportText} readOnly rows={16} />
-                  </label>
-                  <label>
-                    Teamwork CSV Preview
-                    <textarea value={exportCsv} readOnly rows={8} />
-                  </label>
-                  <p className="muted">Current export is CSV for Excel upload. Swap to true XLSX in a later iteration.</p>
-                </div>
-              )}
-
-              <div className="step-nav">
-                <button onClick={() => setStep((value) => (value > 1 ? ((value - 1) as EditorStep) : value))} disabled={step === 1}>
-                  Back
-                </button>
-                {step < 7 && (
-                  <button
-                    className="next-btn"
-                    onClick={() => setStep((value) => (value < 7 ? ((value + 1) as EditorStep) : value))}
-                    disabled={step === 2 && !canAdvanceFromInclusions(activeProposal)}
-                  >
-                    Next
-                  </button>
-                )}
-              </div>
-            </>
-          )}
-        </section>
-      </main>
+              </>
+            )}
+          </section>
+        </main>
+      )}
     </div>
   );
 }
