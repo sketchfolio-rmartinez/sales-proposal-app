@@ -1,4 +1,5 @@
 import { ProposalDraft } from "../types";
+import "./ProposalSidebar.css";
 
 interface ProposalSidebarProps {
   proposals: ProposalDraft[];
@@ -26,14 +27,18 @@ export function ProposalSidebar({
   sizeTierLabel,
 }: ProposalSidebarProps) {
   return (
-    <aside className="sidebar">
-      <div className="sidebar-head">
+    <aside className="sidebar proposal-sidebar">
+      <div className="sidebar-head proposal-sidebar-head">
         <h2>Proposals</h2>
-        <button className="new-proposal-btn" onClick={onNewProposal}>
+        <button
+          type="button"
+          className="new-proposal-btn"
+          onClick={onNewProposal}
+        >
           New
         </button>
       </div>
-      <label className="sidebar-search">
+      <label className="sidebar-search proposal-sidebar-search">
         <input
           placeholder="Search proposals"
           value={proposalQuery}
@@ -45,21 +50,51 @@ export function ProposalSidebar({
       </div>
       <div className="proposal-list">
         {proposals.map((proposal) => (
-          <div key={proposal.id} className={`proposal-row ${proposal.id === activeProposalId ? "active" : ""}`}>
-            <button className="proposal-row-main" onClick={() => onSelectProposal(proposal.id)}>
+          <div
+            key={proposal.id}
+            className={`proposal-row ${proposal.id === activeProposalId ? "active" : ""}`}
+          >
+            <button
+              type="button"
+              className="proposal-row-main"
+              onClick={() => onSelectProposal(proposal.id)}
+            >
               <div className="proposal-primary">
-                <span className="proposal-title">{proposal.name || proposal.projectTitle || "New Proposal"}</span>
-                <span className="proposal-meta">
-                  <span className="proposal-client">{proposal.clientName || "Client pending"}</span>
-                  <span className="proposal-tier">{sizeTierLabel(proposal.sizeTierId)}</span>
-                  <span className="proposal-updated">{formatUpdated(proposal.updatedAt)}</span>
-                </span>
+                <div className="proposal-row-top">
+                  <span className="proposal-title">
+                    {proposal.name || proposal.projectTitle || "New Proposal"}
+                  </span>
+                  <span className="proposal-updated">
+                    {formatUpdated(proposal.updatedAt)}
+                  </span>
+                </div>
+                <div className="proposal-meta">
+                  <span className="proposal-client">
+                    {proposal.clientName || "Client pending"}
+                  </span>
+                  <span className="proposal-tier">
+                    {sizeTierLabel(proposal.sizeTierId)}
+                  </span>
+                </div>
               </div>
             </button>
             <div className="proposal-row-actions">
-              <span className={`status-dot status-${proposal.status.toLowerCase()}`}>{proposal.status}</span>
-              <button onClick={() => onDuplicateProposal(proposal)}>Dup</button>
-              <button className="danger" onClick={() => onDeleteProposal(proposal.id)}>
+              <span
+                className={`status-dot status-${proposal.status.toLowerCase()}`}
+              >
+                {proposal.status}
+              </span>
+              <button
+                type="button"
+                onClick={() => onDuplicateProposal(proposal)}
+              >
+                Dup
+              </button>
+              <button
+                type="button"
+                className="danger"
+                onClick={() => onDeleteProposal(proposal.id)}
+              >
                 Del
               </button>
             </div>
