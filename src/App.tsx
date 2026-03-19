@@ -22,22 +22,24 @@ export default function App() {
   } = useBlurbLibrary();
   const { state, view, handlers } = useProposalBuilder(blurbState.blurbs);
   const { route, navigate } = useAppRoute();
-  const [stepValidity, setStepValidity] = useState<Partial<Record<EditorStep, boolean>>>({});
+  const [stepValidity, setStepValidity] = useState<
+    Partial<Record<EditorStep, boolean>>
+  >({});
 
   useEffect(() => {
     setStepValidity({});
   }, [state.activeProposalId]);
 
-  const canAdvance =
-    view.activeProposal
-      ? (stepValidity[state.step] ?? canAdvanceFromStep(view.activeProposal, state.step))
-      : false;
+  const canAdvance = view.activeProposal
+    ? (stepValidity[state.step] ??
+      canAdvanceFromStep(view.activeProposal, state.step))
+    : false;
 
   return (
     <div className="page">
       <header className="app-header">
         <div className="row">
-          <h1>Proposal & Project Seeding App (v1)</h1>
+          <h1>Sketchfolio Proposal Builder</h1>
           <div className="app-nav">
             <button
               className={route === "builder" ? "active-step" : ""}
@@ -109,7 +111,9 @@ export default function App() {
                   onDownloadCsv={handlers.downloadCsv}
                   onStepValidityChange={(step, isValid) =>
                     setStepValidity((current) =>
-                      current[step] === isValid ? current : { ...current, [step]: isValid },
+                      current[step] === isValid
+                        ? current
+                        : { ...current, [step]: isValid },
                     )
                   }
                 />
