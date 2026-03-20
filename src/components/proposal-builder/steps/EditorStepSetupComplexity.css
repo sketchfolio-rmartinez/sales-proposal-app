@@ -21,7 +21,7 @@
 }
 
 .setup-step-shell .step-section-copy h3 {
-  font-size: clamp(1.45rem, 2vw, 1.8rem);
+  font-size: clamp(1.18rem, 1.7vw, 1.45rem);
   letter-spacing: -0.03em;
 }
 
@@ -135,6 +135,8 @@
 
 .setup-step-field--setup-full {
   grid-column: 1 / -1;
+  width: min(620px, 100%);
+  justify-self: start;
 }
 
 .setup-step-field--setup-half {

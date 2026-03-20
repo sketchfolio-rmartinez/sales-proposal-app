@@ -5,6 +5,10 @@
   margin-bottom: 4px;
 }
 
+.proposal-header:not(.has-meta) {
+  padding-top: 18px;
+}
+
 .proposal-header.has-meta {
   gap: 10px;
 }
@@ -33,6 +37,10 @@
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+.proposal-header:not(.has-meta) .stepper-row {
+  transform: translateY(-4px);
 }
 
 .proposal-header .status-pill {
@@ -71,9 +79,9 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 36px;
-  min-width: 36px;
-  height: 36px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
   padding: 0;
   border: 1px solid #d7e1da;
   border-radius: 999px;
@@ -84,7 +92,7 @@
 
 .proposal-header .step-chip-number {
   color: inherit;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
