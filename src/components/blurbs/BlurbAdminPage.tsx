@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { blurbCategories } from "../../app/blurbConfig";
 import { BlurbCategory, BlurbLibraryItem } from "../../types";
+import "./BlurbAdminPage.css";
 
 interface BlurbAdminPageProps {
   blurbs: BlurbLibraryItem[];

@@ -1,5 +1,9 @@
 .proposal-sidebar {
+  display: flex;
+  flex-direction: column;
   gap: 14px;
+  min-width: 0;
+  max-height: calc(100vh - 48px);
   padding: 24px 22px 18px;
   border: 1px solid #d6e0d9;
   border-radius: 28px;
@@ -25,14 +29,14 @@
 }
 
 .proposal-sidebar-head {
+  position: sticky;
   top: -2px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 2px 0 8px;
-  background: linear-gradient(
-    180deg,
-    rgba(248, 251, 248, 0.98) 0%,
-    rgba(248, 251, 248, 0.92) 72%,
-    rgba(248, 251, 248, 0) 100%
-  );
+  background: transparent;
 }
 
 .proposal-sidebar-head h2 {
@@ -78,6 +82,9 @@
 }
 
 .proposal-sidebar .proposal-list-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
   padding: 0 6px;
   color: #6d8077;
   font-size: 0.72rem;
@@ -86,7 +93,10 @@
 }
 
 .proposal-sidebar .proposal-list {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  overflow-y: auto;
   padding-right: 4px;
 }
 
@@ -122,15 +132,24 @@
 }
 
 .proposal-sidebar .proposal-row-main {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  display: block;
   padding: 14px 14px 10px;
+  text-align: left;
 }
 
 .proposal-sidebar .proposal-primary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
 }
 
-.proposal-row-top,
-.proposal-meta {
+.proposal-sidebar .proposal-row-top,
+.proposal-sidebar .proposal-meta {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -138,16 +157,27 @@
 }
 
 .proposal-sidebar .proposal-title {
+  display: block;
   color: #162625;
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .proposal-sidebar .proposal-client,
 .proposal-sidebar .proposal-updated {
   color: #697b73;
   font-size: 0.88rem;
+}
+
+.proposal-sidebar .proposal-client {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  justify-self: start;
 }
 
 .proposal-sidebar .proposal-tier {
@@ -158,8 +188,11 @@
 }
 
 .proposal-sidebar .proposal-row-actions {
+  display: flex;
   padding: 0 10px 12px;
   gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .proposal-sidebar .proposal-row-actions .status-dot,
@@ -173,6 +206,7 @@
 .proposal-sidebar .proposal-row-actions .status-dot {
   display: inline-flex;
   align-items: center;
+  margin-right: auto;
   border-color: #d3dfd6;
   background: #f4f8f5;
   color: #5c7066;
@@ -241,8 +275,8 @@
     padding: 12px 12px 8px;
   }
 
-  .proposal-row-top,
-  .proposal-meta {
+  .proposal-sidebar .proposal-row-top,
+  .proposal-sidebar .proposal-meta {
     grid-template-columns: 1fr;
     justify-items: start;
   }

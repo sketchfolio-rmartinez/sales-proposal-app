@@ -27,8 +27,8 @@ export function ProposalSidebar({
   sizeTierLabel,
 }: ProposalSidebarProps) {
   return (
-    <aside className="sidebar proposal-sidebar">
-      <div className="sidebar-head proposal-sidebar-head">
+    <aside className="proposal-sidebar">
+      <div className="proposal-sidebar-head">
         <h2>Proposals</h2>
         <button
           type="button"
@@ -38,7 +38,7 @@ export function ProposalSidebar({
           New
         </button>
       </div>
-      <label className="sidebar-search proposal-sidebar-search">
+      <label className="proposal-sidebar-search">
         <input
           placeholder="Search proposals"
           value={proposalQuery}
