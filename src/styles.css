@@ -37,6 +37,10 @@ body {
   max-width: 100%;
 }
 
+.layout--sidebar-collapsed {
+  grid-template-columns: 76px minmax(0, 1fr);
+}
+
 .content {
   display: flex;
   flex-direction: column;
@@ -167,88 +171,6 @@ button {
   cursor: pointer;
 }
 
-.stepper-header {
-  margin: 6px 0 12px;
-}
-
-.stepper-title {
-  margin: 0 0 8px;
-  color: #385a49;
-}
-
-.stepper-progress-track {
-  width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: #e3ece6;
-  overflow: hidden;
-}
-
-.stepper-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #2f7a5b 0%, #4e9b77 100%);
-  transition: width 180ms ease;
-}
-
-.stepper-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 8px;
-}
-
-.step-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: flex-start;
-  background: #f6faf7;
-  border: 1px solid #cfe0d1;
-  color: #2f3f3a;
-  min-width: 0;
-}
-
-.step-chip-number {
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #e3ece6;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.step-chip-label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 13px;
-}
-
-.step-chip.active {
-  background: #2f7a5b;
-  border-color: #2f7a5b;
-  color: #fff;
-}
-
-.step-chip.active .step-chip-number {
-  background: #ffffff;
-  color: #2f7a5b;
-}
-
-.step-chip.locked,
-.step-chip:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.step-chip.complete {
-  border-color: #87b89d;
-  background: #edf7f0;
-}
-
 .step-nav {
   display: flex;
   justify-content: center;
@@ -309,19 +231,6 @@ button.danger {
 .effective {
   color: #385a49;
   font-weight: 600;
-}
-
-.status-pill {
-  border: 1px solid #8ca98c;
-  border-radius: 999px;
-  padding: 4px 10px;
-}
-
-.proposal-heading {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
 }
 
 .muted {

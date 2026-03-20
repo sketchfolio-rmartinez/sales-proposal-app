@@ -5,7 +5,7 @@ import {
   normalizeNonNegativeInput,
   normalizePercentInput,
 } from "../../../lib/editorStepFieldUtils";
-import { StepSectionHeader } from "../../shared/StepSectionHeader";
+import { ProposalStepIntroShell } from "../../shared/ProposalStepIntroShell";
 import { SummaryPill } from "../../shared/SummaryPill";
 
 interface EditorStepRolesLeadSupportProps {
@@ -39,27 +39,26 @@ export function EditorStepRolesLeadSupport({
 }: EditorStepRolesLeadSupportProps) {
   return (
     <div className="step-section">
-      <div className="panel step-section-shell">
-        <StepSectionHeader
-          title="Roles, Lead & Support"
-          description="Select the lead/support lines you need, then split the full 100% project allocation across those lines."
-          summary={
-            <SummaryPill
-              primaryLabel="Allocated"
-              primaryValue={formatPercentValue(staffingTotal)}
-              secondaryLabel={
-                remainingStaffingAllocation >= 0 ? "Remaining" : "Over"
-              }
-              secondaryValue={formatPercentValue(
-                Math.abs(remainingStaffingAllocation),
-              )}
-              secondaryTone={
-                remainingStaffingAllocation === 0 ? "default" : "warning"
-              }
-            />
-          }
-        />
-      </div>
+      <ProposalStepIntroShell
+        activeProposal={activeProposal}
+        title="Roles, Lead & Support"
+        description="Select the lead/support lines you need, then split the full 100% project allocation across those lines."
+        summary={
+          <SummaryPill
+            primaryLabel="Allocated"
+            primaryValue={formatPercentValue(staffingTotal)}
+            secondaryLabel={
+              remainingStaffingAllocation >= 0 ? "Remaining" : "Over"
+            }
+            secondaryValue={formatPercentValue(
+              Math.abs(remainingStaffingAllocation),
+            )}
+            secondaryTone={
+              remainingStaffingAllocation === 0 ? "default" : "warning"
+            }
+          />
+        }
+      />
       <div className="panel">
         <table className="role-matrix staffing-table polished-staffing-table">
           <thead>

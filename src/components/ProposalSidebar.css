@@ -26,6 +26,10 @@
   box-shadow:
     0 20px 44px rgba(31, 47, 47, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition:
+    padding 180ms ease,
+    border-radius 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .proposal-sidebar-head {
@@ -34,6 +38,12 @@
   justify-content: space-between;
   padding: 2px 0 8px;
   background: transparent;
+}
+
+.proposal-sidebar-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .proposal-sidebar-head h2 {
@@ -54,6 +64,30 @@
     0 10px 18px rgba(47, 122, 91, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   font-weight: 600;
+}
+
+.proposal-sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #c9d8ce;
+  border-radius: 999px;
+  background: rgba(247, 251, 248, 0.94);
+  color: #2d4a3d;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.proposal-sidebar-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
 }
 
 .proposal-sidebar-search {
@@ -253,6 +287,35 @@
   padding: 12px 8px 4px;
 }
 
+.proposal-sidebar.is-collapsed {
+  gap: 0;
+  align-items: stretch;
+  padding: 14px 10px;
+  border-radius: 22px;
+}
+
+.proposal-sidebar.is-collapsed .proposal-sidebar-head {
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.proposal-sidebar.is-collapsed .proposal-sidebar-head h2,
+.proposal-sidebar.is-collapsed .new-proposal-btn {
+  display: none;
+}
+
+.proposal-sidebar.is-collapsed .proposal-sidebar-head-actions {
+  width: 100%;
+  justify-content: center;
+}
+
+.proposal-sidebar.is-collapsed .proposal-sidebar-body {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 @media (max-width: 900px) {
   .proposal-sidebar {
     max-height: none;
@@ -263,6 +326,10 @@
   .proposal-sidebar {
     padding: 20px 18px 16px;
     border-radius: 22px;
+  }
+
+  .proposal-sidebar.is-collapsed {
+    padding: 12px 8px;
   }
 
   .proposal-sidebar-head h2 {

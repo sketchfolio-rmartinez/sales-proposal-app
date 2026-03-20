@@ -4,7 +4,7 @@ import { inclusions, phases } from "../../../data/defaults";
 import { BlurbLibraryItem, ProposalDraft } from "../../../types";
 import { normalizePercentInput } from "../../../lib/editorStepFieldUtils";
 import { BlurbPickerModal } from "../../blurbs/BlurbPickerModal";
-import { StepSectionHeader } from "../../shared/StepSectionHeader";
+import { ProposalStepIntroShell } from "../../shared/ProposalStepIntroShell";
 import { SummaryPill } from "../../shared/SummaryPill";
 
 interface EditorStepInclusionsScopeBuilderProps {
@@ -33,27 +33,26 @@ export function EditorStepInclusionsScopeBuilder({
   return (
     <>
       <div className="step-section">
-        <div className="panel step-section-shell">
-          <StepSectionHeader
-            title="Inclusions (Scope Builder)"
-            description="All inclusions start at 0%. Allocate the full 100% of the project budget to move forward."
-            summary={
-              <SummaryPill
-                primaryLabel="Allocated"
-                primaryValue={formatPercentValue(inclusionTotal)}
-                secondaryLabel={
-                  remainingInclusionAllocation >= 0 ? "Remaining" : "Over"
-                }
-                secondaryValue={formatPercentValue(
-                  Math.abs(remainingInclusionAllocation),
-                )}
-                secondaryTone={
-                  remainingInclusionAllocation === 0 ? "default" : "warning"
-                }
-              />
-            }
-          />
-        </div>
+        <ProposalStepIntroShell
+          activeProposal={activeProposal}
+          title="Inclusions (Scope Builder)"
+          description="All inclusions start at 0%. Allocate the full 100% of the project budget to move forward."
+          summary={
+            <SummaryPill
+              primaryLabel="Allocated"
+              primaryValue={formatPercentValue(inclusionTotal)}
+              secondaryLabel={
+                remainingInclusionAllocation >= 0 ? "Remaining" : "Over"
+              }
+              secondaryValue={formatPercentValue(
+                Math.abs(remainingInclusionAllocation),
+              )}
+              secondaryTone={
+                remainingInclusionAllocation === 0 ? "default" : "warning"
+              }
+            />
+          }
+        />
         <div className="panel">
           {phases.map((phase) => {
             const phaseItems = inclusions.filter((item) => item.phaseId === phase.id);

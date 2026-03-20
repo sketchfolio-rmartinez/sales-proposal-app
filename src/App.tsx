@@ -22,6 +22,7 @@ export default function App() {
   } = useBlurbLibrary();
   const { state, view, handlers } = useProposalBuilder(blurbState.blurbs);
   const { route, navigate } = useAppRoute();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [stepValidity, setStepValidity] = useState<
     Partial<Record<EditorStep, boolean>>
   >({});
@@ -71,8 +72,14 @@ export default function App() {
           />
         </main>
       ) : (
-        <main className="layout">
+        <main
+          className={`layout ${isSidebarCollapsed ? "layout--sidebar-collapsed" : ""}`}
+        >
           <ProposalSidebar
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapsed={() =>
+              setIsSidebarCollapsed((current) => !current)
+            }
             proposals={view.filteredProposals}
             activeProposalId={state.activeProposalId}
             proposalQuery={state.proposalQuery}
@@ -93,9 +100,11 @@ export default function App() {
             ) : (
               <>
                 <ProposalHeader
-                  activeProposal={view.activeProposal}
                   step={state.step}
                   maxAccessibleStep={getMaxAccessibleStep(view.activeProposal)}
+                  showWorkspaceMeta={state.step >= 4}
+                  showStatusPill={state.step < 4}
+                  activeProposal={view.activeProposal}
                   onStepChange={handlers.setStep}
                 />
 
