@@ -1,11 +1,14 @@
-import { canAdvanceFromRoles, updateStaffing } from "../../../app/proposalUtils";
+import {
+  canAdvanceFromRoles,
+  updateStaffing,
+} from "../../../app/proposalUtils";
 import { roles } from "../../../data/defaults";
 import { ProposalDraft } from "../../../types";
 import {
   normalizeNonNegativeInput,
   normalizePercentInput,
 } from "../../../lib/editorStepFieldUtils";
-import { StepSectionHeader } from "../../shared/StepSectionHeader";
+import { ProposalStepIntroShell } from "../../shared/ProposalStepIntroShell";
 import { SummaryPill } from "../../shared/SummaryPill";
 
 interface EditorStepRolesLeadSupportProps {
@@ -39,27 +42,26 @@ export function EditorStepRolesLeadSupport({
 }: EditorStepRolesLeadSupportProps) {
   return (
     <div className="step-section">
-      <div className="panel step-section-shell">
-        <StepSectionHeader
-          title="Roles, Lead & Support"
-          description="Select the lead/support lines you need, then split the full 100% project allocation across those lines."
-          summary={
-            <SummaryPill
-              primaryLabel="Allocated"
-              primaryValue={formatPercentValue(staffingTotal)}
-              secondaryLabel={
-                remainingStaffingAllocation >= 0 ? "Remaining" : "Over"
-              }
-              secondaryValue={formatPercentValue(
-                Math.abs(remainingStaffingAllocation),
-              )}
-              secondaryTone={
-                remainingStaffingAllocation === 0 ? "default" : "warning"
-              }
-            />
-          }
-        />
-      </div>
+      <ProposalStepIntroShell
+        activeProposal={activeProposal}
+        title="Roles, Lead & Support"
+        description="Select the lead/support lines you need, then split the full 100% project allocation across those lines."
+        summary={
+          <SummaryPill
+            primaryLabel="Allocated"
+            primaryValue={formatPercentValue(staffingTotal)}
+            secondaryLabel={
+              remainingStaffingAllocation >= 0 ? "Remaining" : "Over"
+            }
+            secondaryValue={formatPercentValue(
+              Math.abs(remainingStaffingAllocation),
+            )}
+            secondaryTone={
+              remainingStaffingAllocation === 0 ? "default" : "warning"
+            }
+          />
+        }
+      />
       <div className="panel">
         <table className="role-matrix staffing-table polished-staffing-table">
           <thead>
@@ -79,7 +81,10 @@ export function EditorStepRolesLeadSupport({
               );
 
               return (
-                <tr key={line.id} className={line.selected ? "is-selected" : "is-idle"}>
+                <tr
+                  key={line.id}
+                  className={line.selected ? "is-selected" : "is-idle"}
+                >
                   <td>
                     <input
                       type="checkbox"
@@ -87,17 +92,23 @@ export function EditorStepRolesLeadSupport({
                       onChange={(event) =>
                         onUpsertActive({
                           ...activeProposal,
-                          staffing: updateStaffing(activeProposal.staffing, line.id, {
-                            selected: event.target.checked,
-                            allocationPercent: event.target.checked
-                              ? line.allocationPercent
-                              : 0,
-                          }),
+                          staffing: updateStaffing(
+                            activeProposal.staffing,
+                            line.id,
+                            {
+                              selected: event.target.checked,
+                              allocationPercent: event.target.checked
+                                ? line.allocationPercent
+                                : 0,
+                            },
+                          ),
                         })
                       }
                     />
                   </td>
-                  <td className="staffing-line-label">{lineLabel(line.roleId, line.scope)}</td>
+                  <td className="staffing-line-label">
+                    {lineLabel(line.roleId, line.scope)}
+                  </td>
                   <td>
                     <input
                       type="number"
@@ -109,9 +120,15 @@ export function EditorStepRolesLeadSupport({
                       onChange={(event) =>
                         onUpsertActive({
                           ...activeProposal,
-                          staffing: updateStaffing(activeProposal.staffing, line.id, {
-                            allocationPercent: normalizePercentInput(event.target.value),
-                          }),
+                          staffing: updateStaffing(
+                            activeProposal.staffing,
+                            line.id,
+                            {
+                              allocationPercent: normalizePercentInput(
+                                event.target.value,
+                              ),
+                            },
+                          ),
                         })
                       }
                     />
@@ -124,9 +141,15 @@ export function EditorStepRolesLeadSupport({
                       onChange={(event) =>
                         onUpsertActive({
                           ...activeProposal,
-                          staffing: updateStaffing(activeProposal.staffing, line.id, {
-                            baseRate: normalizeNonNegativeInput(event.target.value),
-                          }),
+                          staffing: updateStaffing(
+                            activeProposal.staffing,
+                            line.id,
+                            {
+                              baseRate: normalizeNonNegativeInput(
+                                event.target.value,
+                              ),
+                            },
+                          ),
                         })
                       }
                     />
@@ -139,14 +162,22 @@ export function EditorStepRolesLeadSupport({
                       onChange={(event) =>
                         onUpsertActive({
                           ...activeProposal,
-                          staffing: updateStaffing(activeProposal.staffing, line.id, {
-                            markupPercent: normalizePercentInput(event.target.value),
-                          }),
+                          staffing: updateStaffing(
+                            activeProposal.staffing,
+                            line.id,
+                            {
+                              markupPercent: normalizePercentInput(
+                                event.target.value,
+                              ),
+                            },
+                          ),
                         })
                       }
                     />
                   </td>
-                  <td className="staffing-effective-cell">{formatCurrency(effectiveRate)}</td>
+                  <td className="staffing-effective-cell">
+                    {formatCurrency(effectiveRate)}
+                  </td>
                 </tr>
               );
             })}
@@ -155,7 +186,8 @@ export function EditorStepRolesLeadSupport({
 
         {!canAdvanceFromRoles(activeProposal) && (
           <p className="warning">
-            Selected role lines must have valid rates and total 100% before you can continue.
+            Selected role lines must have valid rates and total 100% before you
+            can continue.
           </p>
         )}
       </div>

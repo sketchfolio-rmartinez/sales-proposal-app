@@ -22,6 +22,7 @@ export default function App() {
   } = useBlurbLibrary();
   const { state, view, handlers } = useProposalBuilder(blurbState.blurbs);
   const { route, navigate } = useAppRoute();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [stepValidity, setStepValidity] = useState<
     Partial<Record<EditorStep, boolean>>
   >({});
@@ -39,7 +40,14 @@ export default function App() {
     <div className="page">
       <header className="app-header">
         <div className="row">
-          <h1>Sketchfolio Proposal Builder</h1>
+          <div className="app-brand">
+            <img
+              alt="Sketchfolio Logo"
+              className="siteLogo"
+              src="https://sketchfolio.com/wp-content/themes/sketchfolio-v3/img/logo-sketchfolio-660x168-white.png"
+            />
+            <span className="app-brand-label">Proposal Builder</span>
+          </div>
           <div className="app-nav">
             <button
               className={route === "builder" ? "active-step" : ""}
@@ -71,8 +79,14 @@ export default function App() {
           />
         </main>
       ) : (
-        <main className="layout">
+        <main
+          className={`layout ${isSidebarCollapsed ? "layout--sidebar-collapsed" : ""}`}
+        >
           <ProposalSidebar
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapsed={() =>
+              setIsSidebarCollapsed((current) => !current)
+            }
             proposals={view.filteredProposals}
             activeProposalId={state.activeProposalId}
             proposalQuery={state.proposalQuery}
@@ -93,9 +107,11 @@ export default function App() {
             ) : (
               <>
                 <ProposalHeader
-                  activeProposal={view.activeProposal}
                   step={state.step}
                   maxAccessibleStep={getMaxAccessibleStep(view.activeProposal)}
+                  showWorkspaceMeta={state.step >= 4}
+                  showStatusPill={state.step < 4}
+                  activeProposal={view.activeProposal}
                   onStepChange={handlers.setStep}
                 />
 

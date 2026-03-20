@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { canAdvanceFromInclusions, updateInclusion } from "../../../app/proposalUtils";
+import {
+  canAdvanceFromInclusions,
+  updateInclusion,
+} from "../../../app/proposalUtils";
 import { inclusions, phases } from "../../../data/defaults";
 import { BlurbLibraryItem, ProposalDraft } from "../../../types";
 import { normalizePercentInput } from "../../../lib/editorStepFieldUtils";
 import { BlurbPickerModal } from "../../blurbs/BlurbPickerModal";
-import { StepSectionHeader } from "../../shared/StepSectionHeader";
+import { ProposalStepIntroShell } from "../../shared/ProposalStepIntroShell";
 import { SummaryPill } from "../../shared/SummaryPill";
 
 interface EditorStepInclusionsScopeBuilderProps {
@@ -26,40 +29,45 @@ export function EditorStepInclusionsScopeBuilder({
   remainingInclusionAllocation,
   onUpsertActive,
 }: EditorStepInclusionsScopeBuilderProps) {
-  const [inclusionPickerId, setInclusionPickerId] = useState<string | null>(null);
+  const [inclusionPickerId, setInclusionPickerId] = useState<string | null>(
+    null,
+  );
   const resolveBlurb = (blurbId: string | null | undefined) =>
     blurbs.find((blurb) => blurb.id === blurbId) ?? null;
 
   return (
     <>
       <div className="step-section">
-        <div className="panel step-section-shell">
-          <StepSectionHeader
-            title="Inclusions (Scope Builder)"
-            description="All inclusions start at 0%. Allocate the full 100% of the project budget to move forward."
-            summary={
-              <SummaryPill
-                primaryLabel="Allocated"
-                primaryValue={formatPercentValue(inclusionTotal)}
-                secondaryLabel={
-                  remainingInclusionAllocation >= 0 ? "Remaining" : "Over"
-                }
-                secondaryValue={formatPercentValue(
-                  Math.abs(remainingInclusionAllocation),
-                )}
-                secondaryTone={
-                  remainingInclusionAllocation === 0 ? "default" : "warning"
-                }
-              />
-            }
-          />
-        </div>
+        <ProposalStepIntroShell
+          activeProposal={activeProposal}
+          title="Inclusions (Scope Builder)"
+          description="All inclusions start at 0%. Allocate the full 100% of the project budget to move forward."
+          summary={
+            <SummaryPill
+              primaryLabel="Allocated"
+              primaryValue={formatPercentValue(inclusionTotal)}
+              secondaryLabel={
+                remainingInclusionAllocation >= 0 ? "Remaining" : "Over"
+              }
+              secondaryValue={formatPercentValue(
+                Math.abs(remainingInclusionAllocation),
+              )}
+              secondaryTone={
+                remainingInclusionAllocation === 0 ? "default" : "warning"
+              }
+            />
+          }
+        />
         <div className="panel">
           {phases.map((phase) => {
-            const phaseItems = inclusions.filter((item) => item.phaseId === phase.id);
+            const phaseItems = inclusions.filter(
+              (item) => item.phaseId === phase.id,
+            );
             const phaseTotal = activeProposal.inclusions
               .filter((item) =>
-                phaseItems.some((phaseItem) => phaseItem.id === item.inclusionId),
+                phaseItems.some(
+                  (phaseItem) => phaseItem.id === item.inclusionId,
+                ),
               )
               .reduce((sum, item) => sum + item.allocationPercent, 0);
 
@@ -67,7 +75,9 @@ export function EditorStepInclusionsScopeBuilder({
               <div key={phase.id} className="subpanel">
                 <div className="row wrap">
                   <h4>{phase.name}</h4>
-                  <span className="muted">Phase total: {formatPercentValue(phaseTotal)}</span>
+                  <span className="muted">
+                    Phase total: {formatPercentValue(phaseTotal)}
+                  </span>
                 </div>
                 {phaseItems.map((inclusion) => {
                   const state = activeProposal.inclusions.find(
@@ -97,7 +107,9 @@ export function EditorStepInclusionsScopeBuilder({
                                   activeProposal.inclusions,
                                   inclusion.id,
                                   {
-                                    allocationPercent: normalizePercentInput(event.target.value),
+                                    allocationPercent: normalizePercentInput(
+                                      event.target.value,
+                                    ),
                                   },
                                 ),
                               })
@@ -128,7 +140,9 @@ export function EditorStepInclusionsScopeBuilder({
                             type="button"
                             onClick={() => setInclusionPickerId(inclusion.id)}
                           >
-                            {state.blurbIds.length > 0 ? "Manage Blurbs" : "+ Add Blurbs"}
+                            {state.blurbIds.length > 0
+                              ? "Manage Blurbs"
+                              : "+ Add Blurbs"}
                           </button>
                           {state.blurbIds.length > 0 && (
                             <button
@@ -160,7 +174,8 @@ export function EditorStepInclusionsScopeBuilder({
 
           {!canAdvanceFromInclusions(activeProposal) && (
             <p className="warning">
-              Total inclusion allocation must equal 100% before you can continue.
+              Total inclusion allocation must equal 100% before you can
+              continue.
             </p>
           )}
         </div>

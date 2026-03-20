@@ -1,50 +1,82 @@
 import { steps, type EditorStep } from "../../app/editorConfig";
 import { ProposalDraft } from "../../types";
+import "../shared/ProposalStatusPill.css";
+import "./ProposalHeader.css";
 
 interface ProposalHeaderProps {
-  activeProposal: ProposalDraft;
   step: EditorStep;
   maxAccessibleStep: EditorStep;
+  showWorkspaceMeta?: boolean;
+  showStatusPill?: boolean;
+  activeProposal?: ProposalDraft;
   onStepChange: (step: EditorStep) => void;
 }
 
 export function ProposalHeader({
-  activeProposal,
   step,
   maxAccessibleStep,
+  showWorkspaceMeta = true,
+  showStatusPill = false,
+  activeProposal,
   onStepChange,
 }: ProposalHeaderProps) {
   return (
-    <div className="panel">
-      <div className="proposal-heading">
-        <h2>{activeProposal.name || activeProposal.projectTitle || "New Proposal"}</h2>
-        <span className="status-pill">{activeProposal.status}</span>
-      </div>
-      <div className="stepper-header">
-        <p className="stepper-title">
-          Step {step} of {steps.length}: <strong>{steps[step - 1].label}</strong>
-        </p>
-        <div className="stepper-progress-track" aria-hidden="true">
-          <div className="stepper-progress-fill" style={{ width: `${(step / steps.length) * 100}%` }} />
+    <div
+      className={`proposal-header ${showWorkspaceMeta ? "has-meta" : ""}`.trim()}
+    >
+      {showWorkspaceMeta && activeProposal ? (
+        <div className="proposal-heading">
+          <h2>
+            {activeProposal.name ||
+              activeProposal.projectTitle ||
+              "New Proposal"}
+          </h2>
+          <span
+            className={`status-pill status-pill--${activeProposal.status.toLowerCase()}`}
+          >
+            {activeProposal.status}
+          </span>
         </div>
-      </div>
-      <div className="stepper-grid" role="tablist" aria-label="Proposal steps">
-        {steps.map((stepItem) => {
-          const isActive = step === stepItem.id;
-          const isComplete = step > stepItem.id;
-          const isLocked = stepItem.id > maxAccessibleStep;
-          return (
-            <button
-              key={stepItem.id}
-              onClick={() => onStepChange(stepItem.id)}
-              disabled={isLocked}
-              className={`step-chip ${isActive ? "active" : ""} ${isComplete ? "complete" : ""} ${isLocked ? "locked" : ""}`}
-            >
-              <span className="step-chip-number">{stepItem.id}</span>
-              <span className="step-chip-label">{stepItem.label}</span>
-            </button>
-          );
-        })}
+      ) : null}
+      <div className="stepper-row">
+        <div
+          className="stepper-grid"
+          role="tablist"
+          aria-label="Proposal steps"
+        >
+          {steps.map((stepItem) => {
+            const isActive = step === stepItem.id;
+            const isComplete = step > stepItem.id;
+            const isLocked = stepItem.id > maxAccessibleStep;
+            return (
+              <div
+                key={stepItem.id}
+                className={`step-node ${isActive ? "active" : ""} ${isComplete ? "complete" : ""} ${isLocked ? "locked" : ""}`}
+              >
+                <button
+                  type="button"
+                  onClick={() => onStepChange(stepItem.id)}
+                  disabled={isLocked}
+                  className="step-chip"
+                  aria-label={`Step ${stepItem.id}: ${stepItem.label}`}
+                  title={stepItem.label}
+                >
+                  <span className="step-chip-number">{stepItem.id}</span>
+                </button>
+                {stepItem.id < steps.length ? (
+                  <span className="step-node-connector" aria-hidden="true" />
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+        {showStatusPill && activeProposal ? (
+          <span
+            className={`status-pill status-pill--${activeProposal.status.toLowerCase()}`}
+          >
+            {activeProposal.status}
+          </span>
+        ) : null}
       </div>
     </div>
   );

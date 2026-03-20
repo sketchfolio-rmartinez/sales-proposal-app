@@ -12,7 +12,7 @@ import {
 import { SelectField } from "../../forms/SelectField";
 import { TextareaField } from "../../forms/TextareaField";
 import { TextField } from "../../forms/TextField";
-import { StepSectionHeader } from "../../shared/StepSectionHeader";
+import { ProposalStepIntroShell } from "../../shared/ProposalStepIntroShell";
 import { SummaryPill } from "../../shared/SummaryPill";
 import "./EditorStepSetupComplexity.css";
 
@@ -56,18 +56,19 @@ export function EditorStepSetupComplexity({
 
   return (
     <div className="step-section setup-step">
-      <div className="panel step-section-shell setup-step-shell">
-        <StepSectionHeader
-          title="Setup & Complexity"
-          description="Set the core proposal details that shape the working estimate."
-          summary={
-            <SummaryPill
-              primaryLabel="Rough Estimate"
-              primaryValue={setupReady ? roughEstimate : "Complete setup"}
-            />
-          }
-        />
-      </div>
+      <ProposalStepIntroShell
+        activeProposal={activeProposal}
+        className="setup-step-shell"
+        showProposalMeta={false}
+        title="Setup & Complexity"
+        description="Set the core proposal details that shape the working estimate."
+        summary={
+          <SummaryPill
+            primaryLabel="Rough Estimate"
+            primaryValue={setupReady ? roughEstimate : "Complete setup"}
+          />
+        }
+      />
 
       <div className="setup-step-grid">
         <section className="panel setup-step-card setup-step-card--primary">
