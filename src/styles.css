@@ -21,12 +21,34 @@ body {
   overflow-x: clip;
 }
 
-.app-header h1 {
-  margin: 0 0 8px;
+.app-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  margin-left: 0px;
 }
 
-.app-header p {
-  margin: 0;
+.siteLogo {
+  display: block;
+  width: min(193px, 35.5vw);
+  height: auto;
+  filter: brightness(0) saturate(100%);
+  opacity: 0.9;
+  margin-left: 8px;
+}
+
+.app-brand-label {
+  display: block;
+  width: min(193px, 35.5vw);
+  text-align: center;
+  color: #7b8a83;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .layout {
@@ -471,7 +493,44 @@ td {
 
 .app-nav {
   display: flex;
-  gap: 8px;
+  gap: 4px;
+  padding: 2px;
+  border: 1px solid #dbe5dd;
+  border-radius: 12px;
+  background: rgba(250, 252, 250, 0.72);
+  margin-top: -12px;
+  margin-right: -4px;
+  box-shadow:
+    0 6px 14px rgba(31, 47, 47, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.app-nav button {
+  min-height: 24px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #4d625b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-nav button:hover {
+  background: rgba(223, 236, 228, 0.92);
+  color: #325345;
+}
+
+.app-nav .active-step {
+  background: linear-gradient(180deg, #3b8767 0%, #2f7a5b 100%);
+  color: #fff;
+  box-shadow:
+    0 8px 14px rgba(47, 122, 91, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .admin-layout {

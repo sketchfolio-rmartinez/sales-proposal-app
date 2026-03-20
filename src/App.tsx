@@ -40,7 +40,14 @@ export default function App() {
     <div className="page">
       <header className="app-header">
         <div className="row">
-          <h1>Sketchfolio Proposal Builder</h1>
+          <div className="app-brand">
+            <img
+              alt="Sketchfolio Logo"
+              className="siteLogo"
+              src="https://sketchfolio.com/wp-content/themes/sketchfolio-v3/img/logo-sketchfolio-660x168-white.png"
+            />
+            <span className="app-brand-label">Proposal Builder</span>
+          </div>
           <div className="app-nav">
             <button
               className={route === "builder" ? "active-step" : ""}
