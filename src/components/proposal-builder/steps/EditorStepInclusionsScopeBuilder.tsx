@@ -70,8 +70,7 @@ export function EditorStepInclusionsScopeBuilder({
             />
           }
         />
-        <div className="inclusions-dashboard">
-        <div className="panel inclusions-phase-grid">
+        <div className="inclusions-phase-grid">
           {phases.map((phase) => {
             const phaseItems = inclusions.filter(
               (item) => item.phaseId === phase.id,
@@ -220,7 +219,6 @@ export function EditorStepInclusionsScopeBuilder({
               continue.
             </p>
           )}
-        </div>
         </div>
       </div>
 
