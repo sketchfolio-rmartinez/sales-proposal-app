@@ -44,28 +44,6 @@ export function EditorStepInclusionsScopeBuilder({
   );
   const resolveBlurb = (blurbId: string | null | undefined) =>
     blurbs.find((blurb) => blurb.id === blurbId) ?? null;
-  const attachedBlurbCount = activeProposal.inclusions.reduce(
-    (sum, item) => sum + item.blurbIds.length,
-    0,
-  );
-  const activePhaseCount = phases.filter((phase) => {
-    const phaseItems = inclusions.filter((item) => item.phaseId === phase.id);
-    return activeProposal.inclusions.some(
-      (item) =>
-        phaseItems.some((phaseItem) => phaseItem.id === item.inclusionId) &&
-        item.allocationPercent > 0,
-    );
-  }).length;
-  const summaryLabel =
-    remainingInclusionAllocation === 0
-      ? "Allocated"
-      : remainingInclusionAllocation > 0
-        ? "Remaining"
-        : "Over";
-  const summaryValue =
-    remainingInclusionAllocation === 0
-      ? formatPercentValue(inclusionTotal)
-      : formatPercentValue(Math.abs(remainingInclusionAllocation));
 
   return (
     <>
@@ -78,37 +56,21 @@ export function EditorStepInclusionsScopeBuilder({
           description="All inclusions start at 0%. Allocate the full 100% of the project budget to move forward."
           summary={
             <SummaryPill
-              primaryLabel={summaryLabel}
-              primaryValue={summaryValue}
+              primaryLabel="Allocated"
+              primaryValue={formatPercentValue(inclusionTotal)}
+              secondaryLabel={
+                remainingInclusionAllocation >= 0 ? "Remaining" : "Over"
+              }
+              secondaryValue={formatPercentValue(
+                Math.abs(remainingInclusionAllocation),
+              )}
+              secondaryTone={
+                remainingInclusionAllocation === 0 ? "default" : "warning"
+              }
             />
           }
         />
         <div className="inclusions-dashboard">
-          <div className="inclusions-metrics-grid">
-            <article className="panel inclusions-metric-card">
-              <span className="inclusions-metric-label">Allocated</span>
-              <strong>{formatPercentValue(inclusionTotal)}</strong>
-              <span className="inclusions-metric-note">
-                of proposal scope assigned
-              </span>
-            </article>
-            <article className="panel inclusions-metric-card">
-              <span className="inclusions-metric-label">Phases In Play</span>
-              <strong>{activePhaseCount}</strong>
-              <span className="inclusions-metric-note">
-                {activePhaseCount === 1 ? "phase has" : "phases have"} active
-                allocation
-              </span>
-            </article>
-            <article className="panel inclusions-metric-card">
-              <span className="inclusions-metric-label">Attached Blurbs</span>
-              <strong>{attachedBlurbCount}</strong>
-              <span className="inclusions-metric-note">
-                snippets connected to scope
-              </span>
-            </article>
-          </div>
-
         <div className="panel inclusions-phase-grid">
           {phases.map((phase) => {
             const phaseItems = inclusions.filter(
@@ -129,38 +91,27 @@ export function EditorStepInclusionsScopeBuilder({
                   state: ProposalDraft["inclusions"][number];
                 } => Boolean(item.state),
               );
-            const phaseTotal = phaseStates.reduce(
-              (sum, item) => sum + item.state.allocationPercent,
-              0,
-            );
             const activeInclusionCount = phaseStates.filter(
               (item) => item.state.allocationPercent > 0,
             ).length;
-            const phaseBlurbCount = phaseStates.reduce(
-              (sum, item) => sum + item.state.blurbIds.length,
-              0,
-            );
 
             return (
               <section key={phase.id} className="panel inclusions-phase-card">
                 <div className="inclusions-phase-card-header">
                   <div className="inclusions-phase-card-heading">
                     <p className="inclusions-phase-card-kicker">{phase.name}</p>
-                    <span className="inclusions-phase-card-meta">
-                      {activeInclusionCount > 0
-                        ? `${activeInclusionCount} active`
-                        : "Not set"}
+                    <span
+                      className={`inclusions-phase-card-meta ${activeInclusionCount > 0 ? "is-active" : ""}`}
+                    >
+                      {activeInclusionCount > 0 ? "Active" : "Not set"}
                     </span>
                   </div>
                   <div className="inclusions-phase-accent-bar" aria-hidden="true">
                     {phaseStates.map((item, index) => {
-                      const width =
-                        phaseTotal > 0
-                          ? Math.max(
-                              8,
-                              (item.state.allocationPercent / phaseTotal) * 100,
-                            )
-                          : 100 / Math.max(phaseStates.length, 1);
+                      const width = Math.max(
+                        0,
+                        Math.min(100, item.state.allocationPercent),
+                      );
                       return (
                         <span
                           key={item.inclusion.id}
@@ -174,10 +125,6 @@ export function EditorStepInclusionsScopeBuilder({
                         />
                       );
                     })}
-                  </div>
-                  <div className="inclusions-phase-card-stats">
-                    <span>{formatPercentValue(phaseTotal)} allocated</span>
-                    <span>{phaseBlurbCount} blurbs</span>
                   </div>
                 </div>
                 <div className="inclusions-phase-list">
@@ -196,28 +143,31 @@ export function EditorStepInclusionsScopeBuilder({
                         </div>
                         <label className="inclusions-allocation-field">
                           <span>Allocation</span>
-                          <input
-                            type="number"
-                            min={0}
-                            max={100}
-                            step={1}
-                            inputMode="numeric"
-                            value={state.allocationPercent}
-                            onChange={(event) =>
-                              onUpsertActive({
-                                ...activeProposal,
-                                inclusions: updateInclusion(
-                                  activeProposal.inclusions,
-                                  inclusion.id,
-                                  {
-                                    allocationPercent: normalizePercentInput(
-                                      event.target.value,
-                                    ),
-                                  },
-                                ),
-                              })
-                            }
-                          />
+                          <div className="inclusions-allocation-input">
+                            <input
+                              type="number"
+                              min={0}
+                              max={100}
+                              step={1}
+                              inputMode="numeric"
+                              value={state.allocationPercent}
+                              onChange={(event) =>
+                                onUpsertActive({
+                                  ...activeProposal,
+                                  inclusions: updateInclusion(
+                                    activeProposal.inclusions,
+                                    inclusion.id,
+                                    {
+                                      allocationPercent: normalizePercentInput(
+                                        event.target.value,
+                                      ),
+                                    },
+                                  ),
+                                })
+                              }
+                            />
+                            <span aria-hidden="true">%</span>
+                          </div>
                         </label>
                       </div>
 
@@ -250,26 +200,10 @@ export function EditorStepInclusionsScopeBuilder({
                               ? "Manage Blurbs"
                               : "Add Blurbs"}
                           </button>
-                          {state.blurbIds.length > 0 && (
-                            <button
-                              type="button"
-                              className="inclusions-action-btn inclusions-action-btn--secondary"
-                              onClick={() =>
-                                onUpsertActive({
-                                  ...activeProposal,
-                                  inclusions: updateInclusion(
-                                    activeProposal.inclusions,
-                                    inclusion.id,
-                                    {
-                                      blurbIds: [],
-                                    },
-                                  ),
-                                })
-                              }
-                            >
-                              Remove
-                            </button>
-                          )}
+                          <span className="inclusions-blurb-count">
+                            {state.blurbIds.length}{" "}
+                            {state.blurbIds.length === 1 ? "blurb" : "blurbs"}
+                          </span>
                         </div>
                       </div>
                     </article>

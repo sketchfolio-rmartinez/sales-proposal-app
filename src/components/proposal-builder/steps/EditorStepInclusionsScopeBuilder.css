@@ -26,7 +26,7 @@
 }
 
 .inclusions-step-shell .step-section-description {
-  max-width: 62ch;
+  max-width: 58ch;
   color: #556964;
   font-size: 0.97rem;
   line-height: 1.6;
@@ -43,68 +43,12 @@
 .inclusions-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 18px;
-  border: 1px solid #dce6df;
-  border-radius: 24px;
-  background:
-    radial-gradient(
-      circle at top left,
-      rgba(118, 142, 212, 0.08),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at bottom right,
-      rgba(167, 140, 215, 0.08),
-      transparent 32%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(240, 245, 242, 0.92) 0%,
-      rgba(235, 242, 247, 0.78) 100%
-    );
-  box-shadow:
-    0 20px 44px rgba(31, 47, 47, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.inclusions-metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.inclusions-metric-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 18px 18px 16px;
-  border-color: #dce6df;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 10px 24px rgba(31, 47, 47, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.76);
-}
-
-.inclusions-metric-label {
-  color: #667872;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.inclusions-metric-card strong {
-  color: #1c2d2c;
-  font-size: 1.55rem;
-  letter-spacing: -0.04em;
-}
-
-.inclusions-metric-note {
-  color: #657872;
-  font-size: 0.88rem;
-  line-height: 1.45;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .inclusions-phase-grid {
@@ -171,6 +115,12 @@
   font-weight: 700;
 }
 
+.inclusions-phase-card-meta.is-active {
+  border-color: #b8d6c2;
+  background: #edf7f0;
+  color: #2f7a5b;
+}
+
 .inclusions-phase-accent-bar {
   display: flex;
   gap: 6px;
@@ -184,25 +134,6 @@
   border-radius: 999px;
   background: var(--phase-accent);
   box-shadow: 0 6px 12px rgba(31, 47, 47, 0.08);
-}
-
-.inclusions-phase-card-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  color: #6a7c75;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-.inclusions-phase-card-stats span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border: 1px solid #e1e9e4;
-  border-radius: 999px;
-  background: #f8fbf9;
 }
 
 .inclusions-phase-list {
@@ -269,7 +200,27 @@
     0 1px 2px rgba(31, 47, 47, 0.04);
 }
 
-.inclusions-allocation-field input:focus {
+.inclusions-allocation-input {
+  position: relative;
+}
+
+.inclusions-allocation-input input {
+  padding-right: 34px;
+}
+
+.inclusions-allocation-input span {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: #6d8078;
+  font-size: 0.92rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.inclusions-allocation-field input:focus,
+.inclusions-allocation-input input:focus {
   outline: none;
   border-color: #2f7a5b;
   box-shadow:
@@ -287,6 +238,28 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  max-height: 274px;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(172, 196, 181, 0.38) transparent;
+}
+
+.inclusions-blurb-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.inclusions-blurb-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.inclusions-blurb-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(172, 196, 181, 0.38);
+}
+
+.inclusions-blurb-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 175, 158, 0.58);
 }
 
 .inclusions-blurb-card,
@@ -320,6 +293,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
 }
 
 .inclusions-action-btn {
@@ -348,6 +322,19 @@
   background: #fff5f5;
 }
 
+.inclusions-blurb-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #6b7d76;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .inclusions-warning {
   grid-column: 1 / -1;
   margin: -2px 0 0;
@@ -355,7 +342,6 @@
 }
 
 @media (max-width: 1100px) {
-  .inclusions-metrics-grid,
   .inclusions-phase-grid {
     grid-template-columns: 1fr;
   }
