@@ -9,6 +9,7 @@ import { normalizePercentInput } from "../../../lib/editorStepFieldUtils";
 import { BlurbPickerModal } from "../../blurbs/BlurbPickerModal";
 import { ProposalStepIntroShell } from "../../shared/ProposalStepIntroShell";
 import { SummaryPill } from "../../shared/SummaryPill";
+import "./EditorStepInclusionsScopeBuilder.css";
 
 interface EditorStepInclusionsScopeBuilderProps {
   activeProposal: ProposalDraft;
@@ -17,6 +18,15 @@ interface EditorStepInclusionsScopeBuilderProps {
   remainingInclusionAllocation: number;
   onUpsertActive: (draft: ProposalDraft) => void;
 }
+
+const phaseAccentPalette = [
+  "#8a6ee8",
+  "#f39a2d",
+  "#5c8edb",
+  "#eb8f2f",
+  "#45a658",
+  "#6db7b0",
+];
 
 function formatPercentValue(value: number): string {
   return `${Math.round(value * 100) / 100}%`;
@@ -37,9 +47,11 @@ export function EditorStepInclusionsScopeBuilder({
 
   return (
     <>
-      <div className="step-section">
+      <div className="step-section inclusions-step">
         <ProposalStepIntroShell
           activeProposal={activeProposal}
+          className="inclusions-step-shell"
+          showProposalMeta={false}
           title="Inclusions (Scope Builder)"
           description="All inclusions start at 0%. Allocate the full 100% of the project budget to move forward."
           summary={
@@ -58,27 +70,63 @@ export function EditorStepInclusionsScopeBuilder({
             />
           }
         />
-        <div className="panel">
+        <div className="inclusions-phase-grid">
           {phases.map((phase) => {
             const phaseItems = inclusions.filter(
               (item) => item.phaseId === phase.id,
             );
-            const phaseTotal = activeProposal.inclusions
-              .filter((item) =>
-                phaseItems.some(
-                  (phaseItem) => phaseItem.id === item.inclusionId,
+            const phaseStates = phaseItems
+              .map((item) => ({
+                inclusion: item,
+                state: activeProposal.inclusions.find(
+                  (state) => state.inclusionId === item.id,
                 ),
-              )
-              .reduce((sum, item) => sum + item.allocationPercent, 0);
+              }))
+              .filter(
+                (
+                  item,
+                ): item is {
+                  inclusion: (typeof phaseItems)[number];
+                  state: ProposalDraft["inclusions"][number];
+                } => Boolean(item.state),
+              );
+            const activeInclusionCount = phaseStates.filter(
+              (item) => item.state.allocationPercent > 0,
+            ).length;
 
             return (
-              <div key={phase.id} className="subpanel">
-                <div className="row wrap">
-                  <h4>{phase.name}</h4>
-                  <span className="muted">
-                    Phase total: {formatPercentValue(phaseTotal)}
-                  </span>
+              <section key={phase.id} className="panel inclusions-phase-card">
+                <div className="inclusions-phase-card-header">
+                  <div className="inclusions-phase-card-heading">
+                    <p className="inclusions-phase-card-kicker">{phase.name}</p>
+                    <span
+                      className={`inclusions-phase-card-meta ${activeInclusionCount > 0 ? "is-active" : ""}`}
+                    >
+                      {activeInclusionCount > 0 ? "Active" : "Not set"}
+                    </span>
+                  </div>
+                  <div className="inclusions-phase-accent-bar" aria-hidden="true">
+                    {phaseStates.map((item, index) => {
+                      const width = Math.max(
+                        0,
+                        Math.min(100, item.state.allocationPercent),
+                      );
+                      return (
+                        <span
+                          key={item.inclusion.id}
+                          style={{
+                            width: `${width}%`,
+                            ["--phase-accent" as string]:
+                              phaseAccentPalette[index % phaseAccentPalette.length],
+                            opacity:
+                              item.state.allocationPercent > 0 ? 1 : 0.3,
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
+                <div className="inclusions-phase-list">
                 {phaseItems.map((inclusion) => {
                   const state = activeProposal.inclusions.find(
                     (item) => item.inclusionId === inclusion.id,
@@ -86,46 +134,50 @@ export function EditorStepInclusionsScopeBuilder({
                   if (!state) return null;
 
                   return (
-                    <div key={inclusion.id} className="inclusion-row">
-                      <div className="allocation-row">
-                        <div>
-                          <strong>{inclusion.name}</strong>
-                          <p className="muted">{inclusion.description}</p>
+                    <article key={inclusion.id} className="inclusions-item">
+                      <div className="inclusions-item-top">
+                        <div className="inclusions-item-copy">
+                          <h4>{inclusion.name}</h4>
+                          <p>{inclusion.description}</p>
                         </div>
-                        <label className="compact-field">
-                          Allocation %
-                          <input
-                            type="number"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={state.allocationPercent}
-                            onChange={(event) =>
-                              onUpsertActive({
-                                ...activeProposal,
-                                inclusions: updateInclusion(
-                                  activeProposal.inclusions,
-                                  inclusion.id,
-                                  {
-                                    allocationPercent: normalizePercentInput(
-                                      event.target.value,
-                                    ),
-                                  },
-                                ),
-                              })
-                            }
-                          />
+                        <label className="inclusions-allocation-field">
+                          <span>Allocation</span>
+                          <div className="inclusions-allocation-input">
+                            <input
+                              type="number"
+                              min={0}
+                              max={100}
+                              step={1}
+                              inputMode="numeric"
+                              value={state.allocationPercent}
+                              onChange={(event) =>
+                                onUpsertActive({
+                                  ...activeProposal,
+                                  inclusions: updateInclusion(
+                                    activeProposal.inclusions,
+                                    inclusion.id,
+                                    {
+                                      allocationPercent: normalizePercentInput(
+                                        event.target.value,
+                                      ),
+                                    },
+                                  ),
+                                })
+                              }
+                            />
+                            <span aria-hidden="true">%</span>
+                          </div>
                         </label>
                       </div>
 
-                      <div className="inclusion-blurb-row">
+                      <div className="inclusions-blurb-section">
                         {state.blurbIds.length > 0 ? (
-                          <div className="inline-blurb-stack">
+                          <div className="inclusions-blurb-list">
                             {state.blurbIds.map((blurbId) => {
                               const blurb = resolveBlurb(blurbId);
                               if (!blurb) return null;
                               return (
-                                <div key={blurb.id} className="inline-blurb">
+                                <div key={blurb.id} className="inclusions-blurb-card">
                                   <strong>{blurb.title}</strong>
                                   <span>{blurb.contentPlaintext}</span>
                                 </div>
@@ -133,47 +185,36 @@ export function EditorStepInclusionsScopeBuilder({
                             })}
                           </div>
                         ) : (
-                          <p className="muted">No inclusion blurbs attached.</p>
+                          <p className="inclusions-empty-state">
+                            No inclusion blurbs attached.
+                          </p>
                         )}
-                        <div className="row">
+                        <div className="inclusions-actions">
                           <button
                             type="button"
+                            className="inclusions-action-btn"
                             onClick={() => setInclusionPickerId(inclusion.id)}
                           >
                             {state.blurbIds.length > 0
                               ? "Manage Blurbs"
-                              : "+ Add Blurbs"}
+                              : "Add Blurbs"}
                           </button>
-                          {state.blurbIds.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                onUpsertActive({
-                                  ...activeProposal,
-                                  inclusions: updateInclusion(
-                                    activeProposal.inclusions,
-                                    inclusion.id,
-                                    {
-                                      blurbIds: [],
-                                    },
-                                  ),
-                                })
-                              }
-                            >
-                              Remove
-                            </button>
-                          )}
+                          <span className="inclusions-blurb-count">
+                            {state.blurbIds.length}{" "}
+                            {state.blurbIds.length === 1 ? "blurb" : "blurbs"}
+                          </span>
                         </div>
                       </div>
-                    </div>
+                    </article>
                   );
                 })}
-              </div>
+                </div>
+              </section>
             );
           })}
 
           {!canAdvanceFromInclusions(activeProposal) && (
-            <p className="warning">
+            <p className="warning inclusions-warning">
               Total inclusion allocation must equal 100% before you can
               continue.
             </p>
